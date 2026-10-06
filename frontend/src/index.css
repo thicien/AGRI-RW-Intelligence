@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0D47A1;
+  --color-primary-light: #1976D2;
+  --color-primary-soft: #E3F2FD;
+  --color-agriculture: #2E7D32;
+  --color-agriculture-soft: #E8F5E9;
+  --color-warning: #F9A825;
+  --color-danger: #C62828;
+  --color-background: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-text-main: #1F2937; /* Re-named from text since text is a reserved property in some contexts, but text-text works in tailwind */
+  --color-muted: #667085;
+  --color-border-main: #D9E1EA;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
