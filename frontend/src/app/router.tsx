@@ -3,6 +3,7 @@ import AppShell from './AppShell';
 import DashboardPage from '../features/dashboard/DashboardPage';
 import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
 import LandingPage from '../features/landing/LandingPage';
+import LoginPage from '../features/auth/LoginPage';
 
 export const router = createBrowserRouter([
   {
@@ -11,7 +12,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <div className="flex h-screen items-center justify-center bg-background"><div className="p-8 bg-surface border border-border-main shadow-lg rounded w-96"><h2 className="text-2xl font-bold text-center mb-6 text-primary">Sign in to your account</h2><input type="text" placeholder="Email" className="w-full mb-4 px-3 py-2 border rounded" /><input type="password" placeholder="Password" className="w-full mb-6 px-3 py-2 border rounded" /><button className="w-full bg-primary text-white py-2 rounded font-medium hover:bg-primary-light transition">Sign In</button></div></div>,
+    element: <LoginPage />,
   },
   {
     path: '/app',
