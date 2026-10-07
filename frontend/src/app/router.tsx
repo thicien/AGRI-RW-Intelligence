@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import AppShell from './AppShell';
 import DashboardPage from '../features/dashboard/DashboardPage';
+import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +14,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'map',
-        element: <div className="p-4">Intelligence Map (To be implemented)</div>,
+        element: <IntelligenceMapPage />,
       },
       {
         path: 'priority-zones',
