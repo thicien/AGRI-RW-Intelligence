@@ -8,15 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AgriculturalDataModule = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
 const agricultural_data_controller_1 = require("./agricultural-data.controller");
 const agricultural_data_service_1 = require("./agricultural-data.service");
+const farm_entity_1 = require("./entities/farm.entity");
+const farm_crop_entity_1 = require("./entities/farm-crop.entity");
 let AgriculturalDataModule = class AgriculturalDataModule {
 };
 exports.AgriculturalDataModule = AgriculturalDataModule;
 exports.AgriculturalDataModule = AgriculturalDataModule = __decorate([
     (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([farm_entity_1.Farm, farm_crop_entity_1.FarmCrop])],
         controllers: [agricultural_data_controller_1.AgriculturalDataController],
-        providers: [agricultural_data_service_1.AgriculturalDataService]
+        providers: [agricultural_data_service_1.AgriculturalDataService],
+        exports: [agricultural_data_service_1.AgriculturalDataService]
     })
 ], AgriculturalDataModule);
 //# sourceMappingURL=agricultural-data.module.js.map

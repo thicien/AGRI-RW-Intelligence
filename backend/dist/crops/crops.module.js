@@ -8,15 +8,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CropsModule = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
 const crops_controller_1 = require("./crops.controller");
 const crops_service_1 = require("./crops.service");
+const crop_entity_1 = require("./entities/crop.entity");
 let CropsModule = class CropsModule {
 };
 exports.CropsModule = CropsModule;
 exports.CropsModule = CropsModule = __decorate([
     (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([crop_entity_1.Crop])],
         controllers: [crops_controller_1.CropsController],
-        providers: [crops_service_1.CropsService]
+        providers: [crops_service_1.CropsService],
+        exports: [crops_service_1.CropsService]
     })
 ], CropsModule);
 //# sourceMappingURL=crops.module.js.map

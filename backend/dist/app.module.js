@@ -48,12 +48,12 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
                 host: process.env.DB_HOST || 'localhost',
-                port: parseInt(process.env.DB_PORT || '5432', 10),
+                port: parseInt(process.env.DB_PORT || '5433', 10),
                 username: process.env.DB_USERNAME || 'postgres',
-                password: process.env.DB_PASSWORD || 'postgres',
+                password: process.env.DB_PASSWORD || 'Mug2thi4',
                 database: process.env.DB_NAME || 'agrilens_db',
                 autoLoadEntities: true,
-                synchronize: false,
+                synchronize: true,
             }),
             auth_module_1.AuthModule, users_module_1.UsersModule, administrative_units_module_1.AdministrativeUnitsModule, crops_module_1.CropsModule, seasons_module_1.SeasonsModule, datasets_module_1.DatasetsModule, crop_statistics_module_1.CropStatisticsModule, agricultural_data_module_1.AgriculturalDataModule, environmental_module_1.EnvironmentalModule, irrigation_module_1.IrrigationModule, climate_module_1.ClimateModule, satellite_module_1.SatelliteModule, infrastructure_module_1.InfrastructureModule, analytics_module_1.AnalyticsModule, gis_module_1.GisModule, ai_models_module_1.AiModelsModule, model_runs_module_1.ModelRunsModule, predictions_module_1.PredictionsModule, priority_zones_module_1.PriorityZonesModule, evidence_module_1.EvidenceModule, recommendations_module_1.RecommendationsModule, interventions_module_1.InterventionsModule, intervention_feedback_module_1.InterventionFeedbackModule, alerts_module_1.AlertsModule, reports_module_1.ReportsModule, dashboard_module_1.DashboardModule, scenarios_module_1.ScenariosModule, ingestion_module_1.IngestionModule
         ],
