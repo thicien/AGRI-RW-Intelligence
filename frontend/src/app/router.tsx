@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppShell from './AppShell';
-import DashboardPage from '../features/dashboard/DashboardPage';
+import AdminDashboardPage from '../features/dashboard/AdminDashboardPage';
 import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
 import LandingPage from '../features/landing/LandingPage';
 import LoginPage from '../features/auth/LoginPage';
@@ -15,12 +15,12 @@ export const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/app',
+    path: '/admin',
     element: <AppShell />,
     children: [
       {
         path: 'dashboard',
-        element: <DashboardPage />,
+        element: <AdminDashboardPage />,
       },
       {
         path: 'map',

@@ -51,7 +51,7 @@ export default function LoginPage() {
       }
       
       // On success, redirect to dashboard
-      navigate('/app/dashboard');
+      navigate('/admin/dashboard');
     }, 1500);
   };
 

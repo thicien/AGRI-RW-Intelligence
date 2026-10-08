@@ -23,9 +23,7 @@ export default function LandingPage() {
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm border-b border-border-main py-3' : 'bg-transparent py-5'}`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white">
-              <LeafIcon className="w-5 h-5" />
-            </div>
+            <img src="/logo.png" alt="AgriLens Logo" className="w-8 h-8 object-contain" />
             <div className="font-bold text-xl tracking-tight text-primary">
               AgriLens <span className="font-light text-primary-light">RWANDA</span>
             </div>
@@ -41,7 +39,7 @@ export default function LandingPage() {
             <Link to="/login" className="text-sm font-medium text-text-main hover:text-primary transition-colors hidden sm:block">
               Sign In
             </Link>
-            <Link to="/app/dashboard" className="bg-primary hover:bg-primary-light text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-sm">
+            <Link to="/admin/dashboard" className="bg-primary hover:bg-primary-light text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-sm">
               Access Platform
             </Link>
           </div>
@@ -65,7 +63,7 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-wrap items-center gap-4 mb-10">
-              <Link to="/app/map" className="bg-primary hover:bg-primary-light text-white px-6 py-3 rounded font-medium flex items-center transition-colors shadow-sm group">
+              <Link to="/admin/map" className="bg-primary hover:bg-primary-light text-white px-6 py-3 rounded font-medium flex items-center transition-colors shadow-sm group">
                 Explore Intelligence <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link to="/login" className="bg-white border border-border-main hover:bg-background text-text-main px-6 py-3 rounded font-medium transition-colors shadow-sm">
@@ -216,7 +214,7 @@ export default function LandingPage() {
           <p className="text-lg text-muted mb-10">
             Explore agricultural patterns, priority areas and evidence-driven intelligence for Rwanda.
           </p>
-          <Link to="/app/map" className="inline-flex items-center bg-primary hover:bg-primary-light text-white px-8 py-4 rounded font-semibold transition-colors shadow-lg group">
+          <Link to="/admin/map" className="inline-flex items-center bg-primary hover:bg-primary-light text-white px-8 py-4 rounded font-semibold transition-colors shadow-lg group">
             Explore Intelligence <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -228,7 +226,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
             <div className="md:col-span-1">
               <div className="font-bold text-xl tracking-tight text-primary mb-4 flex items-center gap-2">
-                <LeafIcon className="w-5 h-5" /> AgriLens <span className="font-light">Rwanda</span>
+                <img src="/logo.png" alt="AgriLens Logo" className="w-5 h-5 object-contain" /> AgriLens <span className="font-light">Rwanda</span>
               </div>
               <p className="text-sm text-muted">Data-driven agricultural intelligence for better decisions.</p>
             </div>
@@ -236,8 +234,8 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold text-sm uppercase tracking-wider mb-4">Platform</h4>
               <ul className="space-y-3 text-sm text-muted">
-                <li><Link to="/app/map" className="hover:text-primary transition-colors">Intelligence Map</Link></li>
-                <li><Link to="/app/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
+                <li><Link to="/admin/map" className="hover:text-primary transition-colors">Intelligence Map</Link></li>
+                <li><Link to="/admin/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
                 <li><Link to="/login" className="hover:text-primary transition-colors">Sign In</Link></li>
               </ul>
             </div>
