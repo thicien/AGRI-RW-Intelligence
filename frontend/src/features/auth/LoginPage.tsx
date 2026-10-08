@@ -95,9 +95,7 @@ export default function LoginPage() {
           
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center text-white shadow-sm">
-              <Map className="w-5 h-5" />
-            </div>
+            <img src="/logo.png" alt="AgriLens Logo" className="w-10 h-10 object-contain shadow-sm" />
             <div>
               <div className="font-bold text-2xl tracking-tight text-primary leading-none">
                 AgriLens <span className="font-light text-primary-light">RWANDA</span>
