@@ -4,6 +4,12 @@ import AdminDashboardPage from '../features/dashboard/AdminDashboardPage';
 import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
 import LandingPage from '../features/landing/LandingPage';
 import LoginPage from '../features/auth/LoginPage';
+import PriorityZonesPage from '../features/intelligence/PriorityZonesPage';
+import FarmersPage from '../features/agriculture/FarmersPage';
+import FarmsPage from '../features/agriculture/FarmsPage';
+import CropsSeasonsPage from '../features/agriculture/CropsSeasonsPage';
+import AgriculturalDataPage from '../features/agriculture/AgriculturalDataPage';
+import RolesPage from '../features/admin/RolesPage';
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +27,30 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <AdminDashboardPage />,
+      },
+      {
+        path: 'farmers',
+        element: <FarmersPage />,
+      },
+      {
+        path: 'farms',
+        element: <FarmsPage />,
+      },
+      {
+        path: 'crops',
+        element: <CropsSeasonsPage />,
+      },
+      {
+        path: 'agricultural-data',
+        element: <AgriculturalDataPage />,
+      },
+      {
+        path: 'roles',
+        element: <RolesPage />,
+      },
+      {
+        path: 'priority-zones',
+        element: <PriorityZonesPage />,
       },
       {
         path: 'map',
