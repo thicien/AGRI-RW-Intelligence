@@ -13,12 +13,15 @@ const agricultural_data_controller_1 = require("./agricultural-data.controller")
 const agricultural_data_service_1 = require("./agricultural-data.service");
 const farm_entity_1 = require("./entities/farm.entity");
 const farm_crop_entity_1 = require("./entities/farm-crop.entity");
+const agricultural_observation_entity_1 = require("./entities/agricultural-observation.entity");
+const crop_entity_1 = require("../crops/entities/crop.entity");
+const season_entity_1 = require("../seasons/entities/season.entity");
 let AgriculturalDataModule = class AgriculturalDataModule {
 };
 exports.AgriculturalDataModule = AgriculturalDataModule;
 exports.AgriculturalDataModule = AgriculturalDataModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([farm_entity_1.Farm, farm_crop_entity_1.FarmCrop])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([farm_entity_1.Farm, farm_crop_entity_1.FarmCrop, agricultural_observation_entity_1.AgriculturalObservation, crop_entity_1.Crop, season_entity_1.Season])],
         controllers: [agricultural_data_controller_1.AgriculturalDataController],
         providers: [agricultural_data_service_1.AgriculturalDataService],
         exports: [agricultural_data_service_1.AgriculturalDataService]

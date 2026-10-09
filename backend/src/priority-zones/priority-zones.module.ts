@@ -4,6 +4,7 @@ import { PriorityZonesService } from './priority-zones.service';
 
 @Module({
   controllers: [PriorityZonesController],
-  providers: [PriorityZonesService]
+  providers: [PriorityZonesService],
+  exports: [PriorityZonesService]
 })
 export class PriorityZonesModule {}

@@ -10,13 +10,17 @@ exports.GisModule = void 0;
 const common_1 = require("@nestjs/common");
 const gis_controller_1 = require("./gis.controller");
 const gis_service_1 = require("./gis.service");
+const map_controller_1 = require("./map.controller");
+const map_service_1 = require("./map.service");
+const priority_zones_module_1 = require("../priority-zones/priority-zones.module");
 let GisModule = class GisModule {
 };
 exports.GisModule = GisModule;
 exports.GisModule = GisModule = __decorate([
     (0, common_1.Module)({
-        controllers: [gis_controller_1.GisController],
-        providers: [gis_service_1.GisService]
+        imports: [priority_zones_module_1.PriorityZonesModule],
+        controllers: [gis_controller_1.GisController, map_controller_1.MapController],
+        providers: [gis_service_1.GisService, map_service_1.MapService],
     })
 ], GisModule);
 //# sourceMappingURL=gis.module.js.map

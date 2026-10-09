@@ -16,7 +16,8 @@ exports.PriorityZonesModule = PriorityZonesModule;
 exports.PriorityZonesModule = PriorityZonesModule = __decorate([
     (0, common_1.Module)({
         controllers: [priority_zones_controller_1.PriorityZonesController],
-        providers: [priority_zones_service_1.PriorityZonesService]
+        providers: [priority_zones_service_1.PriorityZonesService],
+        exports: [priority_zones_service_1.PriorityZonesService]
     })
 ], PriorityZonesModule);
 //# sourceMappingURL=priority-zones.module.js.map
