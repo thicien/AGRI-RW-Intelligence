@@ -115,7 +115,6 @@ export default function AppShell() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="flex flex-col flex-1 w-full overflow-hidden bg-background">
         
         {/* Topbar */}
