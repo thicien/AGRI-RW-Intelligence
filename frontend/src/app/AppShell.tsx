@@ -117,7 +117,6 @@ export default function AppShell() {
 
       <div className="flex flex-col flex-1 w-full overflow-hidden bg-background">
         
-        {/* Topbar */}
         <header className="h-16 bg-surface border-b border-border-main flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
           
           <div className="flex items-center gap-4 flex-1">
