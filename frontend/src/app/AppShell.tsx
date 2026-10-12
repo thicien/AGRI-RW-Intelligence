@@ -70,7 +70,6 @@ export default function AppShell() {
 
   return (
     <div className="flex h-screen w-screen bg-background overflow-hidden font-sans text-text-main">
-      {/* Sidebar - Deep Blue theme (#0D47A1) */}
       <aside className="w-72 bg-primary text-white flex flex-col flex-shrink-0 shadow-2xl z-20 hidden md:flex">
         <div className="h-16 flex items-center px-6 font-semibold text-lg tracking-wide border-b border-white/10 bg-black/10">
           <img src="/logo.png" alt="AgriLens Logo" className="w-6 h-6 mr-3 object-contain" />
