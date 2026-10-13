@@ -144,7 +144,6 @@ export default function AppShell() {
                 <ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
               </div>
             </div>
-            
             <button className="relative p-2 text-muted hover:bg-black/5 hover:text-text-main rounded-full transition-colors focus:outline-none">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full border border-white"></span>
