@@ -117,7 +117,6 @@ export default function AppShell() {
       <div className="flex flex-col flex-1 w-full overflow-hidden bg-background">
         
         <header className="h-16 bg-surface border-b border-border-main flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
-          
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-96 hidden md:block">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
