@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import AppShell from './AppShell';
 import AdminDashboardPage from '../features/dashboard/AdminDashboardPage';
 import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
@@ -10,6 +10,7 @@ import FarmsPage from '../features/agriculture/FarmsPage';
 import CropsSeasonsPage from '../features/agriculture/CropsSeasonsPage';
 import AgriculturalDataPage from '../features/agriculture/AgriculturalDataPage';
 import RolesPage from '../features/admin/RolesPage';
+import AgriculturalIntelligenceHubPage from '../features/intelligence/AgriculturalIntelligenceHubPage';
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,26 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <AdminDashboardPage />,
+      },
+      {
+        path: 'analytics',
+        element: <AgriculturalIntelligenceHubPage />,
+      },
+      {
+        path: 'intelligence-hub',
+        element: <AgriculturalIntelligenceHubPage />,
+      },
+      {
+        path: 'environment',
+        element: <AgriculturalIntelligenceHubPage />,
+      },
+      {
+        path: 'energy',
+        element: <AgriculturalIntelligenceHubPage />,
+      },
+      {
+        path: 'imports-exports',
+        element: <AgriculturalIntelligenceHubPage />,
       },
       {
         path: 'farmers',
@@ -55,10 +76,6 @@ export const router = createBrowserRouter([
       {
         path: 'map',
         element: <IntelligenceMapPage />,
-      },
-      {
-        path: 'priority-zones',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Priority Zones</h2></div>,
       },
       {
         path: 'recommendations',

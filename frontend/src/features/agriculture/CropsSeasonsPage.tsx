@@ -141,8 +141,8 @@ export default function CropsSeasonsPage() {
               />
               <RechartsTooltip 
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                formatter={(value: number) => [
-                  selectedMetric === 'Production (MT)' ? new Intl.NumberFormat('en-US').format(value) : value, 
+                formatter={(value: any) => [
+                  selectedMetric === 'Production (MT)' ? new Intl.NumberFormat('en-US').format(Number(value)) : value, 
                   selectedMetric
                 ]}
               />

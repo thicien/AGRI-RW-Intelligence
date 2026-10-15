@@ -130,7 +130,7 @@ export default function FarmsPage() {
                 <YAxis tickLine={false} axisLine={false} tick={{fill: '#6b7280', fontSize: 12}} tickFormatter={(val) => `${val / 1000}k`} />
                 <RechartsTooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [new Intl.NumberFormat('en-US').format(value), 'Hectares']}
+                  formatter={(value: any) => [new Intl.NumberFormat('en-US').format(Number(value)), 'Hectares']}
                 />
                 <Area type="monotone" dataKey="area" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorArea)" />
               </AreaChart>
@@ -160,7 +160,7 @@ export default function FarmsPage() {
                   ))}
                 </Pie>
                 <RechartsTooltip 
-                  formatter={(value: number) => [new Intl.NumberFormat('en-US').format(value) + ' ha', 'Area']}
+                  formatter={(value: any) => [new Intl.NumberFormat('en-US').format(Number(value)) + ' ha', 'Area']}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Legend 
@@ -195,7 +195,7 @@ export default function FarmsPage() {
                 <RechartsTooltip 
                   cursor={{fill: '#f3f4f6'}}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [new Intl.NumberFormat('en-US').format(value) + ' ha', 'Cultivated Area']}
+                  formatter={(value: any) => [new Intl.NumberFormat('en-US').format(Number(value)) + ' ha', 'Cultivated Area']}
                 />
                 <Bar dataKey="area" radius={[0, 4, 4, 0]} barSize={24} fill="#3b82f6" />
               </BarChart>

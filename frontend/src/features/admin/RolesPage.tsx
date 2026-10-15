@@ -35,7 +35,7 @@ export default function RolesPage() {
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'full': return <CheckCircle2 className="w-4 h-4 text-success mx-auto" />;
-      case 'scoped': return <MapPin className="w-4 h-4 text-primary mx-auto" title="Geographically Scoped" />;
+      case 'scoped': return <span title="Geographically Scoped"><MapPin className="w-4 h-4 text-primary mx-auto" /></span>;
       case 'read': return <Eye className="w-4 h-4 text-muted mx-auto" />;
       case 'limited': return <Shield className="w-4 h-4 text-warning mx-auto" />;
       case 'no': return <XCircle className="w-4 h-4 text-danger/50 mx-auto" />;

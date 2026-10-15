@@ -115,7 +115,7 @@ export default function FarmersPage() {
                 <YAxis tickLine={false} axisLine={false} tick={{fill: '#6b7280', fontSize: 12}} tickFormatter={(val) => `${val / 1000}k`} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [new Intl.NumberFormat('en-US').format(value), 'Farmers']}
+                  formatter={(value: any) => [new Intl.NumberFormat('en-US').format(Number(value)), 'Farmers']}
                 />
                 <Area type="monotone" dataKey="farmers" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorFarmers)" />
               </AreaChart>
@@ -135,7 +135,7 @@ export default function FarmersPage() {
                 <Tooltip 
                   cursor={{fill: '#f3f4f6'}}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [new Intl.NumberFormat('en-US').format(value), 'Farmers']}
+                  formatter={(value: any) => [new Intl.NumberFormat('en-US').format(Number(value)), 'Farmers']}
                 />
                 <Bar dataKey="farmers" radius={[0, 4, 4, 0]} barSize={32}>
                   {cropData.map((entry, index) => (
