@@ -20,6 +20,9 @@ let IngestionController = class IngestionController {
     async runIngestion() {
         return await this.ingestionService.runAgriculturalIngestion();
     }
+    async getJobs() {
+        return await this.ingestionService.getJobs();
+    }
 };
 exports.IngestionController = IngestionController;
 __decorate([
@@ -29,8 +32,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], IngestionController.prototype, "runIngestion", null);
+__decorate([
+    (0, common_1.Get)('jobs'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], IngestionController.prototype, "getJobs", null);
 exports.IngestionController = IngestionController = __decorate([
-    (0, common_1.Controller)('api/ingestion'),
+    (0, common_1.Controller)('ingestion'),
     __metadata("design:paramtypes", [ingestion_service_1.IngestionService])
 ], IngestionController);
 //# sourceMappingURL=ingestion.controller.js.map

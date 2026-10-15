@@ -60,6 +60,7 @@ const farm_entity_1 = require("../agricultural-data/entities/farm.entity");
 const village_entity_1 = require("../administrative-units/entities/village.entity");
 const agricultural_observation_entity_1 = require("../agricultural-data/entities/agricultural-observation.entity");
 let IngestionService = IngestionService_1 = class IngestionService {
+    dataSource;
     cropRepository;
     seasonRepository;
     farmCropRepository;
@@ -68,13 +69,32 @@ let IngestionService = IngestionService_1 = class IngestionService {
     observationRepository;
     logger = new common_1.Logger(IngestionService_1.name);
     dataDir = path.resolve(__dirname, '../../../data/agriculture');
-    constructor(cropRepository, seasonRepository, farmCropRepository, farmRepository, villageRepository, observationRepository) {
+    constructor(dataSource, cropRepository, seasonRepository, farmCropRepository, farmRepository, villageRepository, observationRepository) {
+        this.dataSource = dataSource;
         this.cropRepository = cropRepository;
         this.seasonRepository = seasonRepository;
         this.farmCropRepository = farmCropRepository;
         this.farmRepository = farmRepository;
         this.villageRepository = villageRepository;
         this.observationRepository = observationRepository;
+    }
+    async getJobs() {
+        return this.dataSource.query(`
+      SELECT 
+        id,
+        original_filename,
+        file_format,
+        target_domain,
+        status,
+        total_rows,
+        valid_rows,
+        invalid_rows,
+        started_at,
+        completed_at,
+        created_at
+      FROM agrilens.data_import_jobs
+      ORDER BY created_at DESC;
+    `);
     }
     async onModuleInit() {
         this.logger.log('Backend startup detected: Commencing background data ingestion...');
@@ -226,13 +246,15 @@ let IngestionService = IngestionService_1 = class IngestionService {
 exports.IngestionService = IngestionService;
 exports.IngestionService = IngestionService = IngestionService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(crop_entity_1.Crop)),
-    __param(1, (0, typeorm_1.InjectRepository)(season_entity_1.Season)),
-    __param(2, (0, typeorm_1.InjectRepository)(farm_crop_entity_1.FarmCrop)),
-    __param(3, (0, typeorm_1.InjectRepository)(farm_entity_1.Farm)),
-    __param(4, (0, typeorm_1.InjectRepository)(village_entity_1.Village)),
-    __param(5, (0, typeorm_1.InjectRepository)(agricultural_observation_entity_1.AgriculturalObservation)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
+    __param(0, (0, typeorm_1.InjectDataSource)()),
+    __param(1, (0, typeorm_1.InjectRepository)(crop_entity_1.Crop)),
+    __param(2, (0, typeorm_1.InjectRepository)(season_entity_1.Season)),
+    __param(3, (0, typeorm_1.InjectRepository)(farm_crop_entity_1.FarmCrop)),
+    __param(4, (0, typeorm_1.InjectRepository)(farm_entity_1.Farm)),
+    __param(5, (0, typeorm_1.InjectRepository)(village_entity_1.Village)),
+    __param(6, (0, typeorm_1.InjectRepository)(agricultural_observation_entity_1.AgriculturalObservation)),
+    __metadata("design:paramtypes", [typeorm_2.DataSource,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

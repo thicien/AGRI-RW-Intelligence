@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 // xlsx is required dynamically to prevent crashes
@@ -21,6 +21,7 @@ export class IngestionService implements OnModuleInit {
   private readonly dataDir = path.resolve(__dirname, '../../../data/agriculture');
 
   constructor(
+    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(Crop) private cropRepository: Repository<Crop>,
     @InjectRepository(Season) private seasonRepository: Repository<Season>,
     @InjectRepository(FarmCrop) private farmCropRepository: Repository<FarmCrop>,
@@ -28,6 +29,25 @@ export class IngestionService implements OnModuleInit {
     @InjectRepository(Village) private villageRepository: Repository<Village>,
     @InjectRepository(AgriculturalObservation) private observationRepository: Repository<AgriculturalObservation>,
   ) {}
+
+  async getJobs() {
+    return this.dataSource.query(`
+      SELECT 
+        id,
+        original_filename,
+        file_format,
+        target_domain,
+        status,
+        total_rows,
+        valid_rows,
+        invalid_rows,
+        started_at,
+        completed_at,
+        created_at
+      FROM agrilens.data_import_jobs
+      ORDER BY created_at DESC;
+    `);
+  }
 
   /**
    * Automatically runs ingestion when the module initializes (backend startup)

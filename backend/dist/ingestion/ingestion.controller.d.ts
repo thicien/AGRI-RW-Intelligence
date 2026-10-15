@@ -15,4 +15,5 @@ export declare class IngestionController {
         pdfPages: number;
         message?: undefined;
     }>;
+    getJobs(): Promise<any>;
 }

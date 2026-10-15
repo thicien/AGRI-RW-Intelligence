@@ -1,5 +1,5 @@
 import { OnModuleInit } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Crop } from '../crops/entities/crop.entity';
 import { Season } from '../seasons/entities/season.entity';
 import { FarmCrop } from '../agricultural-data/entities/farm-crop.entity';
@@ -7,6 +7,7 @@ import { Farm } from '../agricultural-data/entities/farm.entity';
 import { Village } from '../administrative-units/entities/village.entity';
 import { AgriculturalObservation } from '../agricultural-data/entities/agricultural-observation.entity';
 export declare class IngestionService implements OnModuleInit {
+    private dataSource;
     private cropRepository;
     private seasonRepository;
     private farmCropRepository;
@@ -15,7 +16,8 @@ export declare class IngestionService implements OnModuleInit {
     private observationRepository;
     private readonly logger;
     private readonly dataDir;
-    constructor(cropRepository: Repository<Crop>, seasonRepository: Repository<Season>, farmCropRepository: Repository<FarmCrop>, farmRepository: Repository<Farm>, villageRepository: Repository<Village>, observationRepository: Repository<AgriculturalObservation>);
+    constructor(dataSource: DataSource, cropRepository: Repository<Crop>, seasonRepository: Repository<Season>, farmCropRepository: Repository<FarmCrop>, farmRepository: Repository<Farm>, villageRepository: Repository<Village>, observationRepository: Repository<AgriculturalObservation>);
+    getJobs(): Promise<any>;
     onModuleInit(): Promise<void>;
     runAgriculturalIngestion(): Promise<{
         success: boolean;
