@@ -11,6 +11,9 @@ import CropsSeasonsPage from '../features/agriculture/CropsSeasonsPage';
 import AgriculturalDataPage from '../features/agriculture/AgriculturalDataPage';
 import RolesPage from '../features/admin/RolesPage';
 import AgriculturalIntelligenceHubPage from '../features/intelligence/AgriculturalIntelligenceHubPage';
+import Irrigation from '../features/environment/Irrigation';
+import SoilConservation from '../features/environment/SoilConservation';
+import PostHarvestProcessing from '../features/environment/PostHarvestProcessing';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +39,18 @@ export const router = createBrowserRouter([
       {
         path: 'intelligence-hub',
         element: <AgriculturalIntelligenceHubPage />,
+      },
+      {
+        path: 'irrigation',
+        element: <Irrigation />,
+      },
+      {
+        path: 'soil-conservation',
+        element: <SoilConservation />,
+      },
+      {
+        path: 'post-harvest',
+        element: <PostHarvestProcessing />,
       },
       {
         path: 'environment',

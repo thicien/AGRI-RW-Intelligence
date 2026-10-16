@@ -3,7 +3,8 @@ import {
   LayoutDashboard, Map as MapIcon, BarChart3, Droplets, 
   Leaf, Package, ShieldAlert, FileText, ClipboardList, 
   MessageSquare, Database, BrainCircuit, PlaySquare, 
-  FileBarChart, Users, Settings, Bell, Search, User, ChevronDown
+  FileBarChart, Users, Settings, Bell, Search, User, ChevronDown,
+  Layers
 } from 'lucide-react';
 import clsx from 'clsx';
 import React from 'react';
@@ -30,6 +31,9 @@ export default function AppShell() {
     {
       title: 'ENVIRONMENT & ENERGY',
       items: [
+        { to: '/admin/irrigation', label: 'Irrigation', icon: Droplets },
+        { to: '/admin/soil-conservation', label: 'Soil & Fertility', icon: Layers },
+        { to: '/admin/post-harvest', label: 'Post-Harvest & Processing', icon: Package },
         { to: '/admin/environment', label: 'Environment', icon: Leaf },
         { to: '/admin/energy', label: 'Energy & Infrastructure', icon: Leaf },
       ]
