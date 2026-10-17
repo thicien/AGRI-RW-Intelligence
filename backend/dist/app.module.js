@@ -21,6 +21,9 @@ const crop_statistics_module_1 = require("./crop-statistics/crop-statistics.modu
 const agricultural_data_module_1 = require("./agricultural-data/agricultural-data.module");
 const environmental_module_1 = require("./environmental/environmental.module");
 const irrigation_module_1 = require("./irrigation/irrigation.module");
+const soil_fertility_module_1 = require("./soil-fertility/soil-fertility.module");
+const post_harvest_module_1 = require("./post-harvest/post-harvest.module");
+const trade_module_1 = require("./trade/trade.module");
 const climate_module_1 = require("./climate/climate.module");
 const satellite_module_1 = require("./satellite/satellite.module");
 const infrastructure_module_1 = require("./infrastructure/infrastructure.module");
@@ -55,7 +58,7 @@ exports.AppModule = AppModule = __decorate([
                 autoLoadEntities: true,
                 synchronize: true,
             }),
-            auth_module_1.AuthModule, users_module_1.UsersModule, administrative_units_module_1.AdministrativeUnitsModule, crops_module_1.CropsModule, seasons_module_1.SeasonsModule, datasets_module_1.DatasetsModule, crop_statistics_module_1.CropStatisticsModule, agricultural_data_module_1.AgriculturalDataModule, environmental_module_1.EnvironmentalModule, irrigation_module_1.IrrigationModule, climate_module_1.ClimateModule, satellite_module_1.SatelliteModule, infrastructure_module_1.InfrastructureModule, analytics_module_1.AnalyticsModule, gis_module_1.GisModule, ai_models_module_1.AiModelsModule, model_runs_module_1.ModelRunsModule, predictions_module_1.PredictionsModule, priority_zones_module_1.PriorityZonesModule, evidence_module_1.EvidenceModule, recommendations_module_1.RecommendationsModule, interventions_module_1.InterventionsModule, intervention_feedback_module_1.InterventionFeedbackModule, alerts_module_1.AlertsModule, reports_module_1.ReportsModule, dashboard_module_1.DashboardModule, scenarios_module_1.ScenariosModule, ingestion_module_1.IngestionModule
+            auth_module_1.AuthModule, users_module_1.UsersModule, administrative_units_module_1.AdministrativeUnitsModule, crops_module_1.CropsModule, seasons_module_1.SeasonsModule, datasets_module_1.DatasetsModule, crop_statistics_module_1.CropStatisticsModule, agricultural_data_module_1.AgriculturalDataModule, environmental_module_1.EnvironmentalModule, irrigation_module_1.IrrigationModule, soil_fertility_module_1.SoilFertilityModule, post_harvest_module_1.PostHarvestModule, trade_module_1.TradeModule, climate_module_1.ClimateModule, satellite_module_1.SatelliteModule, infrastructure_module_1.InfrastructureModule, analytics_module_1.AnalyticsModule, gis_module_1.GisModule, ai_models_module_1.AiModelsModule, model_runs_module_1.ModelRunsModule, predictions_module_1.PredictionsModule, priority_zones_module_1.PriorityZonesModule, evidence_module_1.EvidenceModule, recommendations_module_1.RecommendationsModule, interventions_module_1.InterventionsModule, intervention_feedback_module_1.InterventionFeedbackModule, alerts_module_1.AlertsModule, reports_module_1.ReportsModule, dashboard_module_1.DashboardModule, scenarios_module_1.ScenariosModule, ingestion_module_1.IngestionModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

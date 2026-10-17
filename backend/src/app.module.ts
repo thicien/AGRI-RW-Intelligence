@@ -12,6 +12,9 @@ import { CropStatisticsModule } from './crop-statistics/crop-statistics.module';
 import { AgriculturalDataModule } from './agricultural-data/agricultural-data.module';
 import { EnvironmentalModule } from './environmental/environmental.module';
 import { IrrigationModule } from './irrigation/irrigation.module';
+import { SoilFertilityModule } from './soil-fertility/soil-fertility.module';
+import { PostHarvestModule } from './post-harvest/post-harvest.module';
+import { TradeModule } from './trade/trade.module';
 import { ClimateModule } from './climate/climate.module';
 import { SatelliteModule } from './satellite/satellite.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
@@ -43,7 +46,7 @@ import { IngestionModule } from './ingestion/ingestion.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    AuthModule, UsersModule, AdministrativeUnitsModule, CropsModule, SeasonsModule, DatasetsModule, CropStatisticsModule, AgriculturalDataModule, EnvironmentalModule, IrrigationModule, ClimateModule, SatelliteModule, InfrastructureModule, AnalyticsModule, GisModule, AiModelsModule, ModelRunsModule, PredictionsModule, PriorityZonesModule, EvidenceModule, RecommendationsModule, InterventionsModule, InterventionFeedbackModule, AlertsModule, ReportsModule, DashboardModule, ScenariosModule, IngestionModule],
+    AuthModule, UsersModule, AdministrativeUnitsModule, CropsModule, SeasonsModule, DatasetsModule, CropStatisticsModule, AgriculturalDataModule, EnvironmentalModule, IrrigationModule, SoilFertilityModule, PostHarvestModule, TradeModule, ClimateModule, SatelliteModule, InfrastructureModule, AnalyticsModule, GisModule, AiModelsModule, ModelRunsModule, PredictionsModule, PriorityZonesModule, EvidenceModule, RecommendationsModule, InterventionsModule, InterventionFeedbackModule, AlertsModule, ReportsModule, DashboardModule, ScenariosModule, IngestionModule],
   controllers: [AppController],
   providers: [AppService],
 })

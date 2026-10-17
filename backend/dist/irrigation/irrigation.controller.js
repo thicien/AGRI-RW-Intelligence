@@ -20,27 +20,88 @@ let IrrigationController = class IrrigationController {
     constructor(service) {
         this.service = service;
     }
-    async getPotential(season) {
-        return this.service.getPotential(season || '2025A');
+    async getSummary(season) {
+        return this.service.getSummary(season || '2026B');
     }
-    async getAssets() {
-        return this.service.getAssets();
+    async getDistricts(season) {
+        return this.service.getDistricts(season || '2026B');
+    }
+    async getSeasons() {
+        return this.service.getSeasons();
+    }
+    async getOpportunityScreening(season) {
+        return this.service.getOpportunityScreening(season || '2026B');
+    }
+    async getSchemes() {
+        return this.service.getSchemes();
+    }
+    async getSiteDossier(district, season) {
+        const d = district || 'Bugesera';
+        const s = season || '2026B';
+        return this.service.getSiteDossier(d, s);
+    }
+    async getPotentialLegacy(season) {
+        return this.service.getOpportunityScreening(season || '2026B');
+    }
+    async getAssetsLegacy() {
+        return this.service.getSchemes();
     }
 };
 exports.IrrigationController = IrrigationController;
+__decorate([
+    (0, common_1.Get)('summary'),
+    __param(0, (0, common_1.Query)('season')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getSummary", null);
+__decorate([
+    (0, common_1.Get)('districts'),
+    __param(0, (0, common_1.Query)('season')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getDistricts", null);
+__decorate([
+    (0, common_1.Get)('seasons'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getSeasons", null);
+__decorate([
+    (0, common_1.Get)('opportunity-screening'),
+    __param(0, (0, common_1.Query)('season')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getOpportunityScreening", null);
+__decorate([
+    (0, common_1.Get)('schemes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getSchemes", null);
+__decorate([
+    (0, common_1.Get)('site-dossier'),
+    __param(0, (0, common_1.Query)('district')),
+    __param(1, (0, common_1.Query)('season')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], IrrigationController.prototype, "getSiteDossier", null);
 __decorate([
     (0, common_1.Get)('potential'),
     __param(0, (0, common_1.Query)('season')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], IrrigationController.prototype, "getPotential", null);
+], IrrigationController.prototype, "getPotentialLegacy", null);
 __decorate([
     (0, common_1.Get)('assets'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], IrrigationController.prototype, "getAssets", null);
+], IrrigationController.prototype, "getAssetsLegacy", null);
 exports.IrrigationController = IrrigationController = __decorate([
     (0, common_1.Controller)('irrigation'),
     __metadata("design:paramtypes", [irrigation_service_1.IrrigationService])

@@ -67,14 +67,14 @@ let UsersService = UsersService_1 = class UsersService {
     }
     async seedRolesAndAdmin() {
         const defaultRoles = [
-            { name: 'System Administrator', description: 'Full system access and data management' },
-            { name: 'Data Manager', description: 'Import and validate agricultural datasets' },
-            { name: 'National Planner', description: 'National level agricultural analytics access' },
-            { name: 'District Officer', description: 'District-level analytics and operations' },
-            { name: 'Sector Officer', description: 'Sector-level analytics and operations' },
-            { name: 'Researcher / Analyst', description: 'Statistical and analytical research access' },
-            { name: 'Development Partner', description: 'Program-specific geographic data access' },
-            { name: 'Viewer', description: 'Read-only access to approved intelligence' }
+            { name: 'Platform Administrator', description: 'Highest privilege. Manages accounts, role assignments, permissions, system configuration and security.' },
+            { name: 'Data Manager', description: 'Manages dataset uploads, extraction jobs, metadata, data validation, corrections and publication of approved datasets.' },
+            { name: 'National Agricultural Planner', description: 'Views national and district-level indicators, compares seasons, reviews opportunity rankings, generates reports.' },
+            { name: 'District Agricultural Officer', description: 'Views the assigned district and its sectors, analyzes local agricultural trends, reviews intervention priorities.' },
+            { name: 'Sector Agricultural Officer', description: 'Views the assigned sector, available local indicators and aggregated agricultural statistics.' },
+            { name: 'Researcher or Data Analyst', description: 'Explores authorized datasets, filters seasonal and geographic data, conducts comparisons and exports records.' },
+            { name: 'Cooperative or Farmer User', description: 'Views accessible crop trends, seasonal guidance, nearby verified facilities and relevant market information.' },
+            { name: 'Partner, Policymaker or Viewer', description: 'Accesses approved dashboards, public maps and published reports. Cannot upload datasets or alter records.' }
         ];
         for (const roleData of defaultRoles) {
             let role = await this.roleRepository.findOne({ where: { name: roleData.name } });
