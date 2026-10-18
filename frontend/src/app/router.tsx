@@ -14,6 +14,8 @@ import AgriculturalIntelligenceHubPage from '../features/intelligence/Agricultur
 import Irrigation from '../features/environment/Irrigation';
 import SoilConservation from '../features/environment/SoilConservation';
 import PostHarvestProcessing from '../features/environment/PostHarvestProcessing';
+import ExportImportIntelligence from '../features/trade/ExportImportIntelligence';
+import DataManagementPage from '../features/admin/DataManagementPage';
 
 export const router = createBrowserRouter([
   {
@@ -62,7 +64,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'imports-exports',
-        element: <AgriculturalIntelligenceHubPage />,
+        element: <ExportImportIntelligence />,
       },
       {
         path: 'farmers',
@@ -85,6 +87,22 @@ export const router = createBrowserRouter([
         element: <RolesPage />,
       },
       {
+        path: 'users',
+        element: <RolesPage />,
+      },
+      {
+        path: 'audit-logs',
+        element: <RolesPage />,
+      },
+      {
+        path: 'datasets',
+        element: <DataManagementPage />,
+      },
+      {
+        path: 'data-quality',
+        element: <DataManagementPage />,
+      },
+      {
         path: 'priority-zones',
         element: <PriorityZonesPage />,
       },
@@ -93,16 +111,20 @@ export const router = createBrowserRouter([
         element: <IntelligenceMapPage />,
       },
       {
+        path: 'field-validation',
+        element: <AdminDashboardPage />,
+      },
+      {
         path: 'recommendations',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Recommendations</h2></div>,
+        element: <div className="p-8"><h2 className="text-2xl font-bold">Recommendations & Policy Briefs</h2></div>,
       },
       {
         path: 'interventions',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Interventions</h2></div>,
+        element: <div className="p-8"><h2 className="text-2xl font-bold">Agricultural Interventions</h2></div>,
       },
       {
         path: 'reports',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Reports</h2></div>,
+        element: <div className="p-8"><h2 className="text-2xl font-bold">Evidence Reports & Exports</h2></div>,
       },
     ],
   },
