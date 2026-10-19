@@ -5,7 +5,7 @@ import {
   MessageSquare, Database, BrainCircuit, PlaySquare, 
   FileBarChart, Users, Settings, Bell, Search, User, ChevronDown,
   Layers, Globe, CheckCircle2, ShieldCheck, MapPin, Key, XCircle,
-  AlertTriangle, Lock, RefreshCw, UserCheck, Check
+  AlertTriangle, Lock, RefreshCw, UserCheck, Check, Building2
 } from 'lucide-react';
 import clsx from 'clsx';
 import React, { useState } from 'react';
@@ -34,6 +34,7 @@ export default function AppShell() {
       title: 'AGRICULTURAL SECTORS',
       items: [
         { to: '/admin/crops', label: 'Crops & Seasons (2014-2026A)', icon: Leaf, minRoles: [] },
+        { to: '/admin/facilities', label: 'Agricultural Facilities Map', icon: Building2, minRoles: [] },
         { to: '/admin/agricultural-data', label: 'Productivity Statistics', icon: Database, minRoles: ['COOPERATIVE_FARMER'] },
         { to: '/admin/farmers', label: 'Farmers Registry', icon: Users, minRoles: ['COOPERATIVE_FARMER'] },
         { to: '/admin/farms', label: 'Farms & Holdings', icon: LayoutDashboard, minRoles: ['COOPERATIVE_FARMER'] },

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShieldAlert, Shield, ShieldCheck, Key, Lock, Users, 
+  ShieldAlert, Shield, ShieldCheck, Key, Lock, Users, UserPlus,
   Database, MapPin, Search, Filter, Settings, CheckCircle2, 
   XCircle, Eye, EyeOff, AlertTriangle, FileSpreadsheet, Download,
   Check, RefreshCw, ChevronDown, UserCheck, Activity, Globe,
   HelpCircle, ArrowRight
 } from 'lucide-react';
 import { useAuth, PRESET_PERSONAS } from '../auth/AuthContext';
+import RegisterDistrictOfficerForm from './RegisterDistrictOfficerForm';
 
 export default function RolesPage() {
   const { currentUser, switchPersona, updateGeographicScope, verifyBackendExport } = useAuth();
-  const [activeTab, setActiveTab] = useState<'explorer' | 'matrix' | 'users' | 'audit'>('explorer');
+  const [activeTab, setActiveTab] = useState<'explorer' | 'matrix' | 'users' | 'register-officer' | 'audit'>('explorer');
 
   // Interactive Explorer State (Section 4.4)
   const [selectedRoleCode, setSelectedRoleCode] = useState<string>(currentUser.roleCode);
@@ -235,6 +236,18 @@ export default function RolesPage() {
         >
           <Users className="w-4 h-4" />
           User & Geographic Scopes ({usersList.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('register-officer')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
+            activeTab === 'register-officer'
+              ? 'bg-emerald-700 text-white shadow-sm'
+              : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+          }`}
+        >
+          <UserPlus className="w-4 h-4" />
+          Register District Officer
         </button>
 
         <button
@@ -558,12 +571,20 @@ export default function RolesPage() {
                 Administrative assignment of roles and geographical jurisdictions (Rwanda Country, Districts, Sectors).
               </p>
             </div>
-            <button 
-              onClick={fetchData}
-              className="p-2 border border-border-main rounded-lg hover:bg-background transition-colors text-xs font-semibold flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh Accounts
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setActiveTab('register-officer')}
+                className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+              >
+                <UserPlus className="w-3.5 h-3.5" /> Register District Officer
+              </button>
+              <button 
+                onClick={fetchData}
+                className="p-2 border border-border-main rounded-lg hover:bg-background transition-colors text-xs font-semibold flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Refresh Accounts
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -711,7 +732,15 @@ export default function RolesPage() {
         </div>
       )}
 
-      {/* TAB 4: SECURITY AUDIT LOGS */}
+      {/* TAB 4: REGISTER AGRICULTURAL DISTRICT OFFICER */}
+      {activeTab === 'register-officer' && (
+        <RegisterDistrictOfficerForm 
+          onSuccess={fetchData}
+          existingUsers={usersList}
+        />
+      )}
+
+      {/* TAB 5: SECURITY AUDIT LOGS */}
       {activeTab === 'audit' && (
         <div className="bg-surface rounded-2xl border border-border-main p-6 shadow-sm space-y-4">
           <div className="flex justify-between items-center pb-4 border-b border-border-main">

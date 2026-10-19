@@ -29,7 +29,7 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     
@@ -37,22 +37,44 @@ export default function LoginPage() {
     
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setErrors({ general: data.message || 'The email or password you entered is incorrect.' });
+        return;
+      }
+
+      // Store auth session
+      localStorage.setItem('agrilens_token', data.accessToken);
+      localStorage.setItem('agrilens_user', JSON.stringify(data.user));
+
+      // Role-Based Redirection (Directing users to authorized workspaces)
+      if (data.user?.role === 'DISTRICT_OFFICER') {
+        navigate('/district/overview');
+      } else if (data.user?.role === 'DATA_MANAGER') {
+        navigate('/data-manager/overview');
+      } else if (data.user?.role === 'NATIONAL_PLANNER') {
+        navigate('/admin/analytics');
+      } else {
+        navigate('/admin/dashboard');
+      }
+    } catch (err: any) {
+      setErrors({ general: err.message || 'Unable to connect to authentication service.' });
+    } finally {
       setLoading(false);
-      // Mock failure for demonstration
-      if (email === 'error@agrilens.rw') {
-        setErrors({ general: 'The email or password you entered is incorrect.' });
-        return;
-      }
-      if (email === 'inactive@agrilens.rw') {
-        setErrors({ general: 'Your account is currently inactive. Please contact the system administrator.' });
-        return;
-      }
-      
-      // On success, redirect to dashboard
-      navigate('/admin/dashboard');
-    }, 1500);
+    }
+  };
+
+  const setQuickCredentials = (em: string, pass: string) => {
+    setEmail(em);
+    setPassword(pass);
+    setErrors({});
   };
 
   return (
@@ -221,6 +243,86 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Credentials Panel */}
+          <div className="mt-8 pt-6 border-t border-border-main">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+              Quick Role Sign-In (Official Credentials):
+            </div>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setQuickCredentials('officer.musanze@minagri.gov.rw', 'Musanze@2026!')}
+                className="w-full text-left p-2.5 rounded-lg border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/70 transition-colors flex items-center justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-xs text-emerald-950">
+                    🥔 District Officer (Musanze)
+                  </div>
+                  <div className="text-[11px] text-emerald-800">
+                    officer.musanze@minagri.gov.rw
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-emerald-800 border border-emerald-200">
+                  Fill Credentials
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickCredentials('district.nyagatare@minagri.gov.rw', 'AgriLens@2026!')}
+                className="w-full text-left p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors flex items-center justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-xs text-slate-800">
+                    🌾 District Officer (Nyagatare)
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    district.nyagatare@minagri.gov.rw
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                  Fill Credentials
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickCredentials('datamanager@agrilens.gov.rw', 'Data@2026!')}
+                className="w-full text-left p-2.5 rounded-lg border border-teal-200 bg-teal-50/70 hover:bg-teal-100/70 transition-colors flex items-center justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-xs text-teal-950">
+                    📊 Data Manager (National Data Pipeline)
+                  </div>
+                  <div className="text-[11px] text-teal-800">
+                    datamanager@agrilens.gov.rw
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-teal-800 border border-teal-200">
+                  Fill Credentials
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQuickCredentials('admin@agrilens.gov.rw', 'Admin@2026!')}
+                className="w-full text-left p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors flex items-center justify-between group"
+              >
+                <div>
+                  <div className="font-bold text-xs text-slate-800">
+                    👑 Platform Administrator
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    admin@agrilens.gov.rw
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                  Fill Credentials
+                </span>
+              </button>
+            </div>
+          </div>
 
         </div>
       </div>
