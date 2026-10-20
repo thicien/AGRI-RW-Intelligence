@@ -54,37 +54,14 @@ export default function AppShell() {
       items: [
         { to: '/admin/interventions', label: 'Priority Interventions', icon: ClipboardList, minRoles: ['COOPERATIVE_FARMER'] },
         { to: '/admin/field-validation', label: 'Field Verification & Observations', icon: MessageSquare, minRoles: ['PARTNER_VIEWER'] },
-      ]
-    },
-    {
-      title: 'DATA GOVERNANCE (MANAGERS ONLY)',
-      adminOnly: true,
-      rolesAllowed: ['PLATFORM_ADMIN', 'DATA_MANAGER'],
-      items: [
-        { to: '/admin/datasets', label: 'Dataset Ingestion & Inventory', icon: Database, minRoles: [] },
-        { to: '/admin/data-quality', label: 'Validation Pipeline & QA', icon: FileBarChart, minRoles: [] },
-      ]
-    },
-    {
-      title: 'ADMINISTRATION & RBAC',
-      adminOnly: true,
-      rolesAllowed: ['PLATFORM_ADMIN'],
-      items: [
-        { to: '/admin/roles', label: 'Roles & Permission Explorer', icon: ShieldAlert, minRoles: [] },
-        { to: '/admin/users', label: 'User Scopes & Accounts', icon: Users, minRoles: [] },
-        { to: '/admin/audit-logs', label: 'Security Audit Logs', icon: FileText, minRoles: [] },
-        { to: '/admin/settings', label: 'Platform Security Settings', icon: Settings, minRoles: [] },
+        { to: '/admin/recommendations', label: 'Policy Briefs & Guidance', icon: FileBarChart, minRoles: [] },
+        { to: '/admin/reports', label: 'Evidence Reports & Exports', icon: FileText, minRoles: [] },
       ]
     }
   ];
 
   // Filter sections by user's role
-  const visibleSections = allMenuSections.filter(section => {
-    if (section.rolesAllowed) {
-      return section.rolesAllowed.includes(currentUser.roleCode);
-    }
-    return true;
-  });
+  const visibleSections = allMenuSections;
 
   return (
     <div className="flex h-screen w-screen bg-background overflow-hidden font-sans text-text-main">
@@ -111,11 +88,12 @@ export default function AppShell() {
             <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
               AgriLens <span className="font-light text-emerald-300">Rwanda</span>
             </div>
-            <div className="text-[11px] text-[#5CE68B] font-medium tracking-tight mt-0.5 drop-shadow-xs">
-              Better Data. Stronger Harvests.
+            <div className="text-[11px] text-[#5CE68B] font-semibold tracking-tight mt-0.5 drop-shadow-xs uppercase">
+              Agricultural Planner Dashboard
             </div>
           </div>
         </div>
+
         
         {/* Navigation Sections */}
         <nav className="flex-1 py-4 px-3 overflow-y-auto custom-scrollbar space-y-5 relative z-10">

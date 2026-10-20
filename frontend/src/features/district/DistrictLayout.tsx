@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Sprout, Droplets, Mountain, Warehouse, Globe, 
   Map, CheckSquare, FileText, Bell, UserCheck, Shield, ShieldCheck,
-  ChevronDown, LogOut, ExternalLink, Calendar, MapPin, AlertCircle,
+  ChevronDown, LogOut, ExternalLink, Calendar, AlertCircle,
   Menu, X
 } from 'lucide-react';
 
@@ -108,26 +108,8 @@ export default function DistrictLayout() {
           </div>
         </div>
 
-        {/* District Scope Badge */}
-        <div className="px-3 pt-3 pb-1 relative z-10">
-          <div className="p-2.5 rounded-lg bg-[#0d4531]/80 border border-[#34D399]/30 flex items-center gap-2.5 backdrop-blur-sm shadow-inner">
-            <div className="w-7 h-7 rounded-md bg-[#155333] flex items-center justify-center text-emerald-300 flex-shrink-0 border border-emerald-400/20">
-              <MapPin className="w-4 h-4 text-emerald-300" />
-            </div>
-            <div className="min-w-0 flex-1 text-xs">
-              <div className="font-bold text-white leading-tight flex items-center gap-1.5 truncate">
-                <span>{officer.district} District</span>
-                <span className="text-[9px] bg-emerald-500/25 text-emerald-300 px-1.5 py-0.2 rounded font-mono uppercase font-bold">Scope</span>
-              </div>
-              <div className="text-[10px] text-emerald-200/80 font-medium truncate mt-0.5">
-                Authorized Data Only · NISR SAS
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation Items (The 11 Official Pages) */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 relative z-10 custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 relative z-10 custom-scrollbar">
           <div className="px-3 pb-2 text-[10px] font-extrabold text-[#7CB998] uppercase tracking-wider drop-shadow-xs">
             District Responsibilities (11 Pages)
           </div>

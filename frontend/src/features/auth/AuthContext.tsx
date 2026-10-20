@@ -19,16 +19,30 @@ export const PRESET_PERSONAS: UserPersona[] = [
   {
     id: 'p-1',
     name: 'Hon. Jean-Claude Musabyimana',
-    email: 'admin@agrilens.gov.rw',
+    email: 'admin@agrilens.rw',
+    roleCode: 'NATIONAL_PLANNER',
+    roleName: 'National Agricultural Planner',
+    scopeLevel: 'NATIONAL',
+    district: null,
+    sector: null,
+    title: 'National Agricultural Planner — MINAGRI',
+    avatarColor: 'bg-emerald-700 text-white',
+    avatarInitials: 'JM',
+    description: 'National agricultural intelligence, seasonal performance, policy analytics, opportunity assessments, and evidence planning across Rwanda.'
+  },
+  {
+    id: 'p-admin',
+    name: 'System Administrator',
+    email: 'sysadmin@agrilens.gov.rw',
     roleCode: 'PLATFORM_ADMIN',
     roleName: 'Platform Administrator',
     scopeLevel: 'NATIONAL',
     district: null,
     sector: null,
-    title: 'Platform Administrator & Security Director',
-    avatarColor: 'bg-danger text-white',
-    avatarInitials: 'PA',
-    description: 'Highest privilege. Full access to user lifecycle, security audit logs, and platform settings.'
+    title: 'System Administrator — Technical Governance Center',
+    avatarColor: 'bg-slate-900 text-emerald-400',
+    avatarInitials: 'SA',
+    description: 'Technical operation, security, user account management, RBAC, system health monitoring, and auditability.'
   },
   {
     id: 'p-2',

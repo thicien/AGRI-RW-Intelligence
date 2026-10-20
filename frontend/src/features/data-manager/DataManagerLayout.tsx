@@ -96,26 +96,8 @@ export default function DataManagerLayout() {
           </div>
         </div>
 
-        {/* Data Pipeline Scope Pill */}
-        <div className="px-3 pt-3 pb-1 relative z-10">
-          <div className="p-2.5 rounded-lg bg-[#0d4531]/80 border border-[#34D399]/30 flex items-center gap-2.5 backdrop-blur-sm shadow-inner">
-            <div className="w-7 h-7 rounded-md bg-[#155333] flex items-center justify-center text-emerald-300 flex-shrink-0 border border-emerald-400/20">
-              <Database className="w-4 h-4 text-emerald-300" />
-            </div>
-            <div className="min-w-0 flex-1 text-xs">
-              <div className="font-bold text-white leading-tight flex items-center gap-1.5 truncate">
-                <span>Data Pipeline Scope</span>
-                <span className="text-[9px] bg-emerald-500/25 text-emerald-300 px-1.5 py-0.2 rounded font-mono uppercase font-bold">Admin-Lite</span>
-              </div>
-              <div className="text-[10px] text-emerald-200/80 font-medium truncate mt-0.5">
-                Quality & Pipeline Governance
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation Items (The 12 Official Pages) */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 relative z-10 custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 relative z-10 custom-scrollbar">
           <div className="px-3 pb-2 text-[10px] font-extrabold text-[#7CB998] uppercase tracking-wider drop-shadow-xs">
             Data Operations (12 Pages)
           </div>

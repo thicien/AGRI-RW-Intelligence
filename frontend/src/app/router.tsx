@@ -42,6 +42,20 @@ import AnalyticsReportsPage from '../features/data-manager/AnalyticsReportsPage'
 import DatasetVersionsPage from '../features/data-manager/DatasetVersionsPage';
 import DataAuditActivityPage from '../features/data-manager/DataAuditActivityPage';
 import DataManagerProfilePage from '../features/data-manager/DataManagerProfilePage';
+import AdminLayout from '../features/admin/AdminLayout';
+import AdminOverviewPage from '../features/admin/AdminOverviewPage';
+import UserManagementPage from '../features/admin/UserManagementPage';
+import RolesPermissionsPage from '../features/admin/RolesPermissionsPage';
+import AdminGeographyPage from '../features/admin/AdminGeographyPage';
+import DatasetAdministrationPage from '../features/admin/DatasetAdministrationPage';
+import SystemConfigurationPage from '../features/admin/SystemConfigurationPage';
+import SystemHealthPage from '../features/admin/SystemHealthPage';
+import AuditLogsPage from '../features/admin/AuditLogsPage';
+import SecurityAccessPage from '../features/admin/SecurityAccessPage';
+import BackupRecoveryPage from '../features/admin/BackupRecoveryPage';
+import AdminNotificationsPage from '../features/admin/AdminNotificationsPage';
+import AdminReportsPage from '../features/admin/AdminReportsPage';
+import AdminProfilePage from '../features/admin/AdminProfilePage';
 
 export const router = createBrowserRouter([
   {
@@ -165,9 +179,75 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    path: '/system-admin',
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/system-admin/overview" replace />,
+      },
+      {
+        path: 'overview',
+        element: <AdminOverviewPage />,
+      },
+      {
+        path: 'users',
+        element: <UserManagementPage />,
+      },
+      {
+        path: 'roles',
+        element: <RolesPermissionsPage />,
+      },
+      {
+        path: 'geography',
+        element: <AdminGeographyPage />,
+      },
+      {
+        path: 'datasets',
+        element: <DatasetAdministrationPage />,
+      },
+      {
+        path: 'configuration',
+        element: <SystemConfigurationPage />,
+      },
+      {
+        path: 'health',
+        element: <SystemHealthPage />,
+      },
+      {
+        path: 'audit-logs',
+        element: <AuditLogsPage />,
+      },
+      {
+        path: 'security',
+        element: <SecurityAccessPage />,
+      },
+      {
+        path: 'backup',
+        element: <BackupRecoveryPage />,
+      },
+      {
+        path: 'notifications',
+        element: <AdminNotificationsPage />,
+      },
+      {
+        path: 'reports',
+        element: <AdminReportsPage />,
+      },
+      {
+        path: 'profile',
+        element: <AdminProfilePage />,
+      },
+    ],
+  },
+  {
     path: '/admin',
     element: <AppShell />,
     children: [
+      {
+        index: true,
+        element: <Navigate to="/admin/dashboard" replace />,
+      },
       {
         path: 'dashboard',
         element: <AdminDashboardPage />,
@@ -225,26 +305,6 @@ export const router = createBrowserRouter([
         element: <AgriculturalDataPage />,
       },
       {
-        path: 'roles',
-        element: <RolesPage />,
-      },
-      {
-        path: 'users',
-        element: <RolesPage />,
-      },
-      {
-        path: 'audit-logs',
-        element: <RolesPage />,
-      },
-      {
-        path: 'datasets',
-        element: <DataManagementPage />,
-      },
-      {
-        path: 'data-quality',
-        element: <DataManagementPage />,
-      },
-      {
         path: 'priority-zones',
         element: <PriorityZonesPage />,
       },
@@ -267,6 +327,27 @@ export const router = createBrowserRouter([
       {
         path: 'reports',
         element: <div className="p-8"><h2 className="text-2xl font-bold">Evidence Reports & Exports</h2></div>,
+      },
+      // Redirect legacy admin links to dedicated System Admin dashboard
+      {
+        path: 'users',
+        element: <Navigate to="/system-admin/users" replace />,
+      },
+      {
+        path: 'roles',
+        element: <Navigate to="/system-admin/roles" replace />,
+      },
+      {
+        path: 'audit-logs',
+        element: <Navigate to="/system-admin/audit-logs" replace />,
+      },
+      {
+        path: 'datasets',
+        element: <Navigate to="/system-admin/datasets" replace />,
+      },
+      {
+        path: 'data-quality',
+        element: <Navigate to="/system-admin/datasets" replace />,
       },
     ],
   },
