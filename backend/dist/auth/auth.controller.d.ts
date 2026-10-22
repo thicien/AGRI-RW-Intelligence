@@ -77,4 +77,28 @@ export declare class AuthController {
             sector: any;
         };
     }>;
+    registerDistrictOfficer(body: {
+        fullName: string;
+        email: string;
+        phone?: string;
+        password: string;
+        districtName: string;
+        notes?: string;
+        registeredByEmail?: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        user: {
+            id: any;
+            name: any;
+            email: any;
+            phone: any;
+            role: string;
+            roleName: any;
+            scopeLevel: string;
+            district: any;
+            status: any;
+            createdAt: any;
+        };
+    }>;
 }

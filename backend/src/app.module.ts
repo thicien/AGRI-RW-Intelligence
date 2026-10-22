@@ -33,6 +33,9 @@ import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ScenariosModule } from './scenarios/scenarios.module';
 import { IngestionModule } from './ingestion/ingestion.module';
+import { DistrictModule } from './district/district.module';
+import { DataManagerModule } from './data-manager/data-manager.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -46,7 +49,7 @@ import { IngestionModule } from './ingestion/ingestion.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    AuthModule, UsersModule, AdministrativeUnitsModule, CropsModule, SeasonsModule, DatasetsModule, CropStatisticsModule, AgriculturalDataModule, EnvironmentalModule, IrrigationModule, SoilFertilityModule, PostHarvestModule, TradeModule, ClimateModule, SatelliteModule, InfrastructureModule, AnalyticsModule, GisModule, AiModelsModule, ModelRunsModule, PredictionsModule, PriorityZonesModule, EvidenceModule, RecommendationsModule, InterventionsModule, InterventionFeedbackModule, AlertsModule, ReportsModule, DashboardModule, ScenariosModule, IngestionModule],
+    AuthModule, UsersModule, AdministrativeUnitsModule, CropsModule, SeasonsModule, DatasetsModule, CropStatisticsModule, AgriculturalDataModule, EnvironmentalModule, IrrigationModule, SoilFertilityModule, PostHarvestModule, TradeModule, ClimateModule, SatelliteModule, InfrastructureModule, AnalyticsModule, GisModule, AiModelsModule, ModelRunsModule, PredictionsModule, PriorityZonesModule, EvidenceModule, RecommendationsModule, InterventionsModule, InterventionFeedbackModule, AlertsModule, ReportsModule, DashboardModule, ScenariosModule, IngestionModule, DistrictModule, DataManagerModule, AdminModule],
   controllers: [AppController],
   providers: [AppService],
 })

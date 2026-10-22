@@ -9,7 +9,7 @@ const client = new Client({
 
 async function main() {
   await client.connect();
-  for (const t of ['soil_conditions', 'soil_observations', 'agricultural_practices', 'agricultural_inputs']) {
+  for (const t of ['irrigation_season_statistics', 'soil_fertility_season_statistics', 'post_harvest_season_statistics', 'trade_season_statistics']) {
     const res = await client.query(`
       SELECT column_name, data_type 
       FROM information_schema.columns 

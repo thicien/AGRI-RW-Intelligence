@@ -19,11 +19,14 @@ export declare class IrrigationService {
             rationale: string;
         }[];
         rankedPotentialSites: any;
+        rankings: any;
     }>;
     getSchemes(): Promise<{
         type: string;
         features: any;
         schemesList: any;
+        rawAssets: any;
+        schemes: any;
     }>;
     getSiteDossier(districtIdentifier: string, seasonCode?: string): Promise<{
         district: {

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -609,6 +609,108 @@ export class AuthService {
         scopeLevel: user.scope_level || 'NATIONAL',
         district: user.district_name,
         sector: user.sector_name
+      }
+    };
+  }
+
+  /**
+   * 12. Register an Agricultural District Officer (System Administrator Feature)
+   */
+  async registerDistrictOfficer(body: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    password: string;
+    districtName: string;
+    notes?: string;
+    registeredByEmail?: string;
+  }) {
+    if (!body.fullName || !body.email || !body.password || !body.districtName) {
+      throw new BadRequestException('Full name, email, password, and assigned district are required.');
+    }
+
+    const cleanEmail = body.email.trim().toLowerCase();
+
+    // Check if email already registered
+    const existing = await this.dataSource.query(
+      `SELECT id FROM agrilens.users WHERE email = $1 LIMIT 1;`,
+      [cleanEmail]
+    );
+    if (existing.length > 0) {
+      throw new BadRequestException(`An account with email '${cleanEmail}' is already registered.`);
+    }
+
+    // Hash the password with argon2
+    const hashedPassword = await argon2.hash(body.password);
+
+    // Get DISTRICT_OFFICER role ID
+    const roleRes = await this.dataSource.query(
+      `SELECT id, name FROM agrilens.roles WHERE code = 'DISTRICT_OFFICER' LIMIT 1;`
+    );
+    if (roleRes.length === 0) {
+      throw new NotFoundException('DISTRICT_OFFICER role not found in system.');
+    }
+    const roleId = roleRes[0].id;
+    const roleName = roleRes[0].name;
+
+    // Resolve administrative unit for assigned district
+    const unitRes = await this.dataSource.query(
+      `SELECT id, name FROM agrilens.administrative_units WHERE name ILIKE $1 AND unit_type = 'DISTRICT' LIMIT 1;`,
+      [body.districtName.trim()]
+    );
+    const adminUnitId = unitRes.length > 0 ? unitRes[0].id : null;
+    const resolvedDistrict = unitRes.length > 0 ? unitRes[0].name : body.districtName.trim();
+
+    // Insert user into agrilens.users
+    const insertRes = await this.dataSource.query(`
+      INSERT INTO agrilens.users (full_name, email, phone, password_hash, status, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, 'ACTIVE', NOW(), NOW())
+      RETURNING id, full_name, email, phone, status, created_at;
+    `, [body.fullName.trim(), cleanEmail, body.phone?.trim() || null, hashedPassword]);
+
+    const createdUser = insertRes[0];
+
+    // Assign role in user_roles
+    await this.dataSource.query(`
+      INSERT INTO agrilens.user_roles (user_id, role_id)
+      VALUES ($1, $2);
+    `, [createdUser.id, roleId]);
+
+    // Assign geographic scope in user_locations
+    await this.dataSource.query(`
+      INSERT INTO agrilens.user_locations (user_id, admin_unit_id, scope_level, district_name, sector_name)
+      VALUES ($1, $2, 'DISTRICT', $3, NULL);
+    `, [createdUser.id, adminUnitId, resolvedDistrict]);
+
+    // Log security audit trail
+    await this.logAuditEvent({
+      actorEmail: body.registeredByEmail || 'admin@agrilens.gov.rw',
+      actorRole: 'PLATFORM_ADMIN',
+      action: 'DISTRICT_OFFICER_REGISTERED',
+      resource: `USER:${createdUser.id}`,
+      details: {
+        officerName: createdUser.full_name,
+        officerEmail: createdUser.email,
+        assignedDistrict: resolvedDistrict,
+        role: 'DISTRICT_OFFICER',
+        notes: body.notes || 'Agricultural District Officer registered by System Administrator'
+      }
+    });
+
+    return {
+      success: true,
+      message: `Agricultural District Officer for ${resolvedDistrict} registered successfully.`,
+      user: {
+        id: createdUser.id,
+        name: createdUser.full_name,
+        email: createdUser.email,
+        phone: createdUser.phone,
+        role: 'DISTRICT_OFFICER',
+        roleName: roleName,
+        scopeLevel: 'DISTRICT',
+        district: resolvedDistrict,
+        status: createdUser.status,
+        createdAt: createdUser.created_at
       }
     };
   }

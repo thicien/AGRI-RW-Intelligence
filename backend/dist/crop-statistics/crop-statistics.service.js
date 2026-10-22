@@ -57,16 +57,24 @@ let CropStatisticsService = class CropStatisticsService {
             this.dataSource.query(summaryQuery, [seasonCode]),
             this.dataSource.query(topCropsQuery, [seasonCode]),
         ]);
+        const overviewRaw = summaryRes[0] || {
+            season_code: seasonCode,
+            total_production_mt: 0,
+            total_cultivated_area_ha: 0,
+            total_harvested_area_ha: 0,
+            weighted_national_yield_t_ha: 0,
+        };
         return {
             season: seasonCode,
-            overview: summaryRes[0] || {
-                season_code: seasonCode,
-                total_production_mt: 0,
-                total_cultivated_area_ha: 0,
-                total_harvested_area_ha: 0,
-                weighted_national_yield_t_ha: 0,
+            overview: {
+                ...overviewRaw,
+                total_area_ha: overviewRaw.total_cultivated_area_ha,
+                average_yield_t_ha: overviewRaw.weighted_national_yield_t_ha,
             },
-            crops: topCropsRes,
+            crops: topCropsRes.map((c) => ({
+                ...c,
+                area_ha: c.cultivated_area_ha,
+            })),
         };
     }
     async getDistrictComparisons(cropName = 'Maize', seasonCode = '2025A') {

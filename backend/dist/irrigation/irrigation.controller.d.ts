@@ -19,11 +19,14 @@ export declare class IrrigationController {
             rationale: string;
         }[];
         rankedPotentialSites: any;
+        rankings: any;
     }>;
     getSchemes(): Promise<{
         type: string;
         features: any;
         schemesList: any;
+        rawAssets: any;
+        schemes: any;
     }>;
     getSiteDossier(district?: string, season?: string): Promise<{
         district: {
@@ -69,10 +72,13 @@ export declare class IrrigationController {
             rationale: string;
         }[];
         rankedPotentialSites: any;
+        rankings: any;
     }>;
     getAssetsLegacy(): Promise<{
         type: string;
         features: any;
         schemesList: any;
+        rawAssets: any;
+        schemes: any;
     }>;
 }

@@ -133,4 +133,24 @@ export class AuthController {
   async login(@Body() body: { email: string; password: string }) {
     return await this.authService.login(body.email, body.password);
   }
+
+  /**
+   * 11. POST /api/v1/auth/register-district-officer
+   * System Administrator registers an Agricultural District Officer
+   */
+  @Post('register-district-officer')
+  @HttpCode(HttpStatus.CREATED)
+  async registerDistrictOfficer(
+    @Body() body: {
+      fullName: string;
+      email: string;
+      phone?: string;
+      password: string;
+      districtName: string;
+      notes?: string;
+      registeredByEmail?: string;
+    }
+  ) {
+    return await this.authService.registerDistrictOfficer(body);
+  }
 }

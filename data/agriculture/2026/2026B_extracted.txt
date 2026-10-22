@@ -1,0 +1,2111 @@
+
+--- PAGE 1 ---
+SEASONAL
+AGRICULTURAL
+SURVEY
+SEASON B 	2026
+NATIONAL INSTITUTE OF
+STATISTICS OF RWANDA
+--- PAGE 2 ---
+2
+SAS–2026 B 	©	 	NISR
+NISR © 2026 National Institute of Statistics of Rwanda. Licensed under CC BY 4.0
+The Seasonal Agricultural Survey report is produced by the National Institute of Statistics of Rwanda (NISR):
+P.O Box : 6139 Kigali, Rwanda
+Tel: +250 788 383103
+Hotline: 4321
+Email: info@statistics.gov.rw
+Recommended citation:
+National Institute of Statistics of Rwanda (NISR) Seasonal Agricultural Survey, , Season B, September 2026
+--- PAGE 3 ---
+Chapter
+3
+SAS–2026 B 	©	 	NISR
+Contents
+1 	INTRODUCTION -------------------------------------------------------------------------------------------6
+1.1 	Background ........................................................................................................................ 6
+1.2 	Objectives of the Seasonal Agricultural Survey (SAS) ......................................................... 6
+2 	SURVEY DESIGN -------------------------------------------------------------------------------------------7
+1 	Sample frame design .......................................................................................................... 7
+2 	Data collection procedures ................................................................................................. 17
+2.1. 	Time frame and coverage................................................................................................... 17
+2.2. 	Field staff ............................................................................................................................ 17
+2.3. 	Data collection tools ........................................................................................................... 18
+3 	Data quality assurance ....................................................................................................... 18
+3.1. 	Training of enumerators ..................................................................................................... 18
+3.2. 	Fieldwork monitoring ......................................................................................................... 18
+4 	Data processing and analysis process ................................................................................ 19
+4.1. Data management process ..................................................................................................... 19
+4.2. Detecting outliers and dealing with missing values................................................................ 19
+4.3. Methods for Estimating Area and Yield .................................................................................. 20
+4.4. Data analysis .......................................................................................................................... 21
+3 	SURVEY FINDINGS ----------------------------------------------------------------------------------------22
+3.1 	Agricultural land use .......................................................................................................... 22
+3.2 	Crop area, yield and production estimates for major crops ............................................... 23
+2.1 	Yield and Crop area for major crops .................................................................................. 23
+3. 	Use of inputs ...................................................................................................................... 29
+3.2 	Use of fertilizers .................................................................................................................. 30
+3.3 	Use of pesticides ................................................................................................................. 30
+4 	Agricultural practices ......................................................................................................... 30
+4.1 	Irrigation practices ............................................................................................................. 30
+4.2 	Erosion control measures ................................................................................................... 31
+--- PAGE 4 ---
+Chapter
+4
+SAS–2026 B 	©	 	NISR
+Table 1: List of Rwanda land cover classes .................................................................................... 7
+Map 1: Rwanda land classification map done in 2023 .................................................................. 8
+Table 2: List of strata ..................................................................................................................... 9
+Map 2: Distribution of stratified clusters by district ...................................................................... 9
+Map 3: SAS Sampling Units ........................................................................................................... 10
+Table 3: Population size per district by stratum (Number of segments) ........................................ 11
+Table 4: Allocation of 1200 sampled segments per district by stratum ........................................ 12
+Map 4: Map showing square cluster(segment) with 25 sampled points ...................................... 13
+Table 5: 2026 Season B_ Sampling errors of total areas for major crops at the national level ..... 17
+Figure 1: 2026 Season B - Agricultural land use (in thousands of hectares) .................................. 22
+Figure 2: 2026 Season B - Yield of major crops (MT/ha) ................................................................ 23
+Map 5: Distribution of Maize Production by District, Season B 2026 ............................................ 24
+Map 6: Distribution of Beans Production by District, Season B 2026 ............................................ 25
+Map 7: Distribution of Paddy Rice Production by District, Season B 2026 ..................................... 26
+Map 8: Distribution of Irish Potato Production by District, Season B 2026 .................................... 27
+Map 9: Distribution of Sweet Potato Production by District, Season B 2026 ................................. 28
+Map 10: Distribution of Cassava Production by District, Season B 2026 ....................................... 29
+Map 11: Distribution of Banana Production by District, Season B 2026 ........................................ 30
+Table 6: 2026 Season B Cultivated area, harvested area, production, and yield by crop. ............ 30
+Figure 3: 2026 Season B_Use of inputs by farmers ....................................................................... 32
+Figure 4: 2026 Season B - Use of agricultural practices ................................................................ 33
+Table 7: 2026 Season B_Agricultural land use per district (,000Ha) .............................................. 35
+Table 8: 2026 Season B_Area under agricultural practices............................................................ 36
+Table 9: 2026 Season B_Cultivated area by crop type and district (Ha) ........................................ 37
+Table 10: 2026 Season B_Harvested area by crop type and district (Ha) ..................................... 38
+Table 11: 2026 Season B_Average yield by crop type and district (Kg/Ha) .................................... 39
+Table 12: 2026 Season B_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha)40
+Table 13: 2026 Season B_Crop production by crop type and district (MT) .................................... 41
+Table 14: 2026 Season B_the Use of production by farmers (Percentage) .................................... 42
+Table 15: 2026 Season B_Cultivated area by cropping system and district (Percentage) .............. 43
+Table 16: 2026 Season B_Sowing dates by district (Percentage) ................................................... 44
+Table 17: 2026 Season B_Sowing date by crops (Percentage) ....................................................... 45
+Table 18: 2026 Season B_Use of seeds by farmer type per district (Percentage) .......................... 46
+Table 19: 2026 Season B Seed type by crops (Percentage) ............................................................ 47
+Table 20: 2026 Season B_Percentage of farmers by source of improved seeds per district .......... 48
+Table 21: 2026 Season B_Percentage of crops by source of seeds ................................................ 49
+Table 22: 2026 Season B_Use of organic fertilizer by farmer type per district (Percentage) ......... 50
+Table 23: 2026 Season B Use of inorganic fertilizer by farmer type per district (Percentage) ....... 51
+Table 24: 2026 Season B_Percentage of farmers by source of inorganic fertilizers per district .... 52
+Table 25: 2026 Season B_Source of inorganic fertilizer by type of fertilizer .................................. 53
+Table 26: 2026 Season B Percentage of plots by type of inorganic fertilizer per district ............... 54
+List of Figures, Tables and Maps
+--- PAGE 5 ---
+Chapter
+5
+SAS–2026 B 	©	 	NISR
+Table 27: 2026 Season B_Use of pesticides by farmer type per district (Percentage).................... 55
+Table 28: 2026 Season B Percentage of plots by type of pesticides per district ............................ 56
+Table 29: 2026 Season B Percentage of farmers who practiced agricultural practices. ................ 57
+Table 30: 2026 Season B Percentage of plots by types of irrigation used. .................................... 58
+Table 31: 2026 Season B Percentage of plots by source of water used and district. ..................... 59
+Table 32: Percentage of plots by categories of Erosion Control Measures per Districts ................ 60
+Table 33: 2026 Season B_Percentage of plots by degree of erosion per district ........................... 61
+--- PAGE 6 ---
+Chapter
+6
+SAS–2026 B 	© NISR
+INTRODUCTION	1
+1. 	Background
+2. 	Objectives of the Seasonal Agricultural Survey (SAS)
+The main objective of SAS is to provide timely, accurate, reliable, and comprehensive agricultural statistics
+that describe the structure of agriculture in Rwanda mainly in terms of land use, crop area, yield, and crop
+production. The survey’s results are useful in monitoring current agricultural and food supply conditions,
+thereby facilitating evidence-based decision-making for the development of the agricultural sector.
+The survey specifically captures data related to land use, including agricultural land, arable land, physical crop
+cultivated area, crop land, pasture land, and fallow land. It also generates information on crop production,
+measuring the quantity of harvested crop in kilograms or tons. Additionally, the survey assesses crop
+yield, indicating the quantity of crop harvested per unit of land area in kilograms per hectare. Moreover,
+it examines the use of inputs such as improved seeds, fertilizers, and pesticides. Finally, the survey delves
+into various agricultural practices, including irrigation, soil erosion protection, agroforestry, and agriculture
+mechanization.
+High-quality agricultural statistics are fundamental in assessing the performance of national agricultural
+programs and are therefore essential for evidence-based decision making. As the application of statistical data
+in decision-making processes continues to grow, so does the demand for agricultural data. In this regard, the
+National Institute of Statistics of Rwanda (NISR), in collaboration with the Ministry of Agriculture and Animal
+Resources (MINAGRI) conducts the Seasonal Agricultural Survey (SAS). This survey is designed to collect
+agricultural information, mainly related to potential agricultural land use, crop area, yield, and production,
+agricultural inputs, agricultural practices, and other critical agricultural statistics. Coffee and tea are not
+covered in this report, as their figures are captured in the report of the National Agricultural Export
+Development Board (NAEB), through its routine monitoring of production for these two crops . NISR conducts
+the Seasonal Agricultural Survey (SAS) following three main agricultural seasons. Season A (September to
+February of the following year), Season B (March to June) while Season C (July-September) is a shorter season
+dedicated mainly to the cultivation of vegetables and sweet potatoes grown in swamps and Irish potatoes
+grown in the volcanic agro- ecological zone.
+--- PAGE 7 ---
+Chapter
+7
+SAS–2026 B 	©	 	NISR
+SURVEY DESIGN	2
+1 	Sample frame design
+To establish a foundation for conducting probability-based surveys that comprehensively cover farm-
+level data and to enhance the precision of survey estimates, SAS uses a Multiple Frame Sampling (MFS)
+methodology. This approach involves constructing an area frame from which the survey sample is drawn.
+In addition, this frame is completed by a list frame of Large-Scale Farmers (LSF), defined as those operating
+at least 10 hectares of agricultural land for staple crops and at least 2 hectares for horticultural crops. This
+ensures coverage of crops predominantly cultivated by large-scale farmers, which may not be adequately
+represented in the standalone area frame. The construction of an area frame involves several steps, including
+land cover classification, land stratification and sampling of segments.
+2.1. 	Land cover classification
+Land classification constitutes the first step in designing the sampling frame for the Seasonal Agriculture
+Survey. This process involves categorizing the total available land in the country into different land use or land
+cover types. The purpose is to enhance sampling precision by targeting the adequate land. With a combination
+of different spatial layers available in the country, plus a photo interpretation of a time series (2010 to 2023)
+of high-resolution (50 to 30 cm) satellite images the total land of the country was divided into 14 land cover
+classes (as shown in Table 1).
+Table 1: List of Rwanda land cover classes
+No 	Class name 	Area (Ha) 	Percentage share
+1 	Agricultural land on hills 	1,307,956 	51.7
+2 	Non-rice Agricultural Wetland 	56,905 	2.2
+3 	Mixed rangeland 	127,640 	5.0
+4 	Low-density built-up area 	95,740 	3.8
+5 	Paddy rice wetland 	22,825 	0.9
+6 	Tea plantation 	23,732 	0.9
+7 	Non cropped wetlands 	36,846 	1.5
+8 	Forest 	381,391 	15.1
+9 	National parks 	190,247 	7.5
+10 	Water bodies 	155,030 	6.1
+11 	High-density built-up area 	58,657 	2.3
+12 	Protected wetland 	45,883 	1.8
+13 	Bare land/rocks 	15,412 	0.6
+14 	Exclusive rangeland 	13,064 	0.5
+Source: NISR, SAS 2026
+Six of the fourteen land cover classes are associated to agricultural activities. These include Agricultural land
+on hillside, non-rice agricultural Wetland, mixed rangeland, Low-density built-up areas, wetlands designated
+for paddy rice and tea plantation.
+--- PAGE 8 ---
+8
+SAS–2026 B 	© NISR
+Map 1: Rwanda land classification map done in 2023
+Source: NISR, SAS 2026
+The subsequent step involves constructing the area frame which includes grouping the agriculturally relevant
+land cover classes into distinct strata to identify the sampling frame.
+2.2. 	Land stratification
+The stratification is a result of a combination of sampling units (clusters) with land use/land cover. Each
+cluster is assigned to a specific stratum based on its predominant land class type. Among the fourteen land
+cover classes, four are included into the agricultural survey frame, while the others are excluded.
+The included land cover classes comprise hillside agricultural land, non-rice agricultural land, mixed rangeland,
+and Low-density built-up area (with potential for agricultural production, such as kitchen gardens, fruit trees,
+and livestock). Certain agricultural land classes are excluded from the sampling frame. These exclusions
+comprise: tea plantations as they are subject to regular monitoring by the National Agricultural Export
+Development Board (NAEB), and wetlands designated for paddy rice cultivation are typically considered in
+Large-Scale Farmers, making them another component of the survey frame. Moreover, since the 2024 SAS, a
+new land cover class called Exclusive Rangeland has been introduced specifically for areas used for pastoral
+activities. This class is also excluded from the sampling frame.
+--- PAGE 9 ---
+9
+SAS–2026 B 	© NISR
+By overlapping the clusters layer with land cover classes layer, each cluster is assigned a dominant land cover
+class as a stratum definition, basing on a defined threshold as follow:
+Table 2: List of strata
+Stratum
+code
+Stratum name 	Definition
+1.0 	Dominant hill crop land 	Clusters with Hillside agricultural land cover class greater or equal to 60% of the total area
+of the cluster
+2.0 	Dominant Wetland crops 	Clusters with non-rice wetland land cover class greater than 25% of total area of the cluster
+3.0 	Dominant rangeland 	Clusters with mixed rangeland land cover class greater or equal to 60% of the total area of
+the cluster
+4.0 	Mixed 	The rest of other possible combinations
+9.0 	Excluded 	All clusters with excluded land cover classes greater or equal to 50% of the total area of the
+cluster
+Source: NISR, SAS 2026
+The SAS sample is drawn from four main strata: dominant hill crop land, dominant wetland crops, dominant
+rangeland, and mixed land strata.
+Map 2: Distribution of stratified clusters by district
+Source: NISR, SAS 2026
+--- PAGE 10 ---
+10
+SAS–2026 B 	© NISR
+2.3. 	Sampling Units
+The Seasonal Agricultural Survey is an area-based sample survey that uses land sampling units, small square
+land units of 300 by 300 meters (9ha). Geographic Information System (GIS) technology is used to create
+the units covering the whole country. In total the sampling frame has 269,989 square units (clusters), each
+identified by a unique cluster number as shown on the map below.
+Map 3: SAS Sampling Units
+Source: NISR, SAS 2026
+--- PAGE 11 ---
+11
+SAS–2026 B 	© NISR
+Table 3: Population size per district by stratum (Number of segments)
+District
+Stratum
+Dominant hill
+crop land
+Dominant
+wetland crops
+Dominant
+rangeland
+Mixed stratum 	Excluded
+stratum
+Total
+Nyarugenge 	534 	238 	- 	168 	524 	1,464
+Gasabo 	2,165 	283 	- 	697 	1,632 	4,777
+Kicukiro 	461 	179 	- 	233 	1,000 	1,873
+Nyanza 	5,688 	520 	- 	500 	744 	7,452
+Gisagara 	5,197 	397 	- 	824 	1,077 	7,495
+Nyaruguru 	3,568 	343 	- 	1,300 	6,027 	11,238
+Huye 	3,160 	346 	- 	1,466 	1,496 	6,468
+Nyamagabe 	5,344 	263 	- 	1,154 	5,352 	12,113
+Ruhango 	5,663 	336 	- 	489 	487 	6,975
+Muhanga 	4,983 	237 	- 	760 	1,200 	7,180
+Kamonyi 	5,530 	320 	- 	704 	777 	7,331
+Karongi 	5,757 	117 	- 	726 	2,159 	8,759
+Rutsiro 	4,511 	- 	- 	776 	2,083 	7,370
+Rubavu 	2,516 	- 	- 	446 	843 	3,805
+Nyabihu 	3,481 	- 	- 	671 	1,896 	6,048
+Ngororero 	5,580 	134 	- 	461 	1,276 	7,451
+Rusizi 	3,731 	155 	- 	886 	5,500 	10,272
+Nyamasheke 	4,584 	134 	- 	953 	4,839 	10,510
+Rulindo 	4,144 	304 	- 	625 	1,219 	6,292
+Gakenke 	5,934 	249 	- 	671 	966 	7,820
+Musanze 	3,111 	126 	- 	769 	1,869 	5,875
+Burera 	4,256 	260 	- 	667 	1,976 	7,159
+Gicumbi 	5,883 	208 	- 	950 	2,176 	9,217
+Rwamagana 	5,060 	163 	- 	1,194 	1,122 	7,539
+Nyagatare 	6,591 	516 	9,112 	1,112 	4,050 	21,381
+Gatsibo 	7,362 	435 	788 	1,100 	7,781 	17,466
+Kayonza 	6,471 	149 	3,825 	1,293 	9,730 	21,468
+Kirehe 	7,704 	1,501 	3,972 	13,177
+Ngoma 	6,293 	- 	1,201 	2,154 	9,648
+Bugesera 	6,957 	612 	- 	2,341 	4,456 	14,366
+National 	142,219 	7,024 	13,725 	26,638 	80,383 	269,989
+Source: NISR, SAS 2026
+2.4. 	Sampling procedures
+Out of the five defined strata, only the dominant hill crop land stratum, dominant wetland crops stratum,
+dominant rangeland stratum and mixed stratum are considered as agricultural land potential. The remaining
+stratum is classified as non-agricultural land. Notably, clusters comprising tea plantations and wetlands
+designated for paddy rice cultivation are not considered in the area sample frame due to reasons stated
+above. Thus, SAS is conducted on four strata mentioned above. In the first stage, 1200 segments are selected
+and allocated at the district level using the power allocation approach Bankier (1981). Within each district,
+the sampled segments are distributed across strata according to a proportional-to-area criterion.
+--- PAGE 12 ---
+12
+SAS–2026 B 	© NISR
+Table 4: Allocation of 1200 sampled segments per district by stratum
+District 	Dominant hill crop
+land
+Dominant wetland crops 	Dominant rangeland 	Mixed stratum 	Total
+Nyarugenge 	12 	6 	2 	20
+Gasabo 	22 	4 	3 	29
+Kicukiro 	13 	5 	2 	20
+Nyanza 	37 	4 	2 	43
+Gisagara 	33 	5 	3 	41
+Nyaruguru 	25 	3 	7 	35
+Huye 	27 	3 	5 	35
+Nyamagabe 	36 	2 	6 	44
+Ruhango 	36 	3 	3 	42
+Muhanga 	33 	3 	4 	40
+Kamonyi 	36 	3 	4 	43
+Karongi 	38 	2 	3 	43
+Rutsiro 	34 	4 	38
+Rubavu 	21 	4 	25
+Nyabihu 	29 	3 	32
+Ngororero 	38 	2 	3 	43
+Rusizi 	27 	2 	5 	34
+Nyamasheke 	31 	2 	5 	38
+Rulindo 	28 	3 	4 	35
+Gakenke 	37 	2 	4 	43
+Musanze 	24 	2 	4 	30
+Burera 	30 	2 	3 	35
+Gicumbi 	37 	2 	5 	44
+Rwamagana 	34 	2 	6 	42
+Nyagatare 	31 	5 	25 	7 	68
+Gatsibo 	38 	3 	5 	5 	51
+Kayonza 	32 	2 	13 	5 	52
+Kirehe 	45 	9 	54
+Ngoma 	39 	6 	45
+Bugesera 	45 	3 	8 	56
+Total 	948 	75 	43 	134 	1,200
+Source: NISR, SAS 2026
+At the second stage, 25 sample points are systematically selected, following a special distance of 60 meters
+between points. The sample points serve as reporting units within each segment. Enumerators visit each
+point, identify and delineate the plot in which it falls, and collect records of land use and related information.
+The information recorded is used to characterize the whole segment, and the results are extrapolated to
+the stratum level. Hence, the combination of strata within each district provides district-level area-related
+statistics.
+--- PAGE 13 ---
+13
+SAS–2026 B 	© NISR
+Map 4: Map showing square cluster(segment) with 25 sampled points
+Source: NISR, SAS 2026
+2.5. 	Weighting Procedures
+Based on the stratified two-stage sample design used with the new area frame, the first stage sampling
+probability for sample segments within each stratum is calculated as follows:
+Where:
+p1h = probability of selection of sample segments in stratum h (district by stratum)
+nh = number of sample segments selected in stratum h
+nh = total number of segments in the area frame for stratum h in each stratum
+The second-stage probability was calculated at the plot level, based on the assumption that the plots within
+each sample segment were implicitly selected with PPS using the area of the plot as the measure of size.
+Therefore, the second-stage probability of selection can be expressed as follows:
+--- PAGE 14 ---
+14
+SAS–2026 B 	© NISR
+Where:
+p2hi =Probability of selection of the plot in segment h
+ghi =Number of grid squares selected in the i-th sample segment of stratum h;
+Ahij =Area of the j-th sample plot selected in the i-th sample segment of stratum h
+Ahi =Area of the i-th sample segment of stratum h;
+ghij =Number of selected grid squares in the j-th sample plot of the i-th sample segment of stratum h
+The weight of a sample plot is equal to the inverse of the first and second stage probabilities of selection:
+Where:
+WPhij = weight for the j-th sample plot in the i-th sample segment in stratum h
+2.6. 	Sampling errors computation
+Sample survey results may be subject to two types of errors: (i) sampling errors and (ii) non-sampling errors.
+Non-sampling errors encompass all sources of error not related to sampling and may occur throughout all
+aspects of the survey process, including data collection and processing. They are categorized into four types:
+coverage errors, measurement errors, non-response errors, and processing errors. Although researchers take
+steps to minimize such errors during the design and implementation phases of the survey, their elimination
+is practically impossible. Non-sampling errors, in particular, can be extremely challenging to identify and
+quantify accurately. Despite our best efforts, some degree of uncertainty associated with the survey results
+persists due to the presence of these errors.
+Sampling errors are associated with the sampling selection process, and arise from observing a sample rather
+than the entire population. They represent the disparity between an estimate derived from a sample survey
+and the true value that would result if a census of the entire population were conducted under the same
+conditions.
+In order to assess the precision of the most important estimates derived from the SAS 2026 Season B data, as
+well as the statistical efficiency of the agricultural area frame and sample design, it is important to calculate
+the sampling errors and corresponding coefficients of variation (CVs) for these estimates, such as the total
+area under each major crop. The sampling error of each estimate is measured by its standard error, which is
+the square root of the variance. The Complex Samples module in SPSS and Stata use a linearized Taylor series
+variance estimator that considers the stratification and clustering in the sample design.
+The SPSS Complex Samples software was used to calculate the sampling errors and CVs for estimates of the
+total area of major crops from the SAS data.
+The formula for the estimate of a total can be expressed as follows:
+Where:
+--- PAGE 15 ---
+15
+SAS–2026 B 	© NISR
+L= number of strata
+yhij = value of variable y for the j-th sample household in the i-th sample segment in stratum h
+The variance estimator for a total used by the Complex Samples module of SPSS and Stata can be expressed
+as follows:
+Variance Estimator for a Total:
+Where:
+yhij : value of variable for the -th sample plot in the -th sample segment of stratum h
+The survey estimate of a ratio is defined as follows:
+Where Yˆand Xˆ are estimates of totals for variables and , respectively, calculated as specified previously.
+In the case of a stratified two-stage sample design, means and proportions are special types of ratios. In
+the case of the mean, the variable X, in the denominator of the ratio, is defined to equal 1 for each unit so
+that the denominator is the sum of the weights. For a proportion, the variable X in the denominator is also
+defined to equal 1 for all units; the variable Y in the numerator is binomial and is defined to equal either 0 or
+1, depending on the absence or presence, respectively, of a specified characteristic for the unit.
+The variance estimator for a ratio used by SPSS Complex Samples and Stata can be expressed as follows:
+Variance Estimator for a Total:
+--- PAGE 16 ---
+16
+SAS–2026 B 	© NISR
+Where:
+fh: first stage probability for stratum ;
+(1-fn) is the finite population correction (fpc) factor
+yhij : value of variable for the -th sample plot in the -th sample segment of stratum h
+Variance Estimator for a Ratio:
+Where:
+V (Yˆ)and V(Xˆ)are calculated using the formula for the variance of a total.
+In addition to calculating the standard error, the program also computes the Design Effect (DEFF) for the main
+indicator, which is the area under cultivation. The Design Effect is defined as the variance of an estimate based
+on the actual complex sample design divided by the corresponding variance from a simple random sample
+of the same size. It serves as a measure of the relative statistical efficiency of the sample design, taking into
+account both the stratification and clustering present in the sample design.
+The presence of clustering typically increases the design effect, owing to the intra-cluster correlation of
+plots within the segments. Simultaneously, the land-use stratification of the segments tends to decrease
+the design effects, as it proves to be more efficient than a simple random sample. This dual consideration of
+both factors provides a comprehensive assessment of the efficiency of the sample design in capturing the
+nuances of the area under cultivation. The estimates of the total area of major crops at the national level
+and the corresponding measures of precision (standard error (SE), the coefficient of variation (CV), the 95%
+confidence interval, the design effect (DEFF), and number of unweighted observations (n of sample plots)
+from the SAS 2026 Season B data are presented in Table 5
+--- PAGE 17 ---
+17
+SAS–2026 B 	© NISR
+Table 5: 2026 Season B_ Sampling errors of total areas for major crops at the national level
+Crop name 	Estimate 	SE 	CV 95% Confidence Interval DEFF No. observations
+(plots)	Lower 	Upper
+Maize 	94,823 	4,246 	0.045 	86,491 	103,156 	0.248 	4,006
+Sorghum 	103,139 	4,957 	0.048 	93,412 	112,866 	0.998 	2,005
+Paddy rice 	17,534 	69 	0.004 	17,399 	17,669 	- 	2,596
+Beans 	333,735 	7,494 	0.022 	319,005 	348,416 	0.937 	7,776
+Irish potato 	48,424 	2,921 	0.060 	42,693 	54,155 	0.810 	1,618
+Sweet potato 	84,775 	3,338 	0.039 	78,225 	91,324 	2.728 	1,771
+Soybean 	38,331 	1,917 	0.050 	34,570 	42,093 	0.244 	1,703
+Vegetables 	21,310 	1,377 	0.071 	16,678 	22,083 	0.540 	659
+Cooking banana 	97,498 	4,083 	0.042 	89,487 	105,510 	1.068 	3,583
+Dessert banana 	36,414 	1,572 	0.043 	33,329 	39,499 	1.901 	3,141
+Banana for beer 	116,859 	4,359 	0.037 	108,307 	125,412 	1.512 	3,896
+Cassava 	192,305 	5,038 	0.026 	182,420 	202,190 	1.191 	4,852
+Pea 	7,981 	708 	0.089 	6,591 	9,371 	0.553 	386
+Groundnut 	17,941 	1,497 	0.083 	15,004 	20,878 	1.101 	358
+Fruits 	15,535 	1,558 	0.127 	9,235 	15,347 	0.180 	920
+Source: NISR, SAS 2026
+2 	Data collection procedures
+The SAS data collection is carried out into two distinct phases. The first phase, referred to as screening, is
+done during the planting period. It consists of delineating all plots containing the sampled points within
+all sampled segments, as well as identifying all Large-Scale Farmers (LSF) who have grown crops during the
+current season. During this phase, information is recorded on agricultural land use, crops grown, crop area,
+and the expected harvest period. The second phase involves collecting data within the agricultural plots
+identified during screening activity. This phase captures information related to crop production, agricultural
+inputs, and agricultural practices.
+2.1. 	Time frame and coverage
+During data collection for Season B 2026, the SAS was carried out across all 30 districts of the country, gathering
+data from 1,200 segments and 505 large-scale farmers. Data collection for the Season started on April 19th,
+2026, and concluded on June 28th, 2026. The survey attained a 100% response rate, with complete coverage
+of all sampled segments and the full participation from all operators of the sampled plots, as well as all large-
+scale farmers.
+2.2. 	Field staff
+During this season, a total of 146 enumerators and 29 team leaders, all of whom were experienced, served
+in the field data collection after having completed a refresher training. To ensure data quality, high-level
+supervision was conducted throughout the data collection activities.
+--- PAGE 18 ---
+18
+SAS–2026 B 	© NISR
+2.3. 	Data collection tools
+2.3.1. Survey questionnaires
+The SAS utilizes two main questionnaires: The Screening Questionnaire and the Plot Interview Questionnaire.
+The Screening Questionnaire is designed to gather information on the plot, focusing primarily on aspects
+such as land use, plot area, and crops cultivated. Conversely, the Plot Interview Questionnaire is specifically
+designed to collect detailed information from the sampled plots, covering crop production, agricultural inputs
+used, and applied agricultural practices.
+2.3.2. Data collection applications
+The SAS data collection applications were based on three main software applications:
+ArcGIS Field Maps, which utilizes GIS software and an external GPS linked to tablets via Bluetooth to accurately
+measure crop areas.
+CSPro software, known for its efficiency in census and survey administration, this software facilitates data
+collection, entry, and management processes. CSentry data collection tool was developed by an IT staff
+specialized in the SAS survey, enabling data collection from sampled plots and large- scale farmers.
+Survey123 is used to collect screening data for large-scale farmers.
+3 	Data quality assurance
+Data quality assurance is achieved through a comprehensive approach, involving enumerator training,
+continuous data monitoring, supervision of data collection activities, and data cleaning throughout the
+season.
+3.1. 	Training of enumerators
+Prior to data collection, enumerators participated in a training session held at the NISR training center from
+April 13th to 17th, 2026. The training covered the overview of the new upgrade of the SAS, data collection
+procedures and ethics, screening procedures, the plot interview questionnaire content, and the use of data
+collection applications, including Survey 123, ArcGIS Field Maps, and CSentry.
+3.2. 	Fieldwork monitoring
+3.2.1 Monitoring attendance and performance of enumerators
+Effective monitoring of enumerator attendance and performance is vital for ensuring operational efficiency
+and contribution. During the 2026 SAS Season B, the monitoring system used GPS metadata, capturing
+location and GPS time, data which differs from device time and cannot be modified by the user. Whenever
+the enumerator transmits data to the server, the paradata is included, enabling analysis of attendance
+(including start and end times), data collection locations, and performance metrics such as the number of
+tasks completed.
+--- PAGE 19 ---
+19
+SAS–2026 B 	© NISR
+3.2.2. Attending the sample location and use of high precision GPS
+The SAS collects data from observation points grouped into square segments measuring 300 by 300 meters.
+Enumerators were required to collect data within a one-meter distance buffer around each observation
+point, a specification enforced to ensure accuracy. Any observation recorded outside this buffer is marked
+as an error and rejected by the central database. For plot area measurement, high-precision GPS units are
+employed along with correction services, achieving sub-meter measurement accuracy at a 95% and addressing
+precision-related challenges.
+3.2.3 Field Monitoring Dashboard
+A field monitoring dashboard used is an online web application offering a visual representation of real-time
+data collected from various field operations. It provides a centralized and accessible platform for monitoring
+and managing activities, resources, and performance in the field.
+3.2.4. Field supervision
+To ensure data quality throughout 2026 season B, an intensive field supervision was implemented. The first
+field supervision was conducted in two rounds from April 26th to May 15th, 2026, and a subsequent field
+supervision during the harvesting phase, from May 31st to June 9th, 2026 by a team of NISR staff.
+Throughout both phases, supervisors were deployed to all districts to provide continuous oversight and
+support to field personnel. Their responsibilities included providing technical guidance, monitoring the
+execution of data collection activities, and ensuring compliance with the data collection ethics as well as
+completeness of the workload, among others.
+4 	Data processing and analysis process
+The analysis involved several steps from organization of raw dataset, data management, cleaning, checking
+for outliers and dealing with missing data to ensure the quality and cleaned dataset before tabulation.
+4.1. Data management process
+SAS data are collected electronically using tablets and are then transmitted directly to the NISR servers. The
+data analyst team downloads the data and imports it from CSPro into STATA software for further examination,
+including checking, cleaning, and tabulation.
+An exploratory analysis of the dataset is conducted for all variables to assess the completeness of the
+sample, identifying missing data or incomplete observations. Any identified cases are sent back to the field
+for verification and completion. Exploratory techniques, including descriptive statistics (such as summary
+statistics, frequency tables) and graphical methods (such as histograms, box plots, etc.) are employed to
+detect missing values, incomplete data, and potential abnormalities or outliers within the dataset.
+4.2. Detecting outliers and dealing with missing values
+4.2.1. Missing values and duplicates observation
+During data collection, built-in validation rules within the CSPro application detect missing, omitted, or
+skipped variables. Error messages appear on the tablet screen during interviews when enumerators skip
+questions that require responses. After completing the interview but before sending data to the servers,
+--- PAGE 20 ---
+20
+SAS–2026 B 	© NISR
+an error message notifies users if any questions remain unanswered or if duplicate questionnaire IDs are
+identified.
+Once data is downloaded from the servers and imported into STATA, the data analyst merges the area dataset
+with the crop dataset and conducts preliminary checks, cleaning, and necessary transformations before
+analysis. A do-file is developed to check the completeness of data for screening and plot/harvest datasets.
+A team of data analysts reviews the data on a daily basis, and any inconsistencies identified are communicated
+to field workers for correction and clarification.
+4.2.2. Detecting and dealing with outliers
+Outliers are assessed for all quantitative variables, including crop production, fertilizer quantity, seed quantity,
+agricultural input prices, irrigation costs, and other related expenses. Two approaches are employed to detect
+outliers for variables such as crop production and input quantities, while a single approach is applicable for
+the remaining variables.
+The first approach involves comparing the value per hectare of land to the standard optimum quantity
+provided in the guidelines issued by the Ministry of Agriculture, known as “AGENDA AGRICOLE,” for the
+same land size. Any values exceeding 1.5 times the standard values are flagged as potential outliers and are
+subsequently sent back to field workers for verification and confirmation.
+The second approach utilizes statistical processes to detect outliers. In SAS, various statistical methods such
+as standard deviation are utilized in combination with graphical methods, including normal box plots, to
+identify possible outliers within the dataset.
+4.3. Methods for Estimating Area and Yield
+4.3.1. Estimation of area Approach
+The National Institute of Statistics of Rwanda (NISR) adheres to and applies methodologies and guidelines
+outlined by Food and Agriculture Organization of the United Nations (2017) and the East African Community
+(2022), regarding area and yield estimation. Among the several methods proposed, NISR has opted to
+use high-precision GPS devices to measure crop area, due to its high accuracy and efficiency compared to
+alternative methods. For yield measurement, NISR relies on farmer estimations.
+4.3.2. Process of measuring the area
+After the identification of the plot boundaries, the enumerators mark GPS point locations at approximately
+every three meters, as well as at each corner of the plot, while moving around its perimeter. A polygon is then
+obtained when the starting and final points are connected. The area is finally computed automatically by GIS
+software linked to the enumerator’s GPS device, based on the resulting shape.
+4.3.3. Process of measuring the yield
+Yield data are calculated by considering both the plot and crop areas, alongside the crop production reported
+by the farmer within the sampled plot. This calculation involves dividing the total production, converted into
+kilograms, by the estimated crop areas measured in hectares.
+--- PAGE 21 ---
+21
+SAS–2026 B 	© NISR
+4.4. Data analysis
+The survey data are analyzed using STATA software, which provides robust capabilities for data management,
+including importing, cleaning, merging, and preparation of datasets. These features facilitate the preparation
+of data for analysis. Additionally, STATA enables the development of tabulation commands and the generation
+of survey tables, graphs, and charts for inclusion in survey reports. Furthermore, SPSS and STATA softwares
+are utilized to estimate survey sampling errors, thereby ensuring the accuracy and reliability of the survey
+results.
+--- PAGE 22 ---
+Chapter
+22
+SAS–2026 B 	©	 	NISR
+This section highlights the key results of SAS 2026 Season B related to crop area (including physical land
+use, cultivated area, and harvested area), yield, production, agricultural inputs, and agricultural practices in
+Rwanda.
+3.1 	Agricultural land use
+Figure 1: 2026 Season B - Agricultural land use (in thousands of hectares)
+Source: NISR, SAS 2026
+The total land area of the country is estimated to be 2.376 million hectares, of which 1.414 million hectares
+(approximately 59% of the total land area) are used for agricultural purposes. In 2026 Season B, 1.022 million
+hectares were allocated to Seasonal crops, 0.526 million hectares to permanent crops, and 0.083 million
+hectares were allocated to permanent pasture. (See district details in Table 7).
+3 	SURVEY FINDINGS
+2,376
+1,414
+1,191 	1,160 2,376
+526
+83 155 15
+Total land
+area
+Agricultural
+Land
+Arable
+Land
+Physical
+Cultivated
+Land
+Area under
+Seasonal
+crops
+Area under
+Permanent
+crops
+Area under
+Permanent
+Pasture
+Temporary
+Fallow land
+Temporarily
+meadow
+and pasture
+--- PAGE 23 ---
+23
+SAS–2026 B 	©	 	NISR
+3.2 	Crop area, yield and production estimates for major crops
+3.2.1 	Yield and Crop area for major crops
+Figure 2: 2026 Season B - Yield of major crops (MT/ha)
+Source: NISR, SAS 2026
+Maize: The national average yield was 1.3 tons per hectare, with small-scale farmers harvesting 1.2 tons per
+hectare and large-scale farmers harvesting 4.1 tons per hectare. The cultivated area was estimated at 94,823
+hectares, representing an increase of 2% from Season B of 2025 (see details in Table 9-12).
+Beans: The national average yield was 700 kilograms per hectare. The cultivated area was estimated at
+333,735 hectares, representing a decrease of 0.4% from Season B of 2025 2025 (see details in Table 9-12).
+Paddy rice: The national average yield was 4.6 tons per hectare, with small-scale farmers harvesting 2.4 tons
+per hectare and large-scale farmers harvesting 4.6 tons per hectare. The cultivated area was estimated at
+17,534 hectares, indicating a decrease of 2.4% from Season B of 2025 2025 (see details in Table 9-12).
+Irish potato: The national average yield was 6.9 tons per hectare, with small-scale farmers harvesting 6.8 tons
+per hectare and large-scale farmers harvesting 13.7 tons per hectare. The cultivated area was estimated at
+48,424 hectares, indicating an increase of 5.4% from Season B of 2025. 2025 (see details in Table 9-12).
+Sweet potato: The national average yield was 8.2 tons per hectare. The cultivated area was estimated at
+84,775 hectares, representing a decrease of 5.5% from Season B of 2025 2025 (see details in Table 9-12).
+Cassava: The national average yield was 14.0 tons per hectare. The harvested area was estimated at 60,540
+hectares, while the cultivated area was estimated at 192,305 hectares, representing a decrease of 2.3% from
+Season B of 2025 2025 (see details in Table 9-12).
+Maize
+Paddy rice
+Irish potato
+Beans
+Sweet patato
+Larger Scale Famer 	Small scale Farmer 	National
+Banana
+Banana
+4.1
+1.2
+1.3
+4.6
+2.4 4.6
+13.7
+6.8
+6.9
+1.2
+0.7
+0.7
+8.2
+12.4
+14.0
+--- PAGE 24 ---
+24
+SAS–2026 B 	©	 	NISR
+Banana: The average yield was 12.4 tons per hectare. The harvested area was estimated at 99,539 hectares,
+while the cultivated area was estimated at 250,772 hectares, representing an increase of 5.3% from Season B
+of 2025. 2025 (see details in Table 9-12).
+3.2.2 Production of major crops
+Maize: The production was estimated at 122,370 metric tons, representing a 4% increase compared to Season
+B of 2025. The highest maize production was recorded in the Eastern Province, particularly in the districts of
+Nyagatare, Gatsibo, Kayonza and Bugesera, as illustrated in Map 5 (see details in Table 13).
+Map 5: Distribution of Maize Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 25 ---
+25
+SAS–2026 B 	©	 	NISR
+Beans: The production was estimated at 243,775 metric tons, representing a 1.3% increase compared to
+Season B of 2025. The highest production was recorded in the districts of Nyagatare, Kirehe, Bugesera, Ngoma
+and Gatsibo, as illustrated in Map 6 (see details in Table 13).
+Map 6: Distribution of Beans Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 26 ---
+26
+SAS–2026 B 	©	 	NISR
+Paddy rice: The production was estimated at 80,325 metric tons, indicating a 10.1% increase compared
+to Season B of 2025. The highest production was recorded in the districts of Gisagara, Nyagatare, Gatsibo,
+Bugesera, and Rusizi as shown in Map 7 (see details in Table 13).
+Map 7: Distribution of Paddy Rice Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 27 ---
+27
+SAS–2026 B 	©	 	NISR
+Irish potato: The production was estimated at 331,963 metric tons, representing a 5.7% increase compared
+to Season B of 2025. The highest production was recorded in the districts of Nyabihu, Rubavu, Musanze, and
+Burera, as shown in Map 8 (see details in Table 13).
+Map 8: Distribution of Irish Potato Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 28 ---
+28
+SAS–2026 B 	© NISR
+Sweet potato: The production was estimated at 641,667 metric tons, indicating a 1.7% decrease compared to
+Season B of 2025. The highest production was recorded in the districts of Gakenke, Nyamagabe, Nyaruguru,
+Gicumbi, and Muhanga as shown in Map 9 (see details in Table 13).
+Map 9: Distribution of Sweet Potato Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 29 ---
+29
+SAS–2026 B 	© NISR
+Cassava: The production was estimated at 846,963 metric tons, representing a 0.7% decrease compared
+to Season B of 2025. The highest production was recorded in the districts of Rusizi, Ruhango, Gisagara,
+Nyamasheke, and Kayonza, as shown in Map 10 (see details in Table 13).
+Map 10: Distribution of Cassava Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 30 ---
+30
+SAS–2026 B 	© NISR
+Banana: The production was estimated at 1,231,202 metric tons, indicating a 5.6% increase compared to
+2025 Season B. The highest production was recorded in the Eastern Province, particularly in the districts of
+Gatsibo, Ngoma, Kirehe, and Muhanga, as shown in Map 11 (see details in Table 13).
+Map 11: Distribution of Banana Production by District, Season B 2026
+Source: NISR, SAS 2026
+--- PAGE 31 ---
+31
+SAS–2026 B 	© NISR
+Climbing bean 	123,377 	123,078 	123,377 	123,055 	110,347 	108,108 	0.9 	0.9
+Pea 	7,981 	8,089 	7,981 	8,087 	4,587 	4,586 	0.6 	0.6
+Groundnut 	17,941 	17,804 	17,941 	17,804 	7,743 	7,747 	0.4 	0.4
+Soybean 	38,331 	38,152 	38,331 	38,151 	15,984 	16,388 	0.4 	0.4
+Vegetables & Fruits 	36,845 	32,644 	26,153 	25,247 	225,484 	211,069 	(NA) 	(NA)
+Vegetables 	21,310 	20,699 	20,705 	19,674 	195,402 	181,272 	9.4 	9.2
+Fruits 	15,535 	11,945 	5,448 	5,572 	30,082 	29,798 	5.5 	5.3
+Fodder crops 	9,440 	9,993 	9,145 	9,548 	108,237 	111,566 	11.8 	11.7
+Other crops 	74,041 	66,373 	32,926 	30,539 	122,617 	120,603 	3.9 	3.9
+Total 	1,344,887 	1,328,523 	999,384 	991,229 	(NA) 	(NA) 	(NA) 	(NA)
+Table 6: 2026 Season B Cultivated area, harvested area, production, and yield by crop.
+Crop/crop groups 	Cultivated area
+(Ha)
+Harvested area
+(Ha)
+Production
+(MT)
+Yield
+(MT/ha)
+2026 B 	2025 B 	2026 B 	2025 B 	2026 B 	2025 B 	2026 B 	2025 B
+Cereals 	229,328 	231,224 	229,204 	231,198 	338,540 	330,446 	(NA) 	(NA)
+Maize 	94,823 	93,005 	94,706 	92,979 	122,370 	117,711 	1.3 	1.3
+Sorghum 	103,139 	107,195 	103,136 	107,195 	122,320 	125,656 	1.2 	1.2
+Paddy rice 	17,534 	17,970 	17,533 	17,970 	80,325 	72,976 	4.6 	4.1
+Wheat 	9,138 	9,298 	9,138 	9,298 	10,640 	11,667 	1.2 	1.3
+Other cereals 	4,695 	3,757 	4,691 	3,757 	2,885 	2,437 	0.6 	0.6
+Tubers and Roots 	346,472 	351,074 	204,430 	201,865 	1,945,916 	1,937,090 	(NA) 	(NA)
+Cassava 	192,305 	196,881 	60,540 	59,053 	846,963 	852,541 	14.0 	14.4
+Sweet potato 	84,775 	89,679 	78,504 	81,045 	641,667 	652,515 	8.2 	8.1
+Irish potato 	48,424 	45,940 	48,424 	45,928 	331,963 	314,093 	6.9 	6.8
+Taro &Yams 	20,969 	18,573 	16,961 	15,839 	125,323 	117,941 	7.4 	7.4
+Banana 	250,772 	238,119 	99,539 	93,803 	1,231,202 	1,166,247 	12.4 	12.4
+Cooking banana 	97,498 	85,221 	33,849 	30,604 	571,178 	527,109 	16.9 	17.2
+Dessert banana 	36,414 	35,832 	14,240 	13,746 	156,846 	154,315 	11.0 	11.2
+Banana for beer 	116,859 	117,067 	51,450 	49,453 	503,179 	484,822 	9.8 	9.8
+Legumes and Pulses 	397,988 	399,096 	397,988 	399,030 	272,089 	269,441 	(NA) 	(NA)
+Beans 	333,735 	335,052 	333,735 	334,988 	243,775 	240,721 	0.7 	0.7
+Bush bean 	210,358 	211,974 	210,358 	211,932 	133,428 	132,612 	0.6 	0.6
+Source: NISR, SAS 2026
+--- PAGE 32 ---
+32
+SAS–2026 B 	©	 	NISR
+3. 	Use of inputs
+The results related to the use of agricultural inputs namely seeds, fertilizers, and pesticides, are presented in
+terms of percentage of farmers who applied such agricultural inputs throughout the 2026 season B.
+Use of seeds
+In Season B of 2026, 20.9% of farmers used improved seeds. By farmer type1, 19.4% of small-scale farmers
+(SSF) and 65.0% of large-scale farmers (LSF) utilized improved seeds (See Figure 3). The major sources of
+improved seed were NGOs and companies, which accounted for 35.0%, and agro-dealers, which accounted
+for 33.4% (See details in Tables 8, 18-21).
+3.2 	Use of fertilizers
+In the 2026 Season B:
+• 	Organic fertilizer was applied by 81.3% of farmers, with utilization rates of 81.7% among small-scale
+farmers and 71.3% among large-scale farmers.
+• 	Inorganic fertilizer was applied by 57.5% of farmers, with utilization rates of 56.7% among small-scale
+farmers and 80.2% among large-scale farmers (See Figure 3).
+• 	The main sources of inorganic fertilizers were NGOs and companies, accounting for 50.9% and agro-
+dealers, which accounted for 40.8%.
+• 	The most commonly used inorganic fertilizer types during this season were DAP, UREA, and NPK,
+representing 40%, 35.5%, and 20.3% of applications, respectively (See details in Tables 8, 22-26).
+3.3 	Use of pesticides
+In Season B of 2026, 39.1% of farmers applied pesticides. By farmer type, 37.7% of small-scale farmers and
+80.0% of large-scale farmers applied pesticides (See Figure 3). Rocket, Dithane and Cypermethrin were the
+most used pesticides with 36.2%, 23.1% and 14.2% of farmers using them, respectively (See details in Tables
+27 & 28).
+Figure 3: 2026 Season B_Use of inputs by farmers
+Source: NISR, SAS 2026
+1 Farmer type refers to category of farmers as defined in the survey; a farmer is either a small-scale or a large-
+scale.
+--- PAGE 33 ---
+33
+SAS–2026 B 	©	 	NISR
+4 	Agricultural practices
+The survey covered information related to agricultural practices used by farmers namely irrigation, anti-
+erosion activities, mechanization, and agroforestry. Results are presented in terms of the percentage of
+farmers involved in such practices throughout the 2026 Season B.
+4.1 	Irrigation practices
+In Season B of 2026, 13.1% of farmers practiced irrigation, including 11.5% of small-scale farmers and 56.2%
+of large-scale farmers (See Figure 4). Among farmers who practiced irrigation, 56.9% practiced the modern
+irrigation. With regard to the source of water, lakes/streams along with underground water, were the most
+used sources for irrigation, representing 42.4% and 30.3%, respectively (See details in Tables 8,29-31).
+4.2 	Erosion control measures
+In 2026 Season B, 92.7 % of farmers reported practicing at least one anti-erosion measure across their plots,
+including 92.6 % of small-scale farmers and 97.5 % of large-scale farmers (See Figure 4). However, despite
+this high level of adoption, the effectiveness of these measures remains limited, as only 78.2 % of plots are
+protected, leaving 21.8 % exposed to erosion risks.
+Erosion control measures are classified according to their effectiveness. Most farmers rely on practices
+that control only low levels of erosion, such as ridges, mulching, and cover plants, which are applied on
+44.5 % of plots. Practices with moderate effec tiveness, including ditches, trenches, drainage activities, and
+agroforestry/trees, are used on 12.8 % of plots. In contrast, only 20.9 % of plots are under highly effective
+measures, such as progressive and radical terraces, which are capable of controlling severe erosion. (See
+details in Tables 8, 29, 32 and 33).
+Figure 4: 2026 Season B - Use of agricultural practices
+Source: NISR, SAS 2026
+--- PAGE 34 ---
+34
+SAS–2026 B 	©	 	NISR
+MAIN 	TABLE
+--- PAGE 35 ---
+35
+Table 7: 2026 Season B_Agricultural land use per district (,000Ha)
+Nyarugenge 	13.1 	7.9 	60.0 	5.67 	6.68 	4.57 	3.31 	1.10 	- 	0.07
+Gasabo 	42.7 	20.6 	48.3 	18.17 	18.36 	15.98 	9.89 	1.89 	0.35 	0.04
+Kicukiro 	16.6 	5.5 	33.0 	4.39 	4.47 	3.39 	2.30 	0.95 	0.05 	-
+Nyanza 	67.0 	47.3 	70.5 	45.87 	42.10 	40.91 	15.03 	4.79 	0.23 	0.17
+Gisagara 	67.5 	46.1 	68.2 	44.03 	40.52 	39.21 	15.27 	4.82 	- 	0.71
+Nyaruguru 	101.0 	35.9 	35.5 	31.62 	30.67 	26.42 	10.40 	4.40 	0.81 	-
+Huye 	58.1 	37.0 	63.8 	36.24 	33.03 	32.24 	13.78 	3.95 	0.05 	-
+Nyamagabe 	109.1 	49.5 	45.3 	43.68 	40.83 	35.06 	14.87 	8.45 	0.18 	-
+Ruhango 	62.6 	46.2 	73.8 	41.15 	39.14 	34.27 	15.61 	6.06 	0.92 	0.06
+Muhanga 	64.1 	44.0 	68.7 	37.75 	35.34 	29.13 	18.39 	6.93 	1.69 	0.06
+Kamonyi 	65.8 	49.0 	74.5 	42.44 	42.76 	36.33 	19.48 	5.71 	0.40 	0.11
+Karongi 	78.8 	44.6 	56.6 	36.14 	37.62 	29.02 	20.71 	6.39 	0.61 	-
+Rutsiro 	66.1 	35.9 	54.4 	27.83 	28.93 	21.23 	14.59 	5.96 	0.58 	0.47
+Rubavu 	33.9 	24.3 	71.8 	22.54 	21.48 	20.84 	4.82 	1.61 	0.43 	0.78
+Nyabihu 	54.0 	30.8 	57.0 	29.97 	24.21 	23.75 	3.96 	6.04 	0.43 	0.14
+Ngororero 	66.7 	43.8 	65.8 	38.22 	34.61 	29.00 	15.31 	8.83 	0.39 	-
+Rusizi 	91.6 	39.2 	42.8 	33.70 	35.83 	30.45 	14.75 	3.15 	0.10 	0.11
+Nyamasheke 	94.8 	37.1 	39.2 	31.13 	33.93 	27.92 	17.80 	2.96 	0.25 	-
+Rulindo 	56.6 	34.5 	60.9 	27.27 	28.93 	21.67 	14.55 	5.48 	0.06 	-
+Gakenke 	70.0 	46.4 	66.3 	40.18 	38.50 	32.26 	16.40 	7.68 	0.24 	-
+Musanze 	50.9 	30.5 	59.8 	28.43 	24.62 	22.73 	4.60 	5.61 	0.09 	0.15
+Burera 	58.4 	37.7 	64.6 	36.82 	30.11 	29.20 	4.79 	6.87 	0.76 	-
+Gicumbi 	82.5 	54.2 	65.7 	49.13 	46.04 	41.32 	15.87 	6.63 	1.18 	0.32
+Rwamagana 	65.1 	43.5 	66.7 	37.37 	36.83 	32.29 	17.31 	3.67 	1.41 	1.54
+Nyagatare 	191.5 	147.1 	76.8 	90.67 	91.81 	84.66 	70.00 	5.04 	0.99 	49.26
+Gatsibo 	153.3 	78.4 	51.2 	61.08 	67.64 	57.42 	36.38 	3.04 	0.64 	7.08
+Kayonza 	180.0 	89.3 	49.6 	66.11 	62.96 	58.81 	40.94 	6.68 	0.65 	19.06
+Kirehe 	114.2 	77.2 	67.6 	65.52 	69.47 	59.65 	31.25 	5.87 	0.94 	0.91
+Ngoma 	80.3 	56.4 	70.3 	47.94 	50.48 	44.12 	25.92 	3.69 	0.08 	2.20
+Bugesera 	120.2 	73.9 	61.5 	69.88 	62.44 	58.55 	17.22 	10.80 	0.48 	0.18
+National 	2,376 	1,414 	59 	1,191 	1,160 	1,022 	526 	155 	15 	83
+Source: NISR, SAS 2026
+Total land area 	Agricultural land % of agricultural land 	Arable land 	Physical
+cultivated land
+Area under
+seasonal crops
+Area under
+permanent crops
+Temporary
+fallow land
+Temporarily meadow
+and pasture
+Area under
+permanent pasture
+District
+--- PAGE 36 ---
+36
+Table 8: 2026 Season B_Area under agricultural practices
+District
+Modern irrigated agricultural land
+(Ha)
+Agricultural area under erosion
+control
+Agricultural area under agroforestry
+trees
+Agricultural area under fertilizer application
+Inorganic fertilizer 	Organic fertilizer
+Nyarugenge 	16 	5,214 	4,766 	398 	3,233
+Gasabo 	349 	15,100 	11,123 	5,281 	10,238
+Kicukiro 	24 	2,998 	2,996 	475 	1,591
+Nyanza 	879 	41,066 	27,042 	5,626 	20,192
+Gisagara 	2,145 	33,225 	22,960 	9,760 	22,167
+Nyaruguru 	134 	32,247 	14,237 	13,335 	18,413
+Huye 	1,065 	32,051 	16,343 	5,165 	23,249
+Nyamagabe 	154 	40,725 	21,023 	15,114 	27,116
+Ruhango 	1,134 	38,382 	21,390 	4,980 	20,919
+Muhanga 	240 	39,743 	23,912 	5,841 	22,956
+Kamonyi 	585 	39,853 	24,628 	4,337 	20,901
+Karongi 	64 	34,611 	21,161 	11,319 	23,027
+Rutsiro 	105 	28,207 	18,522 	10,165 	19,168
+Rubavu 	- 	19,228 	13,683 	11,029 	8,025
+Nyabihu 	- 	28,701 	20,964 	15,042 	16,515
+Ngororero 	56 	41,511 	24,583 	14,673 	22,449
+Rusizi 	1,660 	27,140 	24,471 	13,294 	14,623
+Nyamasheke 	372 	30,778 	22,899 	13,737 	20,180
+Rulindo 	146 	31,076 	17,108 	8,049 	18,574
+Gakenke 	20 	42,127 	22,023 	14,036 	25,122
+Musanze 	- 	20,191 	15,661 	11,036 	14,678
+Burera 	31 	34,649 	20,812 	13,580 	21,127
+Gicumbi 	- 	51,031 	29,038 	15,070 	32,959
+Rwamagana 	1,261 	35,879 	31,324 	12,926 	19,012
+Nyagatare 	4,025 	100,560 	92,267 	55,106 	36,312
+Gatsibo 	2,217 	69,753 	50,546 	27,992 	33,970
+Kayonza 	2,664 	54,890 	54,713 	19,345 	21,798
+Kirehe 	3,122 	52,042 	50,513 	21,012 	22,726
+Ngoma 	1,079 	35,171 	32,126 	6,898 	13,418
+Bugesera 	1,993 	42,775 	48,408 	22,532 	28,799
+National 	25,538 	1,100,924 	801,240 	387,154 	603,459
+Source: NISR, SAS 2026
+--- PAGE 37 ---
+37
+Table 9: 2026 Season B_Cultivated area by crop type and district (Ha)
+District 	Maize 	Sorghum 	Paddy
+rice
+Wheat 	Other
+cereals
+Cassava 	Sweet
+potato
+Irish
+potato
+Yams
+& Taro
+Banana 	Cooking
+banana
+Dessert
+banana
+Banana
+for beer
+Beans 	Bush
+bean
+Climbing
+bean
+Pea 	Groundnut 	Soybean 	Vegetables 	Fruits 	Fodder
+Crops
+Other
+crops
+Total
+developed
+land
+Nyarugenge 	574 	269 	523 	212 	22 	2,118 	1,876 	513 	506 	858 	2,166 	2,166 	39 	154 	103 	5 	1,218 	9,282
+Gasabo 	1,275 	3,192 	312 	6 	5,061 	1,522 	387 	167 	4,688 	1,827 	1,130 	1,732 	3,828 	3,515 	314 	20 	116 	334 	737 	41 	323 	1,078 	23,088
+Kicukiro 	498 	485 	102 	1,007 	147 	275 	1,100 	450 	169 	480 	1,346 	1,346 	75 	145 	124 	51 	81 	5,435
+Nyanza 	2,962 	5,303 	688 	237 	9,497 	2,129 	253 	826 	7,457 	2,653 	1,334 	3,470 	14,135 	11,638 	2,497 	210 	976 	2,221 	487 	291 	161 	1,695 	49,528
+Gisagara 	2,435 	2,914 	2,977 	474 	8,505 	2,721 	143 	452 	7,815 	1,770 	1,611 	4,434 	14,326 	12,302 	2,023 	30 	856 	3,146 	457 	201 	1,100 	48,554
+Nyaruguru 	263 	2,781 	50 	385 	6 	7,073 	5,110 	2,083 	527 	3,567 	1,114 	790 	1,663 	8,229 	872 	7,357 	262 	1,154 	691 	86 	496 	4,834 	37,597
+Huye 	977 	4,319 	1,020 	304 	5,999 	2,901 	175 	378 	6,110 	2,193 	1,470 	2,446 	9,788 	6,181 	3,607 	297 	134 	2,283 	738 	946 	48 	1,189 	37,606
+Nyamagabe 	1,092 	4,173 	28 	2,168 	5,517 	5,826 	1,812 	1,070 	5,655 	738 	702 	4,216 	8,046 	821 	7,226 	872 	876 	386 	79 	61 	4,991 	42,654
+Ruhango 	1,043 	2,150 	1,002 	78 	16,245 	3,313 	73 	642 	7,061 	1,348 	1,175 	4,538 	11,268 	8,057 	3,211 	107 	1,865 	3,586 	406 	79 	610 	2,186 	51,715
+Muhanga 	902 	76 	82 	125 	23 	10,996 	4,463 	203 	2,447 	16,868 	3,586 	1,716 	11,565 	6,900 	2,569 	4,330 	161 	68 	2,294 	403 	526 	600 	1,217 	48,353
+Kamonyi 	1,963 	3,315 	266 	14 	21,978 	2,813 	367 	871 	10,245 	1,275 	1,555 	7,415 	10,928 	9,007 	1,921 	107 	870 	3,975 	905 	245 	80 	3,898 	62,841
+Karongi 	706 	1,992 	60 	6,831 	3,916 	196 	1,144 	11,123 	2,526 	1,196 	7,400 	8,452 	1,869 	6,584 	333 	132 	1,650 	941 	175 	483 	3,048 	41,182
+Rutsiro 	1,583 	162 	1,893 	2,873 	3,677 	493 	6,979 	1,914 	1,183 	3,882 	5,725 	724 	5,001 	507 	1,189 	261 	221 	425 	4,232 	30,220
+Rubavu 	1,492 	146 	402 	1,725 	6,596 	159 	2,401 	947 	282 	1,172 	5,022 	695 	4,326 	596 	493 	3,047 	3,047 	311 	1,802 	27,238
+Nyabihu 	4,288 	1,348 	875 	2,704 	8,168 	43 	1,230 	378 	288 	563 	2,741 	70 	2,671 	594 	46 	970 	482 	121 	2,438 	26,048
+Ngororero 	4,005 	1 	1,300 	3,414 	5,420 	1,367 	2,170 	10,049 	1,601 	1,574 	6,874 	6,299 	543 	5,755 	402 	1,604 	419 	342 	307 	1,542 	38,639
+Rusizi 	1,142 	64 	1,542 	17,704 	1,976 	65 	529 	5,560 	2,105 	441 	3,015 	10,565 	7,677 	2,888 	38 	324 	1,034 	585 	1,299 	94 	4,379 	46,900
+Nyamasheke 	485 	11 	368 	12,529 	4,231 	12 	1,150 	6,601 	1,809 	911 	3,880 	7,636 	1,195 	6,441 	79 	861 	1,526 	842 	717 	121 	6,329 	43,499
+Rulindo 	1,193 	3,323 	18 	65 	3,184 	3,363 	1,302 	138 	7,186 	2,307 	1,398 	3,481 	7,802 	2,884 	4,918 	343 	12 	152 	1,058 	321 	112 	4,693 	34,263
+Gakenke 	1,505 	270 	19 	192 	6,281 	6,034 	976 	1,452 	15,351 	3,841 	2,225 	9,285 	11,328 	943 	10,385 	319 	676 	430 	552 	140 	1,972 	47,498
+Musanze 	2,137 	2,042 	1,175 	359 	1,915 	4,434 	181 	2,093 	924 	553 	616 	7,190 	349 	6,841 	230 	28 	1,257 	205 	66 	1,382 	24,692
+Burera 	2,469 	5,105 	551 	76 	183 	3,263 	5,015 	39 	2,186 	929 	123 	1,134 	9,947 	558 	9,389 	1,076 	43 	545 	285 	642 	327 	31,754
+Gicumbi 	2,331 	9,365 	1,337 	4,007 	4,951 	2,582 	170 	6,324 	2,727 	1,675 	1,921 	13,781 	3,468 	10,314 	726 	184 	239 	574 	291 	656 	1,862 	49,380
+Rwamagana 	3,953 	5,957 	524 	32 	4,408 	1,568 	713 	307 	11,218 	6,764 	1,738 	2,715 	12,378 	12,118 	260 	103 	1,666 	624 	921 	265 	956 	1,406 	46,999
+Nyagatare 	26,478 	4,508 	2,158 	81 	1 	2,186 	1,557 	693 	69 	11,561 	6,352 	1,556 	3,653 	29,338 	27,800 	1,538 	926 	2,312 	885 	79 	559 	1,028 	84,417
+Gatsibo 	9,307 	7,910 	1,715 	351 	232 	2,374 	2,911 	2,335 	442 	21,808 	12,646 	2,827 	6,335 	18,859 	16,166 	2,694 	81 	1,977 	1,953 	844 	96 	608 	3,135 	76,940
+Kayonza 	6,908 	13,144 	1,240 	924 	11,633 	1,499 	2,294 	382 	12,483 	8,650 	1,520 	2,313 	20,927 	20,631 	296 	90 	467 	563 	723 	1,874 	636 	1,941 	77,730
+Kirehe 	2,218 	10,519 	959 	599 	6,886 	1,059 	1,435 	1,345 	18,317 	10,756 	1,329 	6,232 	23,350 	15,260 	8,090 	342 	1,324 	1,083 	477 	298 	20 	5,847 	76,078
+Ngoma 	1,949 	5,916 	939 	1,591 	7,103 	1,220 	681 	257 	16,077 	9,237 	1,761 	5,080 	19,293 	16,956 	2,337 	52 	1,324 	1,324 	328 	1,381 	141 	2,219 	61,795
+Bugesera 	6,689 	3,729 	1,525 	97 	7,653 	1,434 	364 	725 	9,784 	3,619 	1,675 	4,489 	22,139 	21,976 	164 	3,821 	1,695 	743 	981 	611 	973 	62,963
+National 	94,823 	103,139 	17,534 	9,138 	4,695 	192,305 	84,775 	48,424 	20,969 	250,772 	97,498 	36,414 	116,859 	333,735 	210,358 	123,377 	7,981 	17,941 	38,331 	21,310 	15,535 	9,440 	74,041 	1,344,887
+SSF 	92,969 	102,922 	248 	9,087 	4,673 	192,275 	84,775 	47,800 	20,969 	250,654 	97,393 	36,406 	116,855 	332,661 	209,469 	123,192 	7,961 	17,941 	37,334 	21,073 	14,554 	9,156 	72,955 	1,320,006
+LSF 	1,855 	217 	17,286 	50 	22 	30 	- 	624 	- 	117 	105 	8 	4 	1,074 	889 	185 	20 	- 	998 	237 	980 	285 	1,087 	24,881
+Source: NISR, SAS 2026
+--- PAGE 38 ---
+38
+Table 10: 2026 Season B_Harvested area by crop type and district (Ha)
+District 	Maize 	Sorghum 	Paddy
+rice
+Wheat 	Other
+cereals
+Cassava 	Sweet
+potato
+Irish
+potato
+Yarms
+& Taro
+Bananas 	Cooking
+banana
+Dessert
+banana
+Banana
+for beer
+Beans 	Bush
+bean
+Climbing
+bean
+Pea 	Groundnut 	Soybean 	vegetables 	Fruits 	Fodder
+crops
+Other
+crops
+All
+crops
+Nyarugenge 	574 	269 	- 	- 	- 	230 	161 	22 	18 	751 	177 	182 	392 	2,166 	2,166 	- 	- 	39 	154 	103 	- 	- 	3 	4,492
+Gasabo 	1,275 	3,189 	312 	- 	6 	597 	1,339 	387 	143 	1,586 	549 	444 	594 	3,828 	3,515 	314 	20 	116 	334 	737 	9 	305 	237 	14,422
+Kicukiro 	498 	485 	102 	- 	- 	96 	122 	- 	233 	426 	135 	95 	196 	1,346 	1,346 	- 	- 	- 	75 	145 	9 	51 	17 	3,605
+Nyanza 	2,962 	5,303 	688 	- 	237 	2,478 	2,072 	253 	803 	2,380 	706 	547 	1,127 	14,135 	11,638 	2,497 	210 	976 	2,221 	487 	104 	161 	989 	36,460
+Gisagara 	2,435 	2,914 	2,977 	- 	474 	4,651 	2,661 	143 	443 	2,560 	642 	683 	1,235 	14,326 	12,302 	2,023 	30 	856 	3,146 	457 	23 	- 	790 	38,888
+Nyaruguru 	263 	2,781 	50 	385 	6 	1,868 	4,268 	2,083 	489 	1,075 	312 	272 	491 	8,229 	872 	7,357 	262 	- 	1,154 	691 	85 	496 	716 	24,901
+Huye 	977 	4,319 	1,019 	- 	304 	1,621 	2,892 	175 	364 	1,878 	676 	424 	778 	9,788 	6,181 	3,607 	297 	134 	2,283 	738 	31 	45 	574 	27,439
+Nyamagabe 	1,092 	4,173 	28 	2,168 	- 	1,367 	5,705 	1,812 	1,070 	2,170 	262 	196 	1,712 	8,046 	821 	7,226 	872 	- 	876 	386 	67 	61 	2,123 	32,019
+Ruhango 	1,043 	2,150 	1,002 	- 	78 	5,813 	3,225 	73 	627 	2,590 	325 	361 	1,904 	11,268 	8,057 	3,211 	107 	1,865 	3,586 	406 	21 	610 	1,624 	36,090
+Muhanga 	902 	76 	82 	125 	23 	2,751 	4,383 	203 	2,409 	7,796 	1,048 	701 	6,046 	6,900 	2,569 	4,330 	161 	68 	2,294 	403 	296 	594 	827 	30,294
+Kamonyi 	1,963 	3,315 	266 	- 	14 	2,770 	2,698 	367 	860 	5,212 	635 	754 	3,823 	10,928 	9,007 	1,921 	107 	870 	3,975 	905 	84 	80 	1,827 	36,242
+Karongi 	706 	1,992 	- 	60 	- 	2,659 	3,797 	196 	1,006 	4,649 	694 	409 	3,547 	8,452 	1,869 	6,584 	333 	132 	1,650 	941 	175 	483 	694 	27,925
+Rutsiro 	1,583 	162 	- 	- 	- 	1,020 	2,716 	3,677 	467 	2,907 	576 	638 	1,693 	5,725 	724 	5,001 	507 	- 	1,189 	261 	96 	425 	1,696 	22,430
+Rubavu 	1,492 	146 	- 	- 	- 	300 	1,725 	6,596 	150 	1,112 	369 	143 	599 	5,022 	695 	4,326 	596 	- 	493 	2,528 	- 	311 	1,323 	21,792
+Nyabihu 	4,219 	- 	- 	1,348 	- 	105 	2,128 	8,168 	43 	377 	94 	117 	166 	2,741 	70 	2,671 	594 	- 	46 	970 	408 	121 	244 	21,511
+Ngororero 	4,005 	- 	1 	1,300 	- 	817 	5,104 	1,367 	1,977 	4,377 	437 	562 	3,378 	6,299 	543 	5,755 	402 	- 	1,604 	419 	234 	307 	605 	28,817
+Rusizi 	1,142 	64 	1,542 	- 	- 	10,734 	1,976 	65 	518 	1,825 	705 	179 	942 	10,565 	7,677 	2,888 	38 	324 	1,034 	585 	175 	94 	3,062 	33,744
+Nyamasheke 	485 	11 	368 	- 	- 	4,643 	3,860 	12 	1,096 	2,070 	572 	277 	1,221 	7,636 	1,195 	6,441 	79 	861 	1,525 	813 	350 	121 	3,278 	27,207
+Rulindo 	1,193 	3,323 	18 	65 	- 	1,009 	2,869 	1,302 	138 	2,893 	712 	636 	1,546 	7,802 	2,884 	4,918 	343 	12 	152 	1,039 	101 	112 	923 	23,293
+Gakenke 	1,505 	270 	19 	192 	- 	1,589 	5,434 	976 	1,390 	6,487 	1,160 	1,057 	4,270 	11,328 	943 	10,385 	319 	- 	676 	430 	370 	140 	1,524 	32,650
+Musanze 	2,088 	2,042 	- 	1,175 	- 	37 	1,915 	4,434 	181 	857 	354 	244 	259 	7,190 	349 	6,841 	230 	- 	28 	1,257 	121 	66 	648 	22,268
+Burera 	2,469 	5,105 	- 	551 	76 	43 	3,054 	5,015 	39 	829 	400 	47 	382 	9,947 	558 	9,389 	1,076 	- 	43 	545 	87 	642 	206 	29,730
+Gicumbi 	2,331 	9,365 	- 	1,337 	- 	834 	4,122 	2,582 	158 	2,505 	893 	682 	929 	13,781 	3,468 	10,314 	726 	184 	239 	574 	135 	615 	858 	40,346
+Rwamagana 	3,953 	5,957 	524 	- 	28 	1,921 	1,514 	713 	291 	4,902 	2,841 	829 	1,232 	12,378 	12,118 	260 	103 	1,666 	624 	921 	85 	835 	719 	37,134
+Nyagatare 	26,478 	4,508 	2,158 	81 	1 	1,032 	1,358 	693 	61 	5,028 	2,428 	459 	2,141 	29,338 	27,800 	1,538 	- 	926 	2,312 	885 	17 	537 	240 	75,652
+Gatsibo 	9,307 	7,910 	1,715 	351 	232 	825 	2,597 	2,335 	306 	7,287 	3,868 	950 	2,469 	18,859 	16,166 	2,694 	81 	1,977 	1,953 	841 	96 	547 	2,232 	59,452
+Kayonza 	6,908 	13,144 	1,240 	- 	924 	3,040 	1,302 	2,294 	261 	4,291 	2,946 	396 	949 	20,927 	20,631 	296 	90 	467 	563 	723 	671 	622 	574 	58,043
+Kirehe 	2,218 	10,519 	959 	- 	599 	1,926 	1,059 	1,435 	934 	6,688 	3,799 	399 	2,490 	23,350 	15,260 	8,090 	342 	1,324 	1,083 	442 	133 	20 	2,914 	55,945
+Ngoma 	1,949 	5,916 	939 	- 	1,591 	1,842 	1,013 	681 	178 	7,223 	4,007 	704 	2,512 	19,293 	16,956 	2,337 	52 	1,324 	1,324 	328 	1,381 	137 	1,128 	46,298
+Bugesera 	6,689 	3,729 	1,525 	- 	97 	1,919 	1,434 	364 	308 	4,808 	1,527 	853 	2,429 	22,139 	21,976 	164 	- 	3,821 	1,695 	743 	84 	606 	331 	50,292
+National 	94,706 	103,136 	17,533 	9,138 	4,691 	60,540 	78,504 	48,424 	16,961 	99,539 	33,849 	14,240 	51,450 	333,735 	210,358 	123,377 	7,981 	17,941 	38,331 	20,705 	5,448 	9,145 	32,926 	999,384
+SSF 	92,851 	102,922 	248 	9,087 	4,673 	60,540 	78,504 	47,800 	16,961 	99,515 	33,825 	14,240 	51,450 	332,661 	209,469 	123,192 	7,961 	17,941 	37,334 	20,513 	4,983 	8,953 	32,240 	975,688
+LSF 	1,855 	214 	17,285 	50 	19 	- 	- 	624 	- 	24 	24 	- 	- 	1,074 	889 	185 	20 	- 	997 	192 	465 	192 	687 	23,697
+Source: NISR, SAS 2026
+--- PAGE 39 ---
+39
+Table 11: 2026 Season B_Average yield by crop type and district (Kg/Ha)
+District 	Maize 	Sorghum 	Paddy
+rice
+Wheat 	Other
+cereals
+Cassava 	Sweet
+potatoes
+Irish
+potatoes
+Yams &
+Taro
+Bananas 	Cooking
+Banana
+Dessert
+banana
+Banana
+for beer
+Beans 	Bush
+bean
+Climbing
+bean
+Peas 	Ground
+nuts
+Soya
+beans
+Vegetables 	Fruits 	Fodder
+crops
+Other crops
+Nyarugenge 	1,194 	797 	- 	- 	- 	11,617 	6,960 	2,871 	8,350 	11,795 	16,532 	8,790 	11,049 	605 	605 	- 	- 	550 	343 	7,996 	- 	- 	2,811
+Gasabo 	1,319 	1,042 	4,137 	- 	524 	11,835 	6,829 	3,570 	3,607 	12,465 	17,353 	11,949 	8,328 	649 	647 	671 	631 	439 	348 	9,557 	847 	6,406 	2,987
+Kicukiro 	747 	1,230 	5,582 	- 	- 	13,329 	6,757 	- 	5,562 	12,564 	16,576 	11,606 	10,274 	623 	623 	- 	- 	- 	490 	8,196 12,312 	4,934 	2,887
+Nyanza 	1,317 	1,095 	4,648 	- 	684 	14,779 	8,854 	4,209 	6,452 	9,804 	11,264 	9,904 	8,839 	626 	591 	793 	883 	481 	367 	7,048 	3,556 	8,510 	2,077
+Gisagara 	1,034 	1,020 	4,375 	- 	706 	13,874 	7,537 	3,890 	9,583 	11,514 	15,088 	9,709 	10,656 	657 	620 	881 	751 	355 	385 	7,293 14,705 	- 	1,317
+Nyaruguru 	1,138 	827 	3,523 	680 	203 	12,699 	9,401 	8,176 	8,472 	10,330 	13,703 	8,968 	8,946 	798 	547 	828 	731 	- 	387 	8,526 	3,513 	12,299 	1,489
+Huye 	1,198 	1,060 	3,659 	- 	527 	17,515 	7,932 	3,983 	9,072 	9,540 	11,052 	10,390 	7,763 	647 	566 	786 	549 	458 	403 	7,752 	6,245 	6,730 	1,264
+Nyamagabe 	1,260 	985 	3,379 	1,261 	- 	13,474 	8,185 	7,939 	7,143 	6,953 	9,476 	11,226 	6,078 	686 	496 	707 	562 	- 	455 	8,819 	5,511 	5,249 	1,565
+Ruhango 	704 	1,093 	4,901 	- 	603 	17,974 	6,308 	2,991 	7,639 	9,649 	13,758 	11,068 	8,678 	636 	635 	640 	524 	420 	396 	7,743 	4,558 	9,395 	2,891
+Muhanga 	1,035 	1,496 	3,285 	1,211 	639 	15,818 	8,063 	4,292 	7,012 	10,190 	14,756 	10,051 	9,415 	579 	526 	610 	574 	307 	440 	7,602 	7,845 	15,459 	1,684
+Kamonyi 	1,156 	997 	4,068 	- 	321 	13,458 	6,992 	5,647 	8,461 	10,404 	15,007 	9,914 	9,736 	595 	576 	687 	432 	531 	344 	5,861 10,626 	16,179 	5,508
+Karongi 	1,163 	1,080 	- 	553 	- 	13,829 	8,321 	3,590 	8,937 	11,831 	15,586 	12,464 	11,023 	1,017 	620 	1,129 	501 	617 	422 	9,329 	5,426 	14,859 	1,112
+Rutsiro 	1,064 	881 	- 	- 	- 	14,060 	7,927 	5,028 	8,729 	11,953 	16,688 	13,156 	9,888 	806 	555 	843 	479 	- 	418 	8,207 	3,714 	8,045 	9,035
+Rubavu 	1,446 	905 	- 	- 	- 	11,716 	8,601 	8,558 	5,864 	12,972 	16,184 	12,208 	11,173 	874 	541 	928 	457 	- 	476 	13,219 	- 	12,685 	4,575
+Nyabihu 	1,403 	- 	- 	1,134 	- 	9,441 	7,241 	8,290 	6,472 	9,321 	15,027 	9,123 	6,219 	1,047 	653 	1,058 	784 	- 	545 	15,055 	4,590 	10,087 	430
+Ngororero 	1,184 	- 	2,356 	1,049 	- 	9,552 	6,923 	5,389 	8,462 	11,677 	15,351 	11,176 	11,284 	824 	474 	857 	474 	- 	368 	9,669 	3,451 	13,582 	9,641
+Rusizi 	1,010 	796 	4,715 	- 	- 	10,266 	8,071 	6,867 	9,818 	12,381 	16,196 	11,157 	9,758 	784 	763 	841 	600 	593 	417 	8,702 	4,816 	16,646 	2,547
+Nyamasheke 	991 	1,329 	4,443 	- 	- 	11,882 	7,889 	4,583 	6,707 	10,869 	12,687 	10,703 	10,055 	760 	633 	783 	452 	433 	385 	8,974 	4,392 	1,888 	3,962
+Rulindo 	1,087 	1,114 	3,691 	1,449 	- 	14,114 	9,745 	4,244 	5,467 	12,614 	17,560 	12,674 	10,311 	811 	636 	914 	475 	534 	486 	9,536 	5,135 	9,129 	1,515
+Gakenke 	1,079 	1,208 	5,101 	1,379 	- 	14,120 	10,179 	5,485 	8,110 	11,639 	17,131 	15,406 	9,214 	919 	671 	941 	592 	- 	435 	9,833 	6,045 	5,222 	11,637
+Musanze 	1,584 	1,434 	- 	1,413 	- 	11,551 	9,608 	9,459 	9,803 	9,692 	11,838 	7,288 	9,023 	1,079 	720 	1,097 	653 	- 	459 	10,000 	5,056 	3,392 	14,414
+Burera 	1,366 	1,281 	- 	1,330 	517 	11,640 	9,070 	7,238 	5,842 	13,287 	17,696 	13,643 	8,636 	1,215 	651 	1,249 	547 	- 	356 	9,482 	9,819 	14,486 	11,855
+Gicumbi 	1,070 	1,345 	- 	1,190 	- 	14,777 	8,695 	6,326 	6,351 	12,468 	16,544 	9,695 	10,586 	856 	609 	939 	614 	254 	523 	7,945 	3,944 	14,511 	5,375
+Rwamagana 	894 	1,060 	4,612 	- 	776 	17,774 	7,665 	3,874 	5,322 	14,543 	18,500 	9,928 	8,525 	542 	542 	535 	499 	395 	630 	8,575 	3,927 	21,925 	7,422
+Nyagatare 	1,555 	1,291 	4,358 	330 	682 	18,849 	5,994 	4,367 	7,308 	14,080 	18,353 	9,219 	10,274 	779 	778 	795 	- 	506 	464 	10,443 	7,893 	2,725 	2,320
+Gatsibo 	1,267 	1,390 	5,312 	568 	712 	17,970 	9,456 	4,593 	6,699 	14,377 	17,285 	11,805 	10,813 	681 	645 	892 	600 	341 	544 	8,419 	4,377 	15,140 	1,595
+Kayonza 	1,186 	1,364 	4,321 	- 	790 	16,060 	7,202 	4,212 	5,326 	15,818 	18,571 	12,349 	8,720 	503 	496 	989 	577 	337 	532 	7,493 	4,991 	1,543 	3,054
+Kirehe 	2,092 	1,141 	5,087 	- 	588 	14,711 	7,245 	4,477 	4,221 	14,973 	19,023 	10,575 	9,500 	692 	665 	742 	642 	390 	662 	5,569 	3,923 	2,825 	1,336
+Ngoma 	856 	1,207 	4,033 	- 	492 	15,701 	7,805 	4,858 	3,764 	14,214 	17,165 	8,363 	11,146 	701 	675 	892 	403 	429 	394 	6,933 	6,565 	18,975 	2,692
+Bugesera 	952 	1,036 	5,220 	- 	662 	13,404 	5,782 	2,843 	4,606 	11,994 	15,588 	11,288 	9,983 	636 	636 	650 	- 	479 	318 	9,220 	1,622 	13,396 	1,061
+National 	1,292 	1,186 	4,581 	1,164 	615 	13,990 	8,174 	6,855 	7,389 	12,369 	16,874 	11,014 	9,780 	730 	634 	894 	575 	432 	417 	9,437 	5,522 	11,835 	3,888
+SSF 	1,236 	1,185 	2,398 	1,163 	614 	13,990 	8,174 	6,766 	7,389 	12,367 	16,872 	11,014 	9,780 	729 	633 	893 	574 	432 	398 	9,450 	5,784 	11,664 	3,916
+LSF 	4,081 	1,479 	4,613 	1,367 	933 	- 	- 	13,667 	- 	19,904 	19,904 	- 	- 	1,158 	1,028 	1,782 	737 	- 	1,133 	8,070 	2,713 	19,791 	2,584
+Source: NISR, SAS 2026
+--- PAGE 40 ---
+40
+Table 12: 2026 Season B_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha)
+District 	Maize 	Sorghum 	Paddy
+rice
+Wheat 	Other
+cereals
+Cassava 	Sweet
+potatoes
+Irish
+potatoes
+Yams &
+Taro
+Bananas 	Cooking
+Banana
+Dessert
+banana
+Banana
+for beer
+Beans 	Bush
+bean
+Climbing
+bean
+Peas 	Ground
+nuts
+Soya
+beans
+Vegetables 	Fruits 	Fodder
+crops
+Other
+crops
+Gasabo 	2,181 	- 	4,137 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	5,926 	847 	17,976 	617
+Kicukiro 	- 	- 	5,582 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	722 	- 	6,587 	881 	-
+Nyanza 	1,572 	- 	4,845 	- 	- 	- 	- 	15,958 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	9,381 	782 	- 	763
+Gisagara 	2,434 	- 	4,394 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	1,360 	1,360 	- 	- 	- 	849 	2,871 	3,237 	- 	-
+Nyaruguru 	- 	- 	3,523 	2,438 	- 	- 	- 	13,898 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	3,138 	- 	1,273
+Huye 	2,758 	- 	3,684 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	1,030 	1,030 	- 	- 	- 	- 	3,269 	2,869 	27,200 	2,325
+Nyamagabe 	3,189 	- 	3,379 	2,337 	- 	- 	- 	16,005 	- 	- 	- 	- 	- 	1,479 	- 	1,479 	1,133 	- 	- 	- 	- 	- 	-
+Ruhango 	1,336 	- 	4,901 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	799 	799 	- 	- 	- 	- 	- 	24,890 	- 	2,431
+Muhanga 	1,321 	- 	3,285 	- 	- 	- 	- 	14,954 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	5,305 	- 	- 	-
+Kamonyi 	5,052 	- 	4,052 	- 	312 	- 	- 	- 	- 	- 	- 	- 	- 	2,597 	913 	2,801 	- 	- 	695 	- 	- 	- 	254
+Karongi 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	543
+Rutsiro 	- 	- 	- 	- 	- 	- 	- 	13,754 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	3,352 	- 	-
+Rubavu 	2,714 	- 	- 	- 	- 	- 	- 	14,255 	- 	- 	- 	- 	- 	- 	- 	- 	683 	- 	- 	- 	- 	- 	-
+Nyabihu 	- 	- 	- 	- 	- 	- 	- 	13,308 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	-
+Ngororero 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	1,539 	- 	1,539 	- 	- 	- 	- 	- 	- 	-
+Rusizi 	- 	- 	4,729 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	674 	674 	- 	- 	- 	- 	- 	- 	- 	179
+Nyamasheke 	- 	- 	4,443 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	917 	- 	917 	- 	- 	918 	10,532 	- 	- 	4,695
+Rulindo 	- 	1,633 	3,691 	1,119 	- 	- 	- 	12,601 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	725
+Gakenke 	- 	- 	5,101 	1,500 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	4,889 	- 	-
+Musanze 	- 	- 	- 	1,568 	- 	- 	- 	15,600 	- 	- 	- 	- 	- 	- 	- 	- 	545 	- 	- 	- 	4,334 	14,617 	-
+Burera 	- 	- 	- 	- 	- 	- 	- 	13,881 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	-
+Gicumbi 	- 	- 	- 	1,040 	- 	- 	- 	16,468 	- 	- 	- 	- 	- 	1,118 	- 	1,118 	- 	- 	- 	- 	- 	18,310 	-
+Rwamagana 	- 	1,402 	4,654 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	957 	957 	- 	- 	- 	- 	10,473 	2,779 	23,773 	712
+Nyagatare 	4,424 	2,293 	4,363 	- 	682 	- 	- 	8,355 	- 	21,152 	21,152 	- 	- 	852 	852 	- 	- 	- 	1,189 	9,300 	7,893 	5,428 	4,618
+Gatsibo 	3,764 	1,480 	5,329 	- 	1,519 	- 	- 	- 	- 	17,686 	17,686 	- 	- 	1,168 	1,168 	- 	- 	- 	1,297 	4,736 	6,257 	22,215 	2,267
+Kayonza 	4,900 	1,023 	4,452 	- 	- 	- 	- 	- 	- 	20,247 	20,247 	- 	- 	773 	773 	- 	- 	- 	1,289 	11,276 	426 	25,187 	9,394
+Kirehe 	4,941 	1,566 	5,112 	- 	309 	- 	- 	13,120 	- 	- 	- 	- 	- 	1,320 	1,320 	- 	- 	- 	1,095 	9,105 	3,941 	- 	4,932
+Ngoma 	2,087 	1,767 	4,033 	- 	320 	- 	- 	- 	- 	17,812 	17,812 	- 	- 	1,136 	1,136 	- 	- 	- 	- 	7,562 	4,273 	- 	1,557
+Bugesera 	2,446 	2,100 	5,234 	- 	- 	- 	- 	- 	- 	- 	- 	- 	- 	1,004 	1,004 	- 	- 	- 	606 	6,768 	830 	40,178 	1,634
+National 	4,081 	1,479 	4,613 	1,367 	933 	- 	- 	13,667 	- 	19,904 	19,904 	- 	- 	1,158 	1,028 	1,782 	737 	- 	1,133 	8,070 	2,713 	19,791 	2,584
+Source: NISR, SAS 2026
+--- PAGE 41 ---
+41
+Table 13: 2026 Season B_Crop production by crop type and district (MT)
+District 	Maize 	Sorghum 	Paddy rice 	Wheat 	Other
+Cereals
+Cassava 	Sweet
+potatoes
+Irish
+potatoes
+Yams &
+Taro
+Banana 	Cooking
+banana
+Dessert
+banana
+Banana
+for beer
+Beans 	Bush
+bean
+Climbing
+bean
+Pea 	Ground
+nuts
+Soya
+bean
+Vegetables 	Fruits 	Fodder
+crops
+Other
+crops
+Nyarugenge 	686 	215 	- 	- 	- 	2,673 	1,122 	64 	153 	8,859 	2,931 	1,602 	4,326 	1,311 	1,311 	- 	- 	21 	53 	826 	- 	- 	8
+Gasabo 	1,682 	3,322 	1,291 	- 	3 	7,069 	9,141 	1,381 	516 	19,775 	9,531 	5,300 	4,943 	2,485 	2,275 	211 	13 	51 	116 	7,044 	8 	1,953 	709
+Kicukiro 	372 	596 	570 	- 	- 	1,275 	823 	- 	1,297 	5,351 	2,232 	1,104 	2,015 	838 	838 	- 	- 	- 	37 	1,187 	117 	253 	50
+Nyanza 	3,901 	5,807 	3,198 	- 	162 	36,623 	18,342 	1,067 	5,180 	23,336 	7,958 	5,421 	9,958 	8,854 	6,874 	1,980 	186 	469 	814 	3,430 	371 	1,366 	2,055
+Gisagara 	2,517 	2,974 	13,025 	- 	335 	64,531 	20,059 	556 	4,250 	29,480 	9,680 	6,636 	13,164 	9,406 	7,624 	1,782 	23 	304 	1,212 	3,334 	339 	- 	1,040
+Nyaruguru 	300 	2,301 	175 	262 	1 	23,729 	40,123 	17,028 	4,139 	11,106 	4,269 	2,441 	4,396 	6,567 	477 	6,090 	192 	- 	447 	5,893 	298 	6,099 	1,066
+Huye 	1,171 	4,578 	3,728 	- 	160 	28,393 	22,939 	696 	3,306 	17,916 	7,472 	4,408 	6,036 	6,334 	3,498 	2,835 	163 	61 	920 	5,724 	191 	306 	726
+Nyamagabe 	1,376 	4,111 	95 	2,735 	- 	18,426 	46,700 	14,384 	7,643 	15,085 	2,480 	2,198 	10,406 	5,517 	407 	5,110 	490 	- 	399 	3,407 	370 	322 	3,322
+Ruhango 	734 	2,350 	4,911 	- 	47 	104,487 	20,346 	218 	4,793 	24,990 	4,471 	4,001 	16,519 	7,166 	5,112 	2,053 	56 	782 	1,420 	3,145 	95 	5,734 	4,694
+Muhanga 	934 	114 	269 	152 	15 	43,522 	35,341 	869 	16,893 	79,439 	15,471 	7,046 	56,922 	3,994 	1,351 	2,642 	93 	21 	1,010 	3,062 	2,321 	9,184 	1,392
+Kamonyi 	2,269 	3,304 	1,082 	- 	4 	37,275 	18,865 	2,073 	7,276 	54,228 	9,524 	7,480 	37,224 	6,507 	5,188 	1,319 	46 	462 	1,368 	5,305 	894 	1,299 	10,064
+Karongi 	820 	2,152 	- 	33 	- 	36,771 	31,597 	703 	8,987 	55,007 	10,815 	5,096 	39,096 	8,593 	1,159 	7,434 	167 	82 	697 	8,781 	948 	7,177 	771
+Rutsiro 	1,684 	142 	- 	- 	- 	14,342 	21,529 	18,489 	4,075 	34,743 	9,612 	8,394 	16,736 	4,616 	401 	4,215 	243 	- 	497 	2,145 	357 	3,416 	15,320
+Rubavu 	2,158 	132 	- 	- 	- 	3,519 	14,838 	56,444 	878 	14,421 	5,979 	1,751 	6,691 	4,390 	377 	4,014 	272 	- 	235 	33,413 	- 	3,945 	653
+Nyabihu 	5,921 	- 	- 	1,528 	- 	988 	15,406 	67,716 	277 	3,516 	1,416 	1,068 	1,032 	2,870 	45 	2,825 	466 	- 	25 	14,608 	1,872 	1,219 	105
+Ngororero 	4,740 	- 	2 	1,364 	- 	7,804 	35,337 	7,367 	16,729 	51,109 	6,714 	6,277 	38,118 	5,192 	258 	4,935 	191 	- 	591 	4,054 	808 	4,166 	5,833
+Rusizi 	1,154 	51 	7,271 	- 	- 	110,192 	15,950 	449 	5,083 	22,596 	11,415 	1,993 	9,188 	8,284 	5,854 	2,430 	23 	192 	431 	5,088 	843 	1,569 	7,798
+Nyamasheke 	480 	15 	1,633 	- 	- 	55,169 	30,452 	56 	7,351 	22,494 	7,252 	2,969 	12,273 	5,800 	757 	5,043 	36 	373 	588 	7,295 	1,536 	228 	12,987
+Rulindo 	1,296 	3,701 	67 	94 	- 	14,239 	27,963 	5,524 	754 	36,492 	12,499 	8,057 	15,937 	6,331 	1,834 	4,497 	163 	6 	74 	9,903 	519 	1,026 	1,398
+Gakenke 	1,624 	326 	96 	264 	- 	22,433 	55,317 	5,356 	11,274 	75,506 	19,878 	16,285 	39,343 	10,408 	633 	9,775 	189 	- 	294 	4,225 	2,237 	733 	17,736
+Musanze 	3,308 	2,928 	- 	1,659 	- 	432 	18,397 	41,941 	1,770 	8,307 	4,190 	1,777 	2,341 	7,754 	251 	7,503 	150 	- 	13 	12,574 	610 	222 	9,344
+Burera 	3,372 	6,540 	- 	733 	40 	503 	27,701 	36,301 	229 	11,010 	7,071 	636 	3,302 	12,086 	363 	11,722 	589 	- 	15 	5,171 	851 	9,298 	2,448
+Gicumbi 	2,494 	12,591 	- 	1,590 	- 	12,326 	35,840 	16,334 	1,005 	31,225 	14,775 	6,616 	9,835 	11,800 	2,113 	9,686 	446 	47 	125 	4,564 	534 	8,919 	4,610
+Rwamagana 	3,535 	6,317 	2,418 	- 	22 	34,143 	11,603 	2,762 	1,550 	71,296 	52,563 	8,226 	10,507 	6,710 	6,571 	139 	51 	658 	393 	7,897 	332 	18,313 	5,333
+Nyagatare 	41,184 	5,817 	9,402 	27 	1 	19,455 	8,140 	3,027 	444 	70,794 	44,565 	4,227 	22,002 	22,841 	21,619 	1,222 	- 	468 	1,073 	9,237 	136 	1,463 	557
+Gatsibo 	11,791 	10,998 	9,111 	200 	165 	14,829 	24,552 	10,726 	2,050 	104,771 	66,857 	11,215 	26,699 	12,836 	10,434 	2,402 	49 	675 	1,062 	7,082 	420 	8,289 	3,560
+Kayonza 	8,191 	17,924 	5,357 	- 	730 	48,829 	9,380 	9,661 	1,390 	67,879 	54,714 	4,890 	8,275 	10,528 	10,236 	293 	52 	157 	300 	5,421 	3,351 	960 	1,754
+Kirehe 	4,639 	12,007 	4,880 	- 	352 	28,340 	7,671 	6,425 	3,942 	100,140 	72,266 	4,219 	23,654 	16,147 	10,147 	6,000 	220 	516 	717 	2,464 	522 	57 	3,894
+Ngoma 	1,669 	7,141 	3,786 	- 	782 	28,926 	7,904 	3,309 	668 	102,665 	68,782 	5,887 	27,997 	13,531 	11,448 	2,084 	21 	568 	521 	2,275 	9,066 	2,607 	3,036
+Bugesera 	6,369 	3,865 	7,958 	- 	64 	25,722 	8,289 	1,036 	1,421 	57,667 	23,796 	9,624 	24,247 	14,078 	13,971 	106 	- 	1,831 	539 	6,850 	136 	8,113 	351
+National 	122,370 	122,320 	80,325 	10,640 	2,885 	846,963 	641,667 	331,963 	125,323 	1,231,202 	571,178 	156,846 	503,179 	243,775 	133,428 	110,347 	4,587 	7,743 	15,984 	195,402 	30,082 	108,237 	122,617
+Source: NISR, SAS 2026
+--- PAGE 42 ---
+42
+Table 14: 2026 Season B_the Use of production by farmers (Percentage)
+Crops 	Sold 	Own consumption 	Wages for hired labour 	Farm rent 	Offered as gift 	Barter trade / Exchanged
+with other things
+Seeds 	Fodder purpose 	Stored 	Post harvesting losses 	Other usage
+Maize 	35.3 	49.3 	1.8 	3.6 	6.6 	0.1 	0.7 	1.0 	1.1 	0.4 	0.2
+Sorghum 	54.6 	28.8 	1.0 	2.1 	7.7 	0.1 	3.6 	0.1 	1.0 	0.7 	0.4
+Paddy rice 	82.5 	16.7 	- 	- 	- 	- 	- 	- 	0.0 	0.4 	0.3
+Wheat 	54.2 	28.0 	0.5 	- 	6.6 	0.1 	8.5 	0.2 	0.1 	0.5 	1.4
+Other cereals 	48.9 	34.2 	0.7 	2.4 	3.8 	- 	6.3 	- 	1.6 	1.5 	0.6
+Sweet potato 	39.4 	46.6 	2.0 	0.6 	6.3 	0.0 	0.0 	4.8 	0.0 	0.0 	0.1
+Irish potato 	50.1 	28.2 	0.8 	0.4 	5.0 	0.0 	15.0 	0.1 	0.0 	0.1 	0.2
+Yam & Taro 	49.5 	37.0 	1.3 	0.4 	6.0 	- 	5.6 	- 	0.0 	0.0 	0.1
+Cassava 	63.3 	29.6 	0.7 	1.8 	3.9 	0.0 	- 	0.1 	0.3 	0.0 	0.2
+Bush bean 	21.5 	47.5 	2.0 	3.6 	5.6 	0.2 	16.9 	- 	1.6 	0.6 	0.5
+Climbing bean 	18.2 	51.5 	1.1 	1.0 	7.9 	0.2 	17.7 	- 	1.5 	0.5 	0.3
+Pea 	42.1 	35.5 	0.5 	0.2 	4.0 	0.4 	16.1 	- 	0.3 	0.2 	0.7
+Groundnut 	40.1 	32.0 	0.4 	1.5 	4.2 	- 	20.2 	- 	0.6 	0.8 	0.1
+Soybean 	28.2 	40.2 	1.0 	1.9 	5.3 	0.3 	20.4 	0.1 	1.0 	1.0 	0.7
+Cooking banana 	66.1 	29.5 	0.7 	0.1 	3.2 	0.0 	0.0 	0.0 	- 	0.0 	0.3
+Dessert banana 	66.4 	29.4 	0.1 	0.2 	3.3 	0.1 	- 	0.0 	- 	0.0 	0.6
+Banana for beer 	77.1 	14.7 	0.1 	0.1 	7.1 	0.0 	- 	0.0 	- 	0.1 	0.7
+Vegetables 	85.8 	9.0 	0.2 	0.4 	3.4 	- 	0.7 	- 	0.0 	0.2 	0.4
+Fruits 	87.4 	7.1 	0.0 	0.2 	3.9 	- 	0.2 	0.0 	- 	0.0 	1.2
+Fodder crops 	4.8 	1.1 	0.0 	- 	0.6 	0.4 	0.1 	91.2 	0.1 	0.0 	1.6
+Other crops 	95.5 	1.9 	0.0 	0.1 	0.7 	- 	0.1 	0.0 	0.0 	0.1 	1.6
+Source : NISR, SAS 2026
+--- PAGE 43 ---
+43
+Table 15: 2026 Season B_Cultivated area by cropping system and district (Percentage)
+District 	Cropping system
+Pure Cropping 	Mixed Cropping
+Nyarugenge 	36.1 	63.9
+Gasabo 	28.4 	71.6
+Kicukiro 	35.6 	64.4
+Nyanza 	24.6 	75.4
+Gisagara 	26.3 	73.7
+Nyaruguru 	52.4 	47.6
+Huye 	24.5 	75.5
+Nyamagabe 	50.9 	49.1
+Ruhango 	33.9 	66.1
+Muhanga 	35.0 	65.0
+Kamonyi 	33.8 	66.2
+Karongi 	42.1 	57.9
+Rutsiro 	54.8 	45.2
+Rubavu 	56.5 	43.5
+Nyabihu 	57.3 	42.7
+Ngororero 	41.0 	59.0
+Rusizi 	37.7 	62.3
+Nyamasheke 	31.5 	68.5
+Rulindo 	55.5 	44.5
+Gakenke 	44.6 	55.4
+Musanze 	68.2 	31.8
+Burera 	62.7 	37.3
+Gicumbi 	53.3 	46.7
+Rwamagana 	32.3 	67.7
+Nyagatare 	30.0 	70.0
+Gatsibo 	40.4 	59.6
+Kayonza 	34.9 	65.1
+Kirehe 	44.4 	55.6
+Ngoma 	33.2 	66.8
+Bugesera 	26.7 	73.3
+National 	39.5 	60.5
+SSF 	38.2 	61.8
+LSF 	94.7 	5.3
+Source: NISR, SAS 2026
+--- PAGE 44 ---
+44
+Table 16: 2026 Season B_Sowing dates by district (Percentage)
+District 	Before January 	Between 01-15 /01 	Between 16- 31/01 	Between 01-15/02 	Between16- 28/02 Between 01-15/03 	Between 16-31/03 	After 31/03 	Other season 	Total
+Nyarugenge 	0.85 	0.78 	0.43 	8.82 	24.06 	29.48 	0.00 	3.78 	31.80 	100
+Gasabo 	4.44 	11.30 	3.84 	24.46 	9.20 	6.41 	2.30 	2.25 	35.80 	100
+Kicukiro 	6.00 	1.57 	3.16 	24.55 	10.11 	9.18 	2.62 	0.00 	42.81 	100
+Nyanza 	7.48 	5.18 	3.54 	33.40 	13.57 	6.60 	2.40 	2.49 	25.34 	100
+Gisagara 	3.46 	2.76 	2.40 	22.42 	23.49 	5.84 	0.42 	1.96 	37.26 	100
+Nyaruguru 	10.29 	4.96 	3.79 	15.40 	11.98 	9.73 	5.80 	13.43 	24.62 	100
+Huye 	6.98 	5.06 	4.21 	22.69 	14.54 	5.60 	2.72 	4.03 	34.17 	100
+Nyamagabe 	6.67 	6.59 	4.71 	11.55 	19.67 	12.18 	8.73 	6.72 	23.17 	100
+Ruhango 	7.37 	9.29 	2.74 	25.53 	18.39 	2.85 	0.97 	3.83 	29.04 	100
+Muhanga 	9.96 	4.66 	2.32 	14.56 	16.62 	5.93 	2.74 	4.71 	38.49 	100
+Kamonyi 	7.75 	5.54 	4.40 	28.19 	14.47 	4.90 	0.36 	2.70 	31.70 	100
+Karongi 	11.27 	3.27 	3.64 	19.47 	13.66 	5.18 	2.76 	3.44 	37.30 	100
+Rutsiro 	10.79 	5.68 	2.74 	9.98 	15.30 	11.10 	2.89 	1.50 	40.01 	100
+Rubavu 	6.55 	3.55 	5.34 	13.90 	11.55 	13.84 	10.58 	16.53 	18.16 	100
+Nyabihu 	6.15 	4.24 	1.94 	9.82 	26.64 	14.17 	9.55 	15.83 	11.66 	100
+Ngororero 	12.54 	5.08 	5.02 	17.94 	17.80 	9.38 	0.86 	3.52 	27.86 	100
+Rusizi 	6.13 	0.48 	1.01 	8.64 	19.28 	9.48 	2.50 	1.23 	51.26 	100
+Nyamasheke 	10.30 	0.74 	1.62 	10.19 	16.39 	8.94 	3.24 	7.27 	41.30 	100
+Rulindo 	7.47 	6.33 	5.74 	9.91 	12.00 	17.70 	7.01 	6.25 	27.59 	100
+Gakenke 	15.85 	4.90 	2.68 	7.72 	7.52 	16.62 	5.63 	5.95 	33.13 	100
+Musanze 	8.47 	9.40 	4.60 	8.33 	12.04 	17.49 	7.17 	7.05 	25.46 	100
+Burera 	7.45 	9.01 	5.77 	19.51 	7.05 	11.05 	14.15 	9.87 	16.14 	100
+Gicumbi 	7.40 	6.63 	5.09 	9.45 	11.66 	24.39 	7.97 	4.96 	22.46 	100
+Rwamagana 	3.92 	5.13 	1.78 	10.51 	21.20 	12.50 	3.35 	1.10 	40.51 	100
+Nyagatare 	1.30 	0.64 	2.74 	25.46 	25.34 	11.78 	2.43 	0.62 	29.69 	100
+Gatsibo 	1.53 	3.30 	3.14 	16.20 	15.00 	14.44 	3.39 	2.21 	40.79 	100
+Kayonza 	2.20 	7.34 	2.65 	13.48 	16.64 	17.51 	5.80 	2.27 	32.12 	100
+Kirehe 	5.88 	5.59 	3.07 	16.63 	15.93 	10.81 	1.76 	0.51 	39.83 	100
+Ngoma 	2.15 	2.50 	1.70 	11.73 	22.45 	10.93 	1.52 	1.17 	45.85 	100
+Bugesera 	1.50 	3.78 	2.57 	12.14 	23.96 	24.74 	4.86 	0.61 	25.85 	100
+National 	7.08 	4.91 	3.35 	16.41 	16.39 	11.36 	4.10 	4.39 	32.01 	100
+Source: NISR, SAS 2026
+--- PAGE 45 ---
+45
+Table 17: 2026 Season B_Sowing date by crops (Percentage)
+Crops 	Before January 	Between 01-15 /01 	Between 16-31/01 	Between 01-15/02 	Between16- 28/02 	Between 01-15/03 	Between 16-31/03 	After 31/03 	Other season 	Total
+Maize 	1.20 	4.14 	4.33 	35.51 	34.05 	16.25 	3.55 	0.98 	0.00 	100
+Sorghum 	8.09 	43.78 	23.00 	17.98 	5.57 	1.02 	0.57 	0.00 	0.00 	100
+Paddy rice 	36.13 	14.14 	9.50 	16.40 	7.59 	6.78 	5.97 	3.49 	0.00 	100
+Wheat 	0.71 	0.63 	0.00 	1.45 	1.96 	20.99 	20.64 	53.62 	0.00 	100
+Other cereals 	0.00 	0.49 	2.79 	35.85 	33.64 	19.50 	6.26 	1.48 	0.00 	100
+Sweet potato 	24.99 	11.04 	6.22 	15.29 	10.14 	12.55 	5.41 	14.35 	0.00 	100
+Irish potato 	2.48 	5.38 	3.40 	14.72 	18.76 	23.63 	11.35 	20.28 	0.00 	100
+Taro & Yams 	78.12 	4.49 	1.61 	5.16 	5.44 	2.12 	1.27 	1.77 	0.00 	100
+Cassava 	3.17 	3.15 	1.60 	5.90 	4.57 	3.77 	1.16 	3.88 	72.81 	100
+Bush bean 	0.13 	0.78 	1.74 	31.02 	38.58 	22.47 	4.47 	0.81 	0.00 	100
+Climbing bean 	0.17 	0.69 	1.94 	25.85 	31.39 	25.67 	11.51 	2.78 	0.00 	100
+Pea 	0.06 	4.07 	2.84 	20.45 	20.10 	23.10 	13.28 	16.10 	0.00 	100
+Groundnut 	0.69 	1.80 	2.57 	43.20 	36.37 	11.84 	3.51 	0.01 	0.00 	100
+Soybean 	0.40 	2.07 	4.75 	36.67 	37.49 	14.81 	3.14 	0.66 	0.00 	100
+Cooking banana 	0.29 	0.18 	0.00 	0.16 	0.15 	0.22 	0.00 	0.12 	98.88 	100
+Dessert banana 	0.09 	0.00 	0.00 	0.10 	0.00 	0.26 	0.09 	0.42 	99.04 	100
+Banana for beer 	0.10 	0.00 	0.00 	0.24 	0.14 	0.03 	0.00 	0.08 	99.41 	100
+Vegetables 	12.86 	12.85 	6.51 	16.84 	9.39 	15.58 	10.19 	15.78 	0.00 	100
+Fruits 	2.11 	2.15 	0.35 	3.85 	2.11 	1.59 	0.41 	11.04 	76.39 	100
+Fodder crops 	1.49 	0.79 	1.22 	1.71 	0.66 	3.39 	3.12 	3.65 	83.96 	100
+Other crops 	17.06 	0.28 	0.51 	0.89 	0.44 	0.82 	0.94 	3.08 	75.97 	100
+Source: NISR, SAS 2026
+--- PAGE 46 ---
+46
+Table 18: 2026 Season B_Use of seeds by farmer type per district (Percentage)
+District 	Percentage of farmers who used improved seeds 	Percentage of sampled plots in which improved seeds was used 	Percentage of land size in which improved seeds were used
+Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF
+Nyarugenge 	21.1 	21.1 	- 	8.1 	8.1 	- 	11.8 	11.8
+Gasabo 	25.7 	23.5 	66.7 	21.6 	21.6 	50.0 	24.7 	23.1 	82.8
+Kicukiro 	8.7 	8.2 	33.3 	6.3 	6.3 	50.0 	8.3 	5.8 	88.4
+Nyanza 	27.5 	26.9 	66.7 	18.0 	18.0 	66.7 	25.9 	25.1 	70.6
+Gisagara 	19.8 	17.0 	78.3 	11.3 	11.3 	61.8 	22.4 	17.0 	78.9
+Nyaruguru 	7.0 	4.3 	58.8 	4.3 	4.3 	56.5 	3.8 	3.1 	53.7
+Huye 	16.9 	13.5 	65.5 	8.5 	8.5 	68.3 	16.6 	14.8 	66.3
+Nyamagabe 	16.1 	15.4 	57.1 	9.9 	9.9 	41.2 	12.4 	12.3 	38.7
+Ruhango 	14.6 	12.2 	93.8 	9.9 	9.9 	66.7 	12.9 	10.4 	92.3
+Muhanga 	10.1 	9.3 	100.0 	6.5 	6.5 	100.0 	7.1 	6.6 	100.0
+Kamonyi 	20.5 	19.3 	88.9 	12.5 	12.5 	72.7 	16.5 	15.6 	96.5
+Karongi 	12.9 	12.7 	50.0 	11.6 	11.6 	50.0 	10.2 	10.0 	96.0
+Rutsiro 	13.3 	12.9 	50.0 	10.7 	10.7 	50.0 	11.5 	11.4 	79.0
+Rubavu 	25.3 	25.1 	50.0 	10.4 	10.4 	33.3 	22.0 	21.9 	48.3
+Nyabihu 	40.2 	40.1 	100.0 	29.8 	29.8 	100.0 	35.6 	35.5 	100.0
+Ngororero 	24.1 	24.1 	- 	17.7 	17.7 	- 	19.1 	19.1 	-
+Rusizi 	7.0 	6.1 	55.6 	5.6 	5.6 	58.3 	9.8 	5.5 	89.3
+Nyamasheke 	7.3 	6.2 	50.0 	3.8 	3.8 	45.5 	6.0 	4.9 	71.2
+Rulindo 	14.4 	14.0 	40.0 	12.0 	12.0 	22.2 	11.3 	11.3 	34.2
+Gakenke 	12.9 	12.8 	16.7 	11.3 	11.3 	10.0 	10.1 	10.0 	25.1
+Musanze 	11.7 	11.3 	66.7 	10.2 	10.2 	88.9 	12.0 	11.9 	85.8
+Burera 	12.8 	12.6 	50.0 	6.4 	6.4 	50.0 	12.4 	12.4 	52.5
+Gicumbi 	11.4 	11.0 	50.0 	10.6 	10.6 	35.3 	10.8 	10.7 	44.7
+Rwamagana 	24.2 	21.7 	52.5 	20.4 	20.4 	28.9 	21.3 	20.0 	65.0
+Nyagatare 	68.3 	66.9 	79.2 	46.6 	46.6 	55.6 	63.3 	62.4 	88.4
+Gatsibo 	23.6 	20.8 	59.6 	11.8 	11.8 	47.2 	22.1 	19.5 	83.9
+Kayonza 	33.1 	29.1 	80.5 	26.0 	26.0 	77.3 	30.0 	27.7 	90.4
+Kirehe 	8.4 	7.0 	78.6 	5.1 	5.1 	88.4 	10.6 	7.3 	94.2
+Ngoma 	10.4 	8.7 	36.8 	6.2 	6.2 	29.4 	11.0 	9.1 	79.2
+Bugesera 	45.1 	44.1 	65.6 	34.6 	34.6 	54.4 	41.4 	39.6 	89.8
+National 	20.9 	19.4 	65.0 	13.1 	13.1 	53.1 	21.1 	19.6 	83.4
+Source : NISR, SAS 2026
+--- PAGE 47 ---
+47
+Table 19: 2026 Season B Seed type by crops (Percentage)
+Crop 	Traditional seeds 	Improved seeds 	Total
+Maize 	42.5 	57.5 	100
+Paddy rice 	91.6 	8.4 	100
+Wheat 	89.0 	11.0 	100
+Irish potato 	98.0 	2.0 	100
+Cassava 	99.9 	0.1 	100
+Bush bean 	99.6 	0.4 	100
+Climbing bean 	99.4 	0.6 	100
+Pea 	100.0 	0.0 	100
+Soybean 	99.8 	0.3 	100
+Cooking banana 	100.0 	0.0 	100
+Dessert banana 	99.6 	0.4 	100
+Banana for beer 	99.7 	0.3 	100
+Vegetables 	58.7 	41.3 	100
+Fruits 	92.4 	7.6 	100
+Fodder crops 	98.7 	1.3 	100
+Other crops 	86.6 	13.4 	100
+National 	91.0 	9.0 	100
+Source: NISR, SAS 2026
+--- PAGE 48 ---
+48
+Table 20: 2026 Season B_Percentage of farmers by source of improved seeds per district
+District 	Sources of improved seeds
+Government
+(MINAGRI/
+RAB/NAEB)
+Recognized
+seed
+multipliers
+Agro-
+dealers
+NGOs/
+Companies
+Market 	Agriculture
+cooperative
+Other
+source
+Total
+Nyarugenge 	- 	- 	100.0 	- 	- 	- 	- 	100
+Gasabo 	5.3 	10.5 	63.2 	7.9 	5.3 	7.9 	- 	100
+Kicukiro 	14.3 	14.3 	57.1 	- 	- 	14.3 	- 	100
+Nyanza 	1.7 	1.7 	13.3 	60.0 	13.3 	10.0 	- 	100
+Gisagara 	2.3 	4.7 	34.9 	25.6 	- 	32.6 	- 	100
+Nyaruguru 	18.8 	12.5 	6.3 	25.0 	18.8 	18.8 	- 	100
+Huye 	17.1 	31.4 	14.3 	31.4 	2.9 	2.9 	- 	100
+Nyamagabe 	44.4 	11.1 	11.1 	14.8 	- 	18.5 	- 	100
+Ruhango 	9.1 	13.6 	20.5 	40.9 	2.3 	13.6 	- 	100
+Muhanga 	11.8 	11.8 	35.3 	41.2 	- 	- 	- 	100
+Kamonyi 	4.1 	6.1 	18.4 	38.8 	20.4 	12.2 	- 	100
+Karongi 	25.9 	3.7 	22.2 	33.3 	11.1 	- 	3.7 	100
+Rutsiro 	18.2 	9.1 	36.4 	36.4 	- 	- 	- 	100
+Rubavu 	7.8 	18.2 	42.9 	15.6 	13.0 	2.6 	- 	100
+Nyabihu 	1.9 	12.0 	31.5 	28.7 	16.7 	9.3 	- 	100
+Ngororero 	3.7 	1.9 	18.5 	64.8 	9.3 	- 	1.9 	100
+Rusizi 	15.8 	10.5 	42.1 	21.1 	- 	10.5 	- 	100
+Nyamasheke 	9.5 	33.3 	28.6 	23.8 	- 	4.8 	- 	100
+Rulindo 	9.5 	- 	33.3 	42.9 	- 	14.3 	- 	100
+Gakenke 	12.0 	8.0 	24.0 	52.0 	4.0 	- 	- 	100
+Musanze 	6.5 	16.1 	35.5 	29.0 	12.9 	- 	- 	100
+Burera 	8.3 	2.8 	13.9 	72.2 	2.8 	- 	- 	100
+Gicumbi 	3.0 	9.1 	21.2 	54.6 	9.1 	3.0 	- 	100
+Rwamagana 	3.5 	22.4 	31.0 	37.9 	3.5 	1.7 	- 	100
+Nyagatare 	2.0 	10.2 	44.7 	37.8 	1.6 	3.7 	- 	100
+Gatsibo 	9.6 	6.4 	36.2 	38.3 	5.3 	4.3 	- 	100
+Kayonza 	14.1 	5.9 	35.3 	27.1 	3.5 	14.1 	- 	100
+Kirehe 	6.1 	3.0 	12.1 	18.2 	12.1 	45.5 	3.0 	100
+Ngoma 	5.7 	17.1 	25.7 	14.3 	14.3 	22.9 	- 	100
+Bugesera 	0.7 	9.8 	48.3 	35.0 	3.5 	2.8 	- 	100
+National 	6.9 	10.3 	33.4 	35.0 	6.5 	7.8 	0.2 	100
+Source: NISR, SAS 2026
+--- PAGE 49 ---
+49
+Table 21: 2026 Season B_Percentage of crops by source of seeds
+Crop 	Government
+(MINAGRI/RAB/
+Recognized seed
+multipliers
+Agro
+dealers
+NGOs/ 	Market 	Agriculture
+cooperative
+Other
+source
+Total
+Maize 	0.7 	1.9 	42.9 	49.2 	3.5 	1.7 	- 	100
+Paddy rice 	2.4 	46.5 	2.4 	- 	0.8 	48.0 	- 	100
+Wheat 	23.5 	5.9 	- 	64.7 	5.9 	- 	- 	100
+Irish potato 	25.0 	49.1 	2.8 	7.4 	9.3 	6.5 	- 	100
+Cassava 	80.0 	20.0 	- 	- 	- 	- 	- 	100
+Bush bean 	32.1 	7.1 	35.7 	14.3 	7.1 	3.6 	- 	100
+Climbing bean 	29.4 	11.8 	5.9 	29.4 	11.8 	5.9 	5.9 	100
+Pea 	- 	- 	- 	33.3 	66.7 	- 	- 	100
+Soybean 	8.6 	34.5 	- 	5.2 	25.9 	25.9 	- 	100
+Cooking banana 	- 	100.0 	- 	- 	- 	- 	- 	100
+Dessert banana 	61.5 	15.4 	- 	15.4 	- 	- 	7.7 	100
+Banana for beer 	14.3 	57.1 	14.3 	- 	- 	- 	14.3 	100
+Vegetables 	1.3 	2.9 	53.9 	15.5 	25.5 	0.3 	0.7 	100
+Fruits 	43.8 	27.1 	4.2 	6.9 	6.9 	9.7 	1.4 	100
+Fodder crops 	48.0 	2.0 	24.0 	22.0 	2.0 	2.0 	- 	100
+Other crops 	49.3 	13.0 	0.5 	8.5 	6.7 	20.2 	1.8 	100
+Source: NISR, SAS 2026
+--- PAGE 50 ---
+50
+SAS–2026 B 	© NISR
+Table 22: 2026 Season B_Use of organic fertilizer by farmer type per district (Percentage)
+District 	Percentage of farmers who applied
+organic fertilizer
+Percentage of plots in which organic
+fertilizer was applied
+Percentage of land size in which organic
+fertilizer was applied
+Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF
+Nyarugenge 	64.7 	64.7 	78.1 	78.1 	83.0 	83.0
+Gasabo 	77.6 	78.6 	60.0 	76.4 	76.4 	53.5 	77.7 	78.0 	55.0
+Kicukiro 	47.8 	47.4 	66.7 	89.1 	89.1 	100.0 	81.9 	80.7 	100.0
+Nyanza 	87.4 	87.6 	77.8 	58.0 	58.0 	68.8 	57.3 	56.7 	97.7
+Gisagara 	80.0 	79.9 	82.6 	66.6 	66.6 	96.4 	71.5 	69.5 	100.0
+Nyaruguru 	98.0 	98.2 	94.1 	69.1 	69.1 	100.0 	70.3 	69.9 	100.0
+Huye 	90.1 	89.6 	96.6 	80.1 	80.1 	90.0 	78.2 	77.4 	99.2
+Nyamagabe 	96.6 	96.5 	100.0 	81.3 	81.3 	100.0 	77.4 	77.3 	100.0
+Ruhango 	85.2 	84.9 	93.8 	64.4 	64.4 	73.9 	63.8 	63.0 	86.3
+Muhanga 	91.5 	91.4 	100.0 	72.2 	72.2 	100.0 	74.7 	74.6 	100.0
+Kamonyi 	87.2 	87.2 	88.9 	58.6 	58.6 	80.0 	59.9 	59.4 	99.6
+Karongi 	95.0 	95.2 	50.0 	69.4 	69.4 	100.0 	71.2 	71.2 	100.0
+Rutsiro 	96.9 	96.8 	100.0 	66.7 	66.7 	75.0 	75.5 	75.4 	97.3
+Rubavu 	66.3 	66.1 	100.0 	61.3 	61.3 	20.0 	56.6 	56.7 	33.7
+Nyabihu 	96.7 	96.7 	100.0 	75.6 	75.6 	100.0 	71.5 	71.5 	100.0
+Ngororero 	97.5 	97.5 	100.0 	68.7 	68.7 	100.0 	70.5 	70.5 	100.0
+Rusizi 	75.7 	76.5 	33.3 	59.3 	59.3 	75.0 	59.8 	59.4 	76.7
+Nyamasheke 	90.3 	92.3 	16.7 	71.2 	71.2 	100.0 	70.8 	70.6 	100.0
+Rulindo 	95.6 	95.9 	80.0 	84.7 	84.7 	75.0 	82.2 	82.2 	74.9
+Gakenke 	98.5 	99.0 	66.7 	68.7 	68.7 	75.0 	70.4 	70.4 	84.5
+Musanze 	87.9 	87.8 	100.0 	71.6 	71.6 	22.2 	69.3 	69.4 	28.6
+Burera 	85.7 	85.7 	100.0 	84.4 	84.4 	100.0 	82.9 	82.8 	100.0
+Gicumbi 	97.4 	97.3 	100.0 	75.0 	75.0 	100.0 	75.0 	74.9 	100.0
+Rwamagana 	74.7 	74.4 	77.5 	66.0 	66.0 	61.0 	68.6 	68.0 	88.5
+Nyagatare 	59.5 	60.1 	54.2 	72.8 	72.8 	90.6 	70.6 	70.4 	92.6
+Gatsibo 	82.7 	83.4 	73.1 	60.5 	60.5 	59.1 	62.7 	61.8 	88.9
+Kayonza 	72.6 	74.6 	48.8 	53.0 	53.0 	65.0 	50.4 	50.5 	39.3
+Kirehe 	50.1 	49.7 	71.4 	72.1 	72.1 	63.2 	70.0 	69.3 	79.0
+Ngoma 	48.5 	47.5 	65.8 	52.2 	52.2 	44.2 	56.8 	55.8 	83.1
+Bugesera 	76.2 	75.8 	84.4 	59.0 	59.0 	77.9 	62.4 	60.9 	98.8
+National 	81.3 	81.7 	71.3 	69.6 	69.6 	71.4 	68.4 	68.0 	89.1
+Source : NISR, SAS 2026
+--- PAGE 51 ---
+51
+Table 23: 2026 Season B Use of inorganic fertilizer by farmer type per district (Percentage)
+District 	Percentage of farmers who used inorganic fertilizers 	Percentage of plots in which inorganic fertilizer was applied 	Percentage of land under which inorganic fertilizer was
+applied
+Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF
+Nyarugenge 	34.6 	34.6 	37.6 	37.6 	37.3 	37.3
+Gasabo 	42.4 	40.1 	86.7 	61.8 	61.8 	60.9 	68.1 	67.0 	85.7
+Kicukiro 	20.3 	19.3 	66.7 	59.1 	59.1 	100.0 	51.7 	44.3 	100.0
+Nyanza 	40.7 	39.9 	88.9 	29.3 	29.3 	64.3 	35.8 	32.7 	99.4
+Gisagara 	39.6 	36.9 	95.7 	40.8 	40.8 	100.0 	56.6 	45.9 	100.0
+Nyaruguru 	83.7 	82.9 	100.0 	57.5 	57.5 	91.3 	60.4 	59.7 	99.3
+Huye 	36.5 	33.3 	82.8 	39.7 	39.7 	75.8 	45.3 	39.6 	98.9
+Nyamagabe 	70.3 	69.8 	100.0 	56.4 	56.4 	100.0 	58.5 	58.3 	100.0
+Ruhango 	28.5 	26.3 	100.0 	37.1 	37.1 	66.7 	46.0 	40.9 	88.3
+Muhanga 	39.4 	38.8 	100.0 	48.5 	48.5 	100.0 	47.6 	46.8 	100.0
+Kamonyi 	35.9 	35.2 	77.8 	23.2 	23.2 	100.0 	30.2 	28.2 	100.0
+Karongi 	64.5 	64.6 	50.0 	45.4 	45.4 	100.0 	50.8 	50.8 	100.0
+Rutsiro 	64.6 	64.2 	100.0 	50.1 	50.1 	75.0 	61.7 	61.6 	97.3
+Rubavu 	70.8 	70.9 	50.0 	68.2 	68.2 	66.7 	71.2 	71.2 	98.4
+Nyabihu 	89.7 	89.7 	100.0 	67.7 	67.7 	100.0 	70.5 	70.5 	100.0
+Ngororero 	81.1 	81.0 	100.0 	53.4 	53.4 	100.0 	55.5 	55.5 	100.0
+Rusizi 	66.5 	66.1 	88.9 	50.4 	50.4 	100.0 	59.8 	56.7 	100.0
+Nyamasheke 	70.8 	70.6 	75.0 	61.0 	61.0 	100.0 	60.9 	60.0 	100.0
+Rulindo 	68.0 	67.8 	80.0 	49.0 	49.0 	75.0 	50.8 	50.6 	98.6
+Gakenke 	83.0 	83.4 	50.0 	44.8 	44.8 	100.0 	46.7 	46.7 	100.0
+Musanze 	74.8 	74.8 	66.7 	55.3 	55.3 	50.0 	61.6 	61.6 	63.4
+Burera 	63.1 	63.0 	100.0 	62.7 	62.7 	100.0 	70.6 	70.6 	100.0
+Gicumbi 	61.0 	60.7 	83.3 	51.8 	51.8 	100.0 	52.5 	52.5 	100.0
+Rwamagana 	49.7 	48.6 	62.5 	68.1 	68.1 	54.7 	69.3 	68.6 	85.5
+Nyagatare 	74.9 	73.8 	83.3 	71.0 	71.0 	92.6 	87.3 	86.7 	99.1
+Gatsibo 	67.6 	66.6 	80.8 	54.2 	54.2 	57.0 	61.7 	60.0 	91.6
+Kayonza 	58.9 	57.1 	80.5 	55.2 	55.2 	71.6 	55.4 	53.1 	95.8
+Kirehe 	43.3 	42.5 	85.7 	64.2 	64.1 	92.5 	72.2 	69.6 	99.5
+Ngoma 	28.7 	26.9 	57.9 	35.6 	35.6 	61.5 	49.3 	45.4 	91.9
+Bugesera 	59.2 	58.3 	78.1 	55.3 	55.3 	76.0 	62.8 	60.5 	99.2
+National 	57.5 	56.7 	80.2 	52.6 	52.6 	75.6 	60.6 	59.2 	96.7
+Source: NISR, SAS 2026
+--- PAGE 52 ---
+52
+Table 24: 2026 Season B_Percentage of farmers by source of inorganic fertilizers per district
+District 	Government (MINAGRI/
+RAB/NAEB)
+Agro
+dealers
+NGOs/
+Companies
+Market 	Agriculture
+cooperative
+Other
+source
+Total
+Nyarugenge 	- 	89.1 	- 	6.5 	4.4 	- 	100
+Gasabo 	- 	73.6 	19.4 	3.1 	3.9 	- 	100
+Kicukiro 	- 	96.4 	3.6 	- 	- 	- 	100
+Nyanza 	0.4 	13.7 	74.3 	4.9 	6.2 	0.4 	100
+Gisagara 	- 	40.4 	41.9 	2.5 	14.7 	0.5 	100
+Nyaruguru 	0.4 	16.3 	77.4 	5.9 	- 	- 	100
+Huye 	3.1 	32.7 	56.2 	1.9 	6.2 	- 	100
+Nyamagabe 	0.3 	22.9 	69.7 	3.9 	3.2 	- 	100
+Ruhango 	2.0 	20.4 	66.5 	3.3 	7.9 	- 	100
+Muhanga 	- 	30.4 	57.9 	5.9 	5.9 	- 	100
+Kamonyi 	- 	35.6 	43.5 	7.3 	13.6 	- 	100
+Karongi 	- 	39.0 	60.4 	0.7 	- 	- 	100
+Rutsiro 	1.6 	35.9 	59.7 	2.4 	0.4 	- 	100
+Rubavu 	0.4 	74.4 	20.1 	5.2 	- 	- 	100
+Nyabihu 	- 	65.3 	28.0 	6.7 	- 	- 	100
+Ngororero 	- 	25.6 	67.5 	6.9 	- 	- 	100
+Rusizi 	0.3 	19.2 	77.3 	1.5 	1.5 	0.3 	100
+Nyamasheke 	1.2 	32.2 	61.1 	4.9 	0.6 	- 	100
+Rulindo 	1.8 	46.5 	38.7 	3.7 	9.2 	- 	100
+Gakenke 	- 	44.6 	47.6 	5.0 	2.8 	- 	100
+Musanze 	0.3 	65.0 	34.7 	- 	- 	- 	100
+Burera 	1.3 	22.6 	63.8 	9.6 	2.7 	- 	100
+Gicumbi 	- 	32.6 	64.0 	2.5 	0.9 	- 	100
+Rwamagana 	1.6 	31.7 	53.0 	1.6 	12.1 	- 	100
+Nyagatare 	0.4 	56.6 	38.3 	2.9 	1.7 	0.2 	100
+Gatsibo 	1.2 	44.0 	48.1 	5.8 	0.8 	- 	100
+Kayonza 	2.3 	46.8 	42.6 	5.2 	3.2 	- 	100
+Kirehe 	- 	57.3 	32.2 	6.1 	4.5 	- 	100
+Ngoma 	1.1 	30.8 	48.7 	11.9 	6.5 	1.1 	100
+Bugesera 	0.5 	50.5 	44.1 	2.0 	2.9 	- 	100
+National 	0.7 	40.8 	50.9 	4.4 	3.2 	0.1 	100
+Source: NISR, SAS 2026
+--- PAGE 53 ---
+53
+Table 25: 2026 Season B_Source of inorganic fertilizer by type of fertilizer
+Fertilizer name 	Government (MINAGRI/
+RAB/ NAEB)
+Agro dealers 	NGOs/
+Companies
+Market 	Agriculture
+cooperative
+Other
+source
+Total
+NPK 17-17-17; 	0.6 	50.8 	40.3 	4.9 	3.2 	0.3 	100
+NPK 20-10-10; 	3.5 	31.0 	58.6 	- 	6.9 	- 	100
+NPK 25-5-5; 	- 	61.5 	30.8 	7.7 	- 	- 	100
+NPK 22-6-12; 	3.3 	38.3 	53.3 	3.3 	1.7 	- 	100
+Other NPK; 	1.6 	62.3 	23.0 	9.8 	3.3 	- 	100
+Urea; 	0.5 	43.0 	48.1 	5.1 	3.1 	0.1 	100
+liquid urea (Mbonea M 	- 	42.1 	52.6 	5.3 	- 	- 	100
+DAP 	0.5 	40.4 	53.1 	3.7 	2.2 	0.0 	100
+KCL/MOP, 	- 	60.0 	10.0 	- 	30.0 	- 	100
+Omax; 	- 	52.4 	38.1 	4.8 	4.8 	- 	100
+Winner; 	- 	88.5 	7.7 	3.9 	- 	- 	100
+Yara Viva; 	- 	33.3 	66.7 	- 	- 	- 	100
+Amidas; 	- 	42.9 	28.6 	- 	14.3 	14.3 	100
+Rhizobium 	33.3 	66.7 	- 	- 	- 	- 	100
+DI Grow; 	- 	47.6 	35.7 	2.4 	14.3 	- 	100
+Lime/Ishwagara 	2.0 	39.4 	52.7 	5.4 	0.5 	- 	100
+Other type of fertilizer 	0.6 	44.3 	47.7 	4.4 	2.9 	0.1 	100
+Source: NISR, SAS 2026
+--- PAGE 54 ---
+54
+SAS–2026 B 	©	 	NISR
+Table 26: 2026 Season B Percentage of plots by type of inorganic fertilizer per district
+District 	NPK 	Urea 	DAP 	DI Grow 	Lime 	Others 	Total
+Nyarugenge 	24.14 	52.65 	23.22 	- 	- 	- 	100
+Gasabo 	25.83 	48.16 	25.58 	0.43 	- 	- 	100
+Kicukiro 	29.59 	41.92 	28.50 	- 	- 	- 	100
+Nyanza 	10.42 	58.17 	30.74 	- 	0.47 	0.20 	100
+Gisagara 	16.11 	38.61 	43.08 	1.38 	0.81 	0.01 	100
+Nyaruguru 	24.71 	19.11 	38.36 	0.30 	17.53 	- 	100
+Huye 	25.36 	49.31 	25.26 	0.06 	- 	0.01 	100
+Nyamagabe 	26.53 	24.25 	45.87 	- 	3.34 	- 	100
+Ruhango 	14.50 	50.14 	33.25 	- 	- 	2.10 	100
+Muhanga 	20.50 	39.58 	39.75 	- 	- 	0.17 	100
+Kamonyi 	27.59 	49.13 	21.92 	- 	- 	1.35 	100
+Karongi 	5.00 	36.56 	57.22 	- 	1.23 	- 	100
+Rutsiro 	18.42 	29.58 	34.03 	- 	17.40 	0.56 	100
+Rubavu 	53.21 	22.18 	21.38 	0.22 	- 	3.01 	100
+Nyabihu 	24.44 	39.31 	31.80 	0.12 	0.04 	4.29 	100
+Ngororero 	10.01 	37.42 	49.43 	- 	3.13 	- 	100
+Rusizi 	18.27 	22.85 	53.59 	- 	5.04 	0.25 	100
+Nyamasheke 	23.00 	20.52 	49.80 	- 	6.47 	0.20 	100
+Rulindo 	19.78 	46.52 	32.92 	0.78 	- 	- 	100
+Gakenke 	19.59 	29.74 	48.47 	- 	1.38 	0.82 	100
+Musanze 	28.98 	32.93 	27.82 	- 	0.69 	9.58 	100
+Burera 	24.20 	34.70 	37.71 	- 	- 	3.39 	100
+Gicumbi 	47.57 	29.09 	20.25 	- 	0.91 	2.19 	100
+Rwamagana 	12.92 	44.20 	42.39 	- 	- 	0.49 	100
+Nyagatare 	1.98 	51.04 	44.67 	0.21 	0.19 	1.92 	100
+Gatsibo 	24.94 	45.96 	27.31 	- 	0.22 	1.58 	100
+Kayonza 	21.86 	41.05 	35.54 	- 	- 	1.55 	100
+Kirehe 	10.51 	53.17 	32.54 	1.07 	0.42 	2.28 	100
+Ngoma 	20.52 	47.37 	32.11 	- 	- 	- 	100
+Bugesera 	2.95 	36.61 	59.98 	- 	0.03 	0.43 	100
+National 	20.3 	35.5 	40.0 	0.1 	2.9 	1.3 	100
+Source: NISR, SAS 2026
+--- PAGE 55 ---
+55
+Table 27: 2026 Season B_Use of pesticides by farmer type per district (Percentage)
+District 	Percentage of farmers who used pesticides 	Percentage of plots in which pesticides were used 	Percentage of land size in which pesticides were used
+Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF
+Nyarugenge 	29.3 	29.3 	34.5 	34.5 	33.6 	33.6
+Gasabo 	38.2 	35.3 	93.3 	49.5 	49.5 	61.7 	57.3 	54.8 	88.7
+Kicukiro 	12.3 	11.1 	66.7 	47.0 	47.0 	100.0 	46.6 	34.5 	100.0
+Nyanza 	39.6 	38.9 	77.8 	29.5 	29.4 	61.5 	36.2 	33.5 	99.3
+Gisagara 	30.4 	27.3 	95.7 	38.1 	38.1 	96.8 	47.5 	35.3 	86.6
+Nyaruguru 	47.1 	44.3 	100.0 	44.9 	44.9 	91.3 	42.9 	41.0 	99.3
+Huye 	30.4 	26.0 	93.1 	31.9 	31.9 	74.4 	35.4 	27.4 	98.4
+Nyamagabe 	51.5 	50.7 	100.0 	33.9 	33.9 	100.0 	40.2 	39.8 	100.0
+Ruhango 	27.2 	25.2 	93.8 	21.4 	21.4 	60.9 	29.1 	22.5 	85.2
+Muhanga 	24.0 	23.3 	100.0 	40.2 	40.2 	100.0 	41.8 	40.5 	100.0
+Kamonyi 	36.7 	35.8 	88.9 	26.6 	26.6 	100.0 	31.2 	29.2 	100.0
+Karongi 	25.3 	25.0 	100.0 	31.5 	31.5 	100.0 	35.3 	34.5 	100.0
+Rutsiro 	35.7 	35.3 	75.0 	48.0 	48.0 	100.0 	55.8 	55.6 	100.0
+Rubavu 	74.2 	74.1 	100.0 	78.1 	78.1 	66.7 	76.1 	76.1 	79.9
+Nyabihu 	78.6 	78.6 	100.0 	57.1 	57.1 	100.0 	59.4 	59.3 	100.0
+Ngororero 	49.4 	49.3 	100.0 	43.6 	43.6 	100.0 	45.5 	45.5 	100.0
+Rusizi 	21.9 	20.9 	77.8 	29.1 	29.1 	88.9 	46.1 	32.4 	99.2
+Nyamasheke 	27.3 	26.1 	75.0 	37.3 	37.3 	76.9 	46.4 	43.8 	98.7
+Rulindo 	57.4 	56.7 	100.0 	39.4 	39.4 	77.8 	42.0 	41.7 	98.7
+Gakenke 	59.3 	59.2 	66.7 	38.1 	38.1 	75.0 	38.0 	37.9 	84.5
+Musanze 	77.6 	77.7 	66.7 	59.0 	59.0 	37.5 	60.3 	60.3 	49.4
+Burera 	50.5 	50.3 	100.0 	52.9 	52.9 	100.0 	64.5 	64.4 	100.0
+Gicumbi 	50.1 	49.5 	100.0 	38.1 	38.1 	94.1 	38.1 	37.9 	95.5
+Rwamagana 	37.9 	34.5 	77.5 	56.4 	56.4 	45.6 	58.0 	56.1 	82.8
+Nyagatare 	30.4 	24.4 	77.8 	47.6 	47.5 	94.4 	69.9 	66.6 	98.1
+Gatsibo 	43.0 	41.1 	67.3 	44.7 	44.7 	48.8 	52.7 	49.2 	89.7
+Kayonza 	43.5 	40.8 	75.6 	48.6 	48.6 	90.1 	51.7 	48.2 	98.0
+Kirehe 	22.8 	21.7 	78.6 	52.4 	52.4 	92.1 	58.7 	51.7 	99.2
+Ngoma 	16.9 	14.2 	60.5 	32.7 	32.7 	79.0 	49.8 	41.5 	95.4
+Bugesera 	26.0 	23.4 	78.1 	40.7 	40.7 	79.5 	50.1 	43.3 	99.2
+National 	39.1 	37.7 	80.0 	42.6 	42.6 	75.4 	49.7 	47.0 	94.4
+Source : NISR, SAS 2026
+--- PAGE 56 ---
+56
+Table 28: 2026 Season B Percentage of plots by type of pesticides per district
+District 	Dithane 	Ridomil 	Dimethoate 	Cypermetrin 	Rocket 	Beam 	Other pesticide 	Total
+Nyarugenge 	42.1 	- 	5.3 	- 	47.4 	- 	5.3 	100
+Gasabo 	13.8 	- 	9.8 	10.6 	48.0 	3.3 	14.6 	100
+Kicukiro 	14.3 	- 	- 	14.3 	50.0 	- 	21.4 	100
+Nyanza 	8.9 	1.8 	1.8 	4.5 	73.2 	3.6 	6.3 	100
+Gisagara 	8.9 	- 	5.2 	17.8 	52.6 	7.4 	8.2 	100
+Nyaruguru 	24.3 	- 	0.9 	7.5 	34.6 	0.9 	31.8 	100
+Huye 	8.3 	- 	8.3 	22.9 	39.6 	13.5 	7.3 	100
+Nyamagabe 	29.9 	0.6 	1.8 	28.7 	36.6 	1.2 	1.2 	100
+Ruhango 	6.6 	4.9 	1.6 	9.8 	62.3 	6.6 	8.2 	100
+Muhanga 	12.9 	6.5 	1.6 	11.3 	61.3 	1.6 	4.8 	100
+Kamonyi 	18.4 	5.5 	3.7 	9.2 	58.7 	1.8 	2.8 	100
+Karongi 	6.7 	- 	13.3 	26.7 	43.3 	- 	10.0 	100
+Rutsiro 	47.5 	4.3 	11.5 	5.8 	26.6 	- 	4.3 	100
+Rubavu 	31.9 	13.7 	13.4 	11.1 	22.6 	- 	7.5 	100
+Nyabihu 	31.5 	10.9 	6.7 	7.5 	24.9 	- 	18.6 	100
+Ngororero 	16.7 	0.7 	2.7 	10.7 	64.0 	- 	5.3 	100
+Rusizi 	20.5 	- 	18.0 	21.8 	18.0 	5.1 	16.7 	100
+Nyamasheke 	15.3 	2.0 	3.1 	52.0 	18.4 	1.0 	8.2 	100
+Rulindo 	28.1 	2.5 	3.3 	10.7 	40.5 	0.8 	14.1 	100
+Gakenke 	8.9 	1.9 	2.5 	39.9 	36.1 	- 	10.8 	100
+Musanze 	32.0 	5.7 	12.2 	15.2 	28.7 	0.3 	6.0 	100
+Burera 	34.9 	4.4 	8.8 	13.2 	31.2 	- 	7.5 	100
+Gicumbi 	39.4 	1.6 	2.1 	6.2 	40.9 	- 	9.8 	100
+Rwamagana 	12.6 	2.7 	12.6 	13.1 	38.3 	4.1 	16.7 	100
+Nyagatare 	8.3 	1.7 	4.5 	12.2 	43.1 	3.1 	27.1 	100
+Gatsibo 	23.7 	0.7 	1.9 	7.0 	48.9 	1.9 	15.9 	100
+Kayonza 	18.0 	1.0 	6.1 	18.3 	31.2 	4.2 	21.2 	100
+Kirehe 	21.6 	2.5 	6.9 	14.7 	32.4 	2.0 	20.1 	100
+Ngoma 	17.4 	3.0 	9.1 	22.7 	27.3 	6.1 	14.4 	100
+Bugesera 	6.8 	4.9 	4.9 	15.1 	43.4 	6.3 	18.5 	100
+National 	23.1 	4.6 	7.2 	14.2 	36.2 	2.0 	12.7 	100
+Source: NISR, SAS 2026
+--- PAGE 57 ---
+57
+Table 29: 2026 Season B Percentage of farmers who practiced agricultural practices.
+District 	Farmers who protected land against erosion (%) 	Farmers who used any mechanical
+equipment for agriculture activities %)
+Farmers who practiced irrigation (%) 	Farmers who practiced agroforestry (%)
+Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF 	Overall 	SSF 	LSF
+Nyarugenge 	80.5 	80.5 	- 	- 	8.2 	8.2 	57.1 	57.1
+Gasabo 	89.8 	89.6 	93 	0.7 	- 	13.3 	18.2 	16.4 	53.3 	54.3 	53.9 	62.5
+Kicukiro 	73.9 	73.3 	100 	- 	- 	- 	6.9 	5.7 	50.0 	46.9 	46.6 	66.7
+Nyanza 	97.1 	97.1 	100 	- 	- 	- 	22.1 	21.1 	88.9 	57.4 	57.6 	44.4
+Gisagara 	94.8 	95.2 	87.0 	- 	- 	- 	24.6 	22.3 	68.0 	53.2 	54.7 	16.7
+Nyaruguru 	99.7 	99.7 	100 	- 	- 	- 	23.9 	21.0 	77.8 	44.8 	44.9 	41.2
+Huye 	93.5 	93.0 	100 	0.2 	0.2 	- 	25.7 	22.4 	72.4 	46.5 	46.8 	40.6
+Nyamagabe 	97.3 	97.2 	100 	- 	- 	- 	9.0 	8.5 	33.3 	43.3 	43.2 	57.1
+Ruhango 	95.3 	95.2 	100 	0.4 	0.4 	- 	14.6 	12.8 	66.7 	48.8 	49.8 	11.1
+Muhanga 	96.8 	96.7 	100 	0.2 	0.2 	- 	14.3 	14.0 	50.0 	59.4 	59.6 	25.0
+Kamonyi 	95.5 	95.4 	100 	0.9 	1.0 	- 	20.0 	19.2 	66.7 	52.1 	52.7 	10.0
+Karongi 	96.4 	96.4 	100 	- 	- 	- 	14.2 	13.8 	100.0 	50.2 	50.2 	50.0
+Rutsiro 	98.4 	98.4 	100.0 	0.3 	0.3 	- 	5.8 	5.8 	- 	51.9 	52.1 	25.0
+Rubavu 	94.2 	94.2 	100 	- 	- 	- 	2.1 	2.1 	- 	54.1 	53.9 	100.0
+Nyabihu 	98.5 	98.5 	100 	- 	- 	- 	4.5 	4.5 	- 	70.4 	70.3 	100.0
+Ngororero 	98.8 	98.8 	100 	- 	- 	- 	4.5 	4.5 	- 	60.2 	60.2 	100.0
+Rusizi 	92.2 	92.1 	100 	0.2 	0.2 	- 	16.3 	14.8 	90.0 	63.3 	63.7 	33.3
+Nyamasheke 	98.7 	98.7 	100 	- 	- 	- 	13.7 	13.0 	41.7 	62.8 	63.1 	50.0
+Rulindo 	96.6 	96.5 	100 	0.3 	- 	20.0 	19.1 	18.4 	60.0 	54.7 	54.9 	40.0
+Gakenke 	99.2 	99.2 	100 	0.4 	0.4 	- 	5.4 	4.8 	50.0 	51.6 	51.7 	50.0
+Musanze 	94.8 	94.7 	100.0 	0.2 	- 	33.3 	3.5 	3.6 	- 	50.4 	50.3 	66.7
+Burera 	99.2 	99.2 	100.0 	0.4 	0.4 	- 	5.0 	4.6 	100.0 	56.2 	56.2 	50.0
+Gicumbi 	98.9 	98.9 	100 	0.2 	- 	16.7 	8.9 	9.0 	- 	54.4 	54.3 	66.7
+Rwamagana 	90.6 	90.0 	98 	0.8 	0.2 	7.5 	14.4 	9.9 	59.6 	71.2 	71.7 	64.1
+Nyagatare 	80.9 	79.0 	96 	28.2 	23.1 	69.4 	11.4 	8.0 	35.4 	68.0 	68.7 	61.8
+Gatsibo 	96.4 	96.1 	100.0 	3.4 	0.5 	40.4 	11.8 	8.7 	47.4 	67.4 	67.8 	62.3
+Kayonza 	89.0 	88.7 	92.7 	3.0 	0.2 	36.6 	17.5 	11.5 	80.4 	58.6 	59.5 	46.5
+Kirehe 	82.9 	82.6 	100 	0.7 	0.3 	21.4 	13.8 	12.4 	80.0 	68.7 	69.4 	28.6
+Ngoma 	80.0 	78.8 	100 	0.2 	- 	2.6 	5.9 	3.9 	37.5 	61.3 	61.7 	54.6
+Bugesera 	81.3 	80.5 	96.9 	0.7 	0.3 	9.4 	18.6 	15.8 	71.4 	69.9 	70.6 	56.1
+National 	92.7 	92.6 	97.5 	1.8 	1.2 	21.3 	13.1 	11.5 	56.2 	58.0 	58.2 	49.9
+Source: NISR, SAS 2026
+--- PAGE 58 ---
+58
+Table 30: 2026 Season B Percentage of plots by types of irrigation used.
+District 	Modern irrigation 	Traditional techniques
+Surface irrigation 	Flood irrigation 	Drip irrigation 	Sprinkler irrigation 	Pivot irrigation
+Nyarugenge 	33.3 	- 	- 	- 	- 	66.7
+Gasabo 	3.2 	16.1 	16.1 	3.2 	- 	61.3
+Kicukiro 	33.3 	- 	- 	- 	- 	66.7
+Nyanza 	7.7 	48.7 	10.3 	- 	- 	33.3
+Gisagara 	5.4 	48.7 	- 	- 	- 	46.0
+Nyaruguru 	8.0 	8.0 	- 	- 	- 	84.0
+Huye 	- 	64.1 	- 	- 	- 	35.9
+Nyamagabe 	10.0 	40.0 	- 	- 	- 	50.0
+Ruhango 	14.3 	52.4 	- 	- 	- 	33.3
+Muhanga 	30.0 	10.0 	- 	- 	- 	60.0
+Kamonyi 	22.2 	18.5 	- 	- 	- 	59.3
+Karongi 	22.2 	- 	- 	- 	- 	77.8
+Rutsiro 	40.0 	- 	- 	- 	- 	60.0
+Rubavu 	- 	- 	- 	- 	- 	100.0
+Nyabihu 	- 	- 	- 	- 	- 	100.0
+Ngororero 	25.0 	- 	- 	- 	- 	75.0
+Rusizi 	6.3 	56.3 	- 	- 	- 	37.5
+Nyamasheke 	- 	31.3 	- 	- 	- 	68.8
+Rulindo 	36.4 	- 	- 	- 	- 	63.6
+Gakenke 	- 	22.2 	- 	- 	- 	77.8
+Musanze 	- 	- 	- 	- 	- 	-
+Burera 	66.7 	- 	- 	- 	- 	33.3
+Gicumbi 	- 	- 	- 	- 	- 	100.0
+Rwamagana 	26.2 	13.9 	7.7 	9.2 	- 	43.1
+Nyagatare 	26.7 	9.3 	10.7 	6.7 	6.7 	40.0
+Gatsibo 	41.2 	29.4 	- 	2.9 	- 	26.5
+Kayonza 	3.8 	14.3 	11.4 	19.1 	2.9 	48.6
+Kirehe 	25.0 	8.3 	- 	2.1 	52.1 	12.5
+Ngoma 	52.2 	26.1 	- 	- 	- 	21.7
+Bugesera 	25.3 	12.7 	10.1 	26.6 	- 	25.3
+National 	17.8 	22.0 	5.5 	7.3 	4.4 	43.1
+Source: NISR, SAS 2026
+--- PAGE 59 ---
+59
+Table 31: 2026 Season B Percentage of plots by source of water used and district.
+District 	Source of water 	Others
+Rainwater 	Water treatment 	Underground 	Lake / streams 	Water catchment
+Nyarugenge 	- 	66.7 	- 	33.3 	- 	-
+Gasabo 	3.0 	12.1 	51.5 	21.2 	12.1 	-
+Kicukiro 	14.3 	- 	28.6 	57.1 	- 	-
+Nyanza 	4.4 	- 	24.4 	53.3 	17.8 	-
+Gisagara 	2.7 	13.5 	37.8 	40.5 	5.4 	-
+Nyaruguru 	- 	- 	33.3 	66.7 	- 	-
+Huye 	4.4 	- 	34.8 	41.3 	19.6 	-
+Nyamagabe 	8.3 	- 	33.3 	58.3 	- 	-
+Ruhango 	23.3 	2.3 	32.6 	32.6 	7.0 	2.3
+Muhanga 	- 	- 	50.0 	50.0 	- 	-
+Kamonyi 	3.5 	- 	62.1 	31.0 	3.5 	-
+Karongi 	- 	- 	44.4 	55.6 	- 	-
+Rutsiro 	- 	- 	40.0 	60.0 	- 	-
+Rubavu 	- 	- 	100.0 	- 	- 	-
+Nyabihu 	- 	- 	100.0 	- 	- 	-
+Ngororero 	- 	50.0 	50.0 	- 	- 	-
+Rusizi 	- 	11.8 	47.1 	41.2 	- 	-
+Nyamasheke 	- 	5.3 	63.2 	31.6 	- 	-
+Rulindo 	7.7 	15.4 	23.1 	30.8 	23.1 	-
+Gakenke 	- 	- 	55.6 	44.4 	- 	-
+Musanze 	-
+Burera 	- 	- 	- 	100.0 	- 	-
+Gicumbi 	- 	16.7 	66.7 	16.7 	- 	-
+Rwamagana 	- 	8.3 	23.6 	19.4 	48.6 	-
+Nyagatare 	4.3 	- 	21.3 	45.7 	28.7 	-
+Gatsibo 	- 	11.4 	14.3 	48.6 	20.0 	5.7
+Kayonza 	- 	2.2 	28.4 	29.1 	40.3 	-
+Kirehe 	- 	6.1 	16.3 	77.6 	- 	-
+Ngoma 	4.0 	- 	44.0 	40.0 	12.0 	-
+Bugesera 	1.1 	3.3 	15.6 	62.2 	17.8 	-
+National 	3.0 	4.4 	30.3 	42.4 	19.6 	0.3
+Source: NISR, SAS 2026
+--- PAGE 60 ---
+60
+Table 32: Percentage of plots by categories of Erosion Control Measures per Districts
+District 	Plots under erosion control measures 	Categories of erosion control measures adopted
+Measures to control Low-rate erosion 	Measures to control Moderate rate erosion 	Measures to control Severe rate erosion
+Nyarugenge 	61.0 	16.6 	3.5 	40.8
+Gasabo 	69.2 	20.4 	12.3 	36.5
+Kicukiro 	40.0 	23.8 	5.1 	11.2
+Nyanza 	83.7 	44.1 	27.4 	12.2
+Gisagara 	68.0 	33.0 	23.5 	11.5
+Nyaruguru 	89.0 	29.1 	24.4 	35.6
+Huye 	84.7 	24.6 	28.1 	31.9
+Nyamagabe 	79.9 	25.2 	13.6 	41.1
+Ruhango 	78.8 	38.9 	14.8 	25.1
+Muhanga 	88.9 	60.2 	13.3 	15.4
+Kamonyi 	82.1 	58.1 	17.4 	6.6
+Karongi 	74.2 	46.3 	21.4 	6.4
+Rutsiro 	71.5 	37.5 	6.6 	27.5
+Rubavu 	76.9 	53.0 	2.2 	21.7
+Nyabihu 	87.6 	50.1 	3.7 	33.8
+Ngororero 	93.3 	73.0 	9.7 	10.7
+Rusizi 	61.8 	41.5 	12.8 	7.6
+Nyamasheke 	79.7 	57.6 	7.7 	14.5
+Rulindo 	85.6 	47.2 	18.1 	20.4
+Gakenke 	86.7 	56.2 	4.6 	25.9
+Musanze 	66.6 	54.8 	3.4 	8.3
+Burera 	88.7 	48.2 	14.9 	25.6
+Gicumbi 	91.7 	35.6 	5.3 	50.8
+Rwamagana 	76.6 	49.6 	11.4 	15.6
+Nyagatare 	62.8 	26.9 	10.2 	25.7
+Gatsibo 	87.9 	70.3 	11.6 	6.0
+Kayonza 	63.9 	36.4 	16.4 	11.1
+Kirehe 	58.6 	40.4 	8.9 	9.3
+Ngoma 	54.5 	39.1 	5.7 	9.7
+Bugesera 	51.2 	28.2 	5.6 	17.4
+National 	78.2 	44.5 	12.8 	20.9
+Source: NISR, SAS 2026
+--- PAGE 61 ---
+61
+Table 33: 2026 Season B_Percentage of plots by degree of erosion per district
+District 	Degree of erosion
+Severe (Rill erosion, Gully erosion,
+Mass movement/Landslides)
+Moderate (Diffuse overland flow
+erosion, overland flow erosion)
+Low
+(Wind erosion)
+Very Low
+(Splash erosion)
+Nyarugenge 	0.1 	14.2 	4.9 	80.8
+Gasabo 	0.3 	5.1 	22.6 	72.0
+Kicukiro 	0.4 	0.3 	1.7 	97.6
+Nyanza 	0.7 	7.2 	52.6 	39.4
+Gisagara 	1.6 	26.1 	41.7 	30.6
+Nyaruguru 	0.7 	8.5 	51.1 	39.7
+Huye 	0.0 	1.8 	32.7 	65.5
+Nyamagabe 	3.3 	23.5 	17.4 	55.8
+Ruhango 	0.6 	8.0 	25.6 	65.8
+Muhanga 	3.7 	13.4 	46.1 	36.9
+Kamonyi 	3.3 	16.0 	19.9 	60.9
+Karongi 	1.1 	16.4 	46.0 	36.6
+Rutsiro 	1.7 	5.4 	22.7 	70.2
+Rubavu 	0.5 	8.7 	42.0 	48.8
+Nyabihu 	1.5 	13.7 	51.2 	33.6
+Ngororero 	5.5 	13.2 	43.7 	37.6
+Rusizi 	1.6 	6.0 	62.6 	29.8
+Nyamasheke 	0.6 	13.6 	57.7 	28.1
+Rulindo 	1.2 	14.4 	45.3 	39.1
+Gakenke 	0.4 	12.7 	53.4 	33.5
+Musanze 	0.4 	9.9 	60.4 	29.4
+Burera 	1.7 	2.7 	68.5 	27.1
+Gicumbi 	6.4 	13.7 	16.6 	63.3
+Rwamagana 	3.3 	21.2 	19.4 	56.2
+Nyagatare 	0.2 	4.4 	13.3 	82.1
+Gatsibo 	0.2 	4.0 	29.1 	66.8
+Kayonza 	0.1 	8.1 	48.9 	42.9
+Kirehe 	0.7 	7.9 	23.1 	68.3
+Ngoma 	0.5 	5.0 	48.1 	46.3
+Bugesera 	0.4 	1.7 	37.4 	60.4
+National 	1.7 	11.0 	39.1 	48.1
+Source: NISR, SAS 2026
+--- PAGE 62 ---
+62
+ANNEX
+--- PAGE 63 ---
+63
+Annex 1: Concepts, definitions, and estimation methods
+1. Total land area
+Total land area at the district level is defined as the district area excluding area under inland water bodies. The
+definition of inland water bodies generally includes major rivers and lakes.
+2. Agricultural area
+Agricultural area includes arable land, land under permanent1 crops and permanent pasture.
+3. Arable land
+Arable land is defined by the FAO as land under temporary crops (double-cropped areas are counted only once),
+temporary meadows for mowing or pasture, land under market and kitchen gardens, and land temporarily
+fallow (for a period less than five years). Abandoned land resulting from shifting cultivation is excluded from
+this category. Data on arable land are not meant to indicate the amount of land that is potentially cultivable.
+4. Permanent crop land
+Permanent crops are sown or planted once and remain on the land for some years, without requiring to
+be replanted after each annual harvest, such as cocoa, coffee and rubber. This category includes flowering
+shrubs, fruit trees, nut trees, and vines, but excludes trees grown for wood or timber. Within the SAS, the
+following crops are considered as permanent crops: cooking banana, Dessert banana, Banana for beer,
+Avocado, Coffee, Sugar cane, Macadamia, Olive, Mango, Apple, Papaya, Orange, Lemon, Guava, Mulberry,
+Stevia, Jatropha, Palm, and Tea.
+5. Permanent pasture land
+Permanent pasture refers to land used on a permanent basis (for five years or more) for herbaceous forage
+crops, whether cultivated or growing wild, including wild prairie or grazing land.
+6. Irrigated agricultural land
+Area equipped for irrigation indicates land that is actually irrigated, sometimes expressed as a percentage of
+the total land area. This includes area equipped for full or partial control irrigation, equipped lowland areas,
+and areas equipped for spate irrigation. The portion of the equipped area that is irrigated refers to physical
+areas. Irrigated land that is cultivated more than once a year is counted only once.
+7. Physical area
+Physical area is defined as the total area of a plot as physically measured. The physical agricultural area for a
+district is estimated by aggregating all weighted individual agricultural plot areas within that district.
+8. Crop area (cultivated area)
+Crop area refers to the area occupied by a given crop within a plot, considering its density or occupation.
+In context of Rwanda, as well as in many African countries, mixed cropping system is a general practice in
+² For some plots, permanent crops are mixed with temporary crops which mean that same area is counted in
+both arable land area and area under permanent crop.
+--- PAGE 64 ---
+64
+SAS–2026 B 	©	 	NISR
+agriculture. This practice makes it complex to estimate area under crop cultivation. For pure stands, where
+a crop completely covers a plot, crop area is equal to or less than the physical plot area (if a crop is partially
+covering the plot, the share is estimated and applied to the plot area). For mixed crops, enumerators estimate
+the share of each crop within the plot using an eye estimation method based on plant spacing; this proportion
+is then applied to the physical area of the plot to obtain area for each specific crop planted. Cultivated area at
+the district level is defined as the total of weighted crop areas across all plots within the district.
+Examples
+For pure stands, the crop area equals the physical area when the crop fully covers the whole plot. If the crop
+area covers only a portion of the plot, the crop area is less than the physical area. For example, a plot of 1
+hectare where maize is grown and completely occupies the whole plot (100 % occupied), the cultivated area
+for maize is 1 hectare. On the other side, if the maize crop occupies 80 % of the total plot area, the maize area
+equals 0.8 hectares (1hectare times 0.8).
+Under a mixed cropping system, specifically for seasonal crops, the crop area is less than the physical area. For
+example, a plot of 1 ha grown with maize and beans, where maize occupies 60 % and beans occupy 40 % of
+the total plot area. The maize area would be 0.6 ha (1hectare times 0.6), and the beans area would be 0.4 ha
+(1ha times 0.4). It is important to note that the sum of the shares for seasonal crops does not exceed 100%.
+When seasonal and perennial crops are mixed within the same plot, since perennial crops are permanent
+crops in nature, their shares are treated separately from seasonal crops. The sum of seasonal crops share
+does not exceed 100 %, while for perennial crops shares are given based on density (spacing between trees)
+and it may exceed 100 percent. For example, a plot of 1 hectare grown with maize, beans, and cassava with
+60 %, 40 % and 50% shares respectively. Maize area will be 0.6 hectare (1hectare times 0.6), beans area will
+be 0.4(1hectare times 0.4), while cassava area will be 0.5 hectare (1hectare times 0.5).
+9. Developed area
+Developed area refers to the land covered by crops. Due to mixed cropping (over-exploitation or, in the case of
+pure cropping, under-exploitation of agricultural land), the developed area can be either less than or greater
+than the physical area. Basing on the example provided above of a plot where maize, beans and cassava have
+been mixed, maize occupies 0.6 ha, beans occupy 0.4 ha, and cassava occupies 0.5 ha. The developed area
+equals the sum of the crop areas equivalent to 1.5 ha.
+10. Harvested area
+Harvested area is defined as the total number of hectares of all crops harvested during a given agricultural
+season. In case of crops considered as seasonal, harvested area is assumed to equal cultivated area. For
+perennial crops, a farmer can decide to harvest a portion of land and stores the remaining production on the
+farm, or harvest the whole plot for commercial or other purposes. In this case, the proportion of harvested
+area is estimated and applied to the plot area to obtain the actual harvested area. For example, cassava which
+occupies 0.5 hectare has 5,000 trees of cassava. If, during agricultural Season B, the farmer harvested only
+1,250 trees, then the farmer harvested only a quarter (0.125hectares) of the cultivated area.
+--- PAGE 65 ---
+65
+SAS–2026 B 	©	 	NISR
+11. Crop yield
+Crop yield is defined as the total reported quantity of a harvested crop divided by the harvested area of that
+crop.
+12. Crop production
+Crop production is the product of crop yield and crop area (harvested). At the district level, crop production
+is estimated by multiplying the crop yield by the total harvested area within the district.
+--- PAGE 66 ---
+66
+SAS–2026 B 	©	 	NISR
+Annex 2: NISR STAFF WHO CONTRIBUTED TO SEASONAL AGRICULTURE
+National Coordinators
+• 	MURENZI Ivan, Director General
+• 	MWIZERWA Jean Claude, Deputy Director General
+Technical coordination
+• 	SIBOMANA Oscar, Acting Director of Economic Statistics Department
+• 	BIGIRIMANA Florent, Census Program Manager
+• 	MUHOZA Didier, Economic Statistics Project Manager
+Field work coordination
+• 	KAMANZI SHINGIRO Jean Philbert, SAS Specialist
+• 	MUREBWAYIRE Divine, SAS Specialist
+• 	MUGIRANEZA CYUZUZO Yves, Agriculture Survey Specialist
+• 	MUKAMAZIMPAKA Francine, Perennial crops and horticulture statistician
+• 	BYUKUSENGE Josiane, Seasonal Crop Production Statistician
+• 	SINDIKUBWABO Ezechias, Livestock and Fisheries Production Statistician
+• 	INEZA Belise, Young Professional
+Data analysis
+• 	ABAYISENGA Aimable, SAS Specialist
+• 	RWAYITARE Jean Bosco, SAS Specialist
+• 	MUREBWAYIRE Divine, SAS Specialist
+• 	USABYIMANA Monique, Forestry and Environmental Statistician
+• 	DUSINGIZIMANA Emmanuel, Agriculture and Environmental Statistician Team Leader
+GIS
+• 	NIYITEGEKA Beata, GIS Team Leader
+• 	IRAMBONA Eddy Marcus, GIS Specialist
+• 	MUNDERERE Theophile, GIS Specialist
+• 	BIZIMUNGU Clément, Field operations Cartographer Officer
+• 	KARERA Albert, Geometrician in charge of map design & production
+• 	NYIRIMANZI Louis Maxime, Spatial database Geometrician
+• 	NDAZIGARUYE Alfred, GIS Support Staff
+• 	NGABO MUHIRE Olympe, GIS Support Staff
+--- PAGE 67 ---
+67
+SAS–2026 B 	©	 	NISR
+• 	Data processing
+• 	NIYIGENA Eric, Application Admin and Data Processing Officer
+Report writing and editing
+• 	RWAYITARE Jean Bosco, SAS Specialist
+• 	INEZA Belise, Young Professional
+Proofreading
+• 	KALISA NEEMA Grace, Communication Specialist
+Layout, Typesetting & Designing
+• 	UWAMUNGU Thierry, Publication Specialist
+• 	KAGOYIRE Delphine , Young Proffesional
+--- PAGE 68 ---
+SEASONAL
+AGRICULTURAL
+SURVEY
+SEASON 	B
+2026

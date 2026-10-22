@@ -144,6 +144,7 @@ let IrrigationService = class IrrigationService {
         iss.feasibility_tier,
         iss.recommended_technology,
         ROUND(COALESCE(iss.modern_irrigated_ha, 0)::numeric, 1) AS current_modern_irrigated_ha,
+        ROUND(COALESCE(iss.total_cultivated_ha, 0)::numeric, 1) AS total_cultivated_ha,
         ROUND(COALESCE(iss.irrigation_access_pct, 0)::numeric, 2) AS current_access_pct,
         ROUND(GREATEST(0, COALESCE(iss.total_cultivated_ha, 0) - COALESCE(iss.area_irrigated_ha, 0))::numeric, 1) AS unmet_irrigation_gap_ha,
         ROUND(COALESCE(iss.water_deficit_mm, 0)::numeric, 0) AS water_deficit_mm,
@@ -172,9 +173,16 @@ let IrrigationService = class IrrigationService {
       JOIN agrilens.irrigation_season_statistics iss 
         ON iss.admin_unit_id = au.id AND iss.season_id = s.id
       WHERE au.unit_type = 'DISTRICT'
-      ORDER BY iss.opportunity_score DESC;
+      ORDER BY iss.modern_irrigated_ha DESC NULLS LAST, iss.opportunity_score DESC;
     `;
-        const rows = await this.dataSource.query(query, [seasonCode]);
+        const rawRows = await this.dataSource.query(query, [seasonCode]);
+        const rows = rawRows.map((r) => ({
+            ...r,
+            total_irrigated_ha: parseFloat(r.current_modern_irrigated_ha || 0),
+            modern_irrigated_ha: parseFloat(r.current_modern_irrigated_ha || 0),
+            total_cultivated_ha: parseFloat(r.total_cultivated_ha || 0),
+            irrigation_potential_tier: r.feasibility_tier,
+        }));
         return {
             season: seasonCode,
             safeguardNotice: 'CRITICAL SAFEGUARD: A map showing low irrigation coverage is not enough to conclude that a site is suitable for irrigation. Water availability, seasonal demand, terrain, infrastructure cost, environmental constraints and legal requirements must be assessed. Model-generated locations are strictly labelled as potential sites until on-the-ground feasibility verification is conducted.',
@@ -186,6 +194,7 @@ let IrrigationService = class IrrigationService {
                 { name: 'Road & Market Transport Access', weightPct: 10, maxPoints: 10, rationale: 'Ensures harvested irrigated high-value produce can reach aggregation and cooling hubs.' },
             ],
             rankedPotentialSites: rows,
+            rankings: rows,
         };
     }
     async getSchemes() {
@@ -237,6 +246,8 @@ let IrrigationService = class IrrigationService {
                 },
             })),
             schemesList: rows,
+            rawAssets: rows,
+            schemes: rows,
         };
     }
     async getSiteDossier(districtIdentifier, seasonCode = '2026B') {

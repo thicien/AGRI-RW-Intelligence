@@ -8,6 +8,10 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "free-port": "node scripts/free-port.js",
+    "prestart": "node scripts/free-port.js",
+    "prestart:dev": "node scripts/free-port.js",
+    "prestart:debug": "node scripts/free-port.js",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

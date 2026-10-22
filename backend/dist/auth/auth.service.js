@@ -529,6 +529,69 @@ let AuthService = class AuthService {
             }
         };
     }
+    async registerDistrictOfficer(body) {
+        if (!body.fullName || !body.email || !body.password || !body.districtName) {
+            throw new common_1.BadRequestException('Full name, email, password, and assigned district are required.');
+        }
+        const cleanEmail = body.email.trim().toLowerCase();
+        const existing = await this.dataSource.query(`SELECT id FROM agrilens.users WHERE email = $1 LIMIT 1;`, [cleanEmail]);
+        if (existing.length > 0) {
+            throw new common_1.BadRequestException(`An account with email '${cleanEmail}' is already registered.`);
+        }
+        const hashedPassword = await argon2.hash(body.password);
+        const roleRes = await this.dataSource.query(`SELECT id, name FROM agrilens.roles WHERE code = 'DISTRICT_OFFICER' LIMIT 1;`);
+        if (roleRes.length === 0) {
+            throw new common_1.NotFoundException('DISTRICT_OFFICER role not found in system.');
+        }
+        const roleId = roleRes[0].id;
+        const roleName = roleRes[0].name;
+        const unitRes = await this.dataSource.query(`SELECT id, name FROM agrilens.administrative_units WHERE name ILIKE $1 AND unit_type = 'DISTRICT' LIMIT 1;`, [body.districtName.trim()]);
+        const adminUnitId = unitRes.length > 0 ? unitRes[0].id : null;
+        const resolvedDistrict = unitRes.length > 0 ? unitRes[0].name : body.districtName.trim();
+        const insertRes = await this.dataSource.query(`
+      INSERT INTO agrilens.users (full_name, email, phone, password_hash, status, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, 'ACTIVE', NOW(), NOW())
+      RETURNING id, full_name, email, phone, status, created_at;
+    `, [body.fullName.trim(), cleanEmail, body.phone?.trim() || null, hashedPassword]);
+        const createdUser = insertRes[0];
+        await this.dataSource.query(`
+      INSERT INTO agrilens.user_roles (user_id, role_id)
+      VALUES ($1, $2);
+    `, [createdUser.id, roleId]);
+        await this.dataSource.query(`
+      INSERT INTO agrilens.user_locations (user_id, admin_unit_id, scope_level, district_name, sector_name)
+      VALUES ($1, $2, 'DISTRICT', $3, NULL);
+    `, [createdUser.id, adminUnitId, resolvedDistrict]);
+        await this.logAuditEvent({
+            actorEmail: body.registeredByEmail || 'admin@agrilens.gov.rw',
+            actorRole: 'PLATFORM_ADMIN',
+            action: 'DISTRICT_OFFICER_REGISTERED',
+            resource: `USER:${createdUser.id}`,
+            details: {
+                officerName: createdUser.full_name,
+                officerEmail: createdUser.email,
+                assignedDistrict: resolvedDistrict,
+                role: 'DISTRICT_OFFICER',
+                notes: body.notes || 'Agricultural District Officer registered by System Administrator'
+            }
+        });
+        return {
+            success: true,
+            message: `Agricultural District Officer for ${resolvedDistrict} registered successfully.`,
+            user: {
+                id: createdUser.id,
+                name: createdUser.full_name,
+                email: createdUser.email,
+                phone: createdUser.phone,
+                role: 'DISTRICT_OFFICER',
+                roleName: roleName,
+                scopeLevel: 'DISTRICT',
+                district: resolvedDistrict,
+                status: createdUser.status,
+                createdAt: createdUser.created_at
+            }
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
