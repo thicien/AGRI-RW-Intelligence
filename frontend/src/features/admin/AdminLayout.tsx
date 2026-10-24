@@ -158,7 +158,6 @@ export default function AdminLayout() {
           })}
         </div>
 
-        {/* Footer / User Profile & Logout */}
         <div className="p-3 border-t border-white/10 relative z-10 bg-[#063124]/90 backdrop-blur-md">
           <div className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-2 min-w-0">
