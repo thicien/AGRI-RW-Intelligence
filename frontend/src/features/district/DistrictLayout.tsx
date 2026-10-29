@@ -97,7 +97,7 @@ export default function DistrictLayout() {
 
         {/* District Office Header */}
         <div className="h-20 flex items-center px-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
-          <img src="/logo.png" alt="AgriLens Logo" className="w-9 h-9 mr-3 object-contain flex-shrink-0 drop-shadow" />
+          <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-9 h-9 mr-3 object-contain flex-shrink-0 drop-shadow" />
           <div>
             <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
               AgriLens <span className="font-light text-emerald-300">Rwanda</span>

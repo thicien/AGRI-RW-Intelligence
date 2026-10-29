@@ -121,7 +121,7 @@ export default function LoginPage() {
           
           {/* Logo with Forest Green Accents */}
           <div className="flex items-center gap-2 mb-8">
-            <img src="/logo.png" alt="AgriLens Logo" className="w-10 h-10 object-contain shadow-sm" />
+            <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-10 h-10 object-contain shadow-sm" />
             <div>
               <div className="font-extrabold text-2xl tracking-tight text-[#14532d] leading-none">
                 AgriLens <span className="font-light text-emerald-600">RWANDA</span>

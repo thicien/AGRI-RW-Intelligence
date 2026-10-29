@@ -23,7 +23,7 @@ export default function LandingPage() {
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm border-b border-emerald-100 py-3' : 'bg-transparent py-5'}`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="AgriLens Logo" className="w-8 h-8 object-contain" />
+            <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-8 h-8 object-contain" />
             <div className="font-extrabold text-xl tracking-tight text-[#14532d]">
               AgriLens <span className="font-light text-emerald-600">RWANDA</span>
             </div>
@@ -232,7 +232,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
             <div className="md:col-span-1">
               <div className="font-bold text-xl tracking-tight text-white mb-4 flex items-center gap-2">
-                <img src="/logo.png" alt="AgriLens Logo" className="w-5 h-5 object-contain" /> AgriLens <span className="font-light text-emerald-400">Rwanda</span>
+                <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-5 h-5 object-contain" /> AgriLens <span className="font-light text-emerald-400">Rwanda</span>
               </div>
               <p className="text-sm text-emerald-100/70 leading-relaxed">Data-driven agricultural intelligence for better decisions.</p>
             </div>
