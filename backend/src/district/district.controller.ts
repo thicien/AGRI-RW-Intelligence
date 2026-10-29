@@ -70,10 +70,19 @@ export class DistrictController {
   async getProductivity(
     @Query('district') district?: string,
     @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('compareMode') compareMode?: string,
+    @Query('stabilityThreshold') stabilityThreshold?: string,
     @Headers('authorization') auth?: string,
   ) {
     const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-    return await this.districtService.getDistrictProductivity(verifiedDistrict, season || '2026B');
+    return await this.districtService.getDistrictProductivity(
+      verifiedDistrict, 
+      season || '2026B',
+      compareSeason,
+      compareMode,
+      stabilityThreshold ? parseFloat(stabilityThreshold) : 5.0
+    );
   }
 
   /**
@@ -83,10 +92,17 @@ export class DistrictController {
   async getIrrigation(
     @Query('district') district?: string,
     @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('compareMode') compareMode?: string,
     @Headers('authorization') auth?: string,
   ) {
     const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-    return await this.districtService.getDistrictIrrigation(verifiedDistrict, season || '2026B');
+    return await this.districtService.getDistrictIrrigation(
+      verifiedDistrict, 
+      season || '2026B',
+      compareSeason,
+      compareMode
+    );
   }
 
   /**
@@ -96,10 +112,17 @@ export class DistrictController {
   async getSoil(
     @Query('district') district?: string,
     @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('compareMode') compareMode?: string,
     @Headers('authorization') auth?: string,
   ) {
     const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-    return await this.districtService.getDistrictSoil(verifiedDistrict, season || '2026B');
+    return await this.districtService.getDistrictSoil(
+      verifiedDistrict, 
+      season || '2026B',
+      compareSeason,
+      compareMode
+    );
   }
 
   /**

@@ -53,17 +53,17 @@ let DistrictController = class DistrictController {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
         return await this.districtService.getDistrictOverview(verifiedDistrict, season || '2026B', year);
     }
-    async getProductivity(district, season, auth) {
+    async getProductivity(district, season, compareSeason, compareMode, stabilityThreshold, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-        return await this.districtService.getDistrictProductivity(verifiedDistrict, season || '2026B');
+        return await this.districtService.getDistrictProductivity(verifiedDistrict, season || '2026B', compareSeason, compareMode, stabilityThreshold ? parseFloat(stabilityThreshold) : 5.0);
     }
-    async getIrrigation(district, season, auth) {
+    async getIrrigation(district, season, compareSeason, compareMode, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-        return await this.districtService.getDistrictIrrigation(verifiedDistrict, season || '2026B');
+        return await this.districtService.getDistrictIrrigation(verifiedDistrict, season || '2026B', compareSeason, compareMode);
     }
-    async getSoil(district, season, auth) {
+    async getSoil(district, season, compareSeason, compareMode, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-        return await this.districtService.getDistrictSoil(verifiedDistrict, season || '2026B');
+        return await this.districtService.getDistrictSoil(verifiedDistrict, season || '2026B', compareSeason, compareMode);
     }
     async getPostHarvest(district, season, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
@@ -147,27 +147,34 @@ __decorate([
     (0, common_1.Get)('productivity'),
     __param(0, (0, common_1.Query)('district')),
     __param(1, (0, common_1.Query)('season')),
-    __param(2, (0, common_1.Headers)('authorization')),
+    __param(2, (0, common_1.Query)('compareSeason')),
+    __param(3, (0, common_1.Query)('compareMode')),
+    __param(4, (0, common_1.Query)('stabilityThreshold')),
+    __param(5, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistrictController.prototype, "getProductivity", null);
 __decorate([
     (0, common_1.Get)('irrigation'),
     __param(0, (0, common_1.Query)('district')),
     __param(1, (0, common_1.Query)('season')),
-    __param(2, (0, common_1.Headers)('authorization')),
+    __param(2, (0, common_1.Query)('compareSeason')),
+    __param(3, (0, common_1.Query)('compareMode')),
+    __param(4, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistrictController.prototype, "getIrrigation", null);
 __decorate([
     (0, common_1.Get)('soil'),
     __param(0, (0, common_1.Query)('district')),
     __param(1, (0, common_1.Query)('season')),
-    __param(2, (0, common_1.Headers)('authorization')),
+    __param(2, (0, common_1.Query)('compareSeason')),
+    __param(3, (0, common_1.Query)('compareMode')),
+    __param(4, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistrictController.prototype, "getSoil", null);
 __decorate([
