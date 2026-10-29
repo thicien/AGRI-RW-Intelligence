@@ -65,13 +65,13 @@ let DistrictController = class DistrictController {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
         return await this.districtService.getDistrictSoil(verifiedDistrict, season || '2026B', compareSeason, compareMode);
     }
-    async getPostHarvest(district, season, auth) {
+    async getPostHarvest(district, season, compareSeason, compareMode, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-        return await this.districtService.getDistrictPostHarvest(verifiedDistrict, season || '2026B');
+        return await this.districtService.getDistrictPostHarvest(verifiedDistrict, season || '2026B', compareSeason, compareMode);
     }
-    async getExports(district, season, auth) {
+    async getExports(district, season, compareSeason, compareMode, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-        return await this.districtService.getDistrictExports(verifiedDistrict, season || '2026B');
+        return await this.districtService.getDistrictExports(verifiedDistrict, season || '2026B', compareSeason, compareMode);
     }
     async getInterventions(district, status, auth) {
         const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
@@ -181,18 +181,22 @@ __decorate([
     (0, common_1.Get)('post-harvest'),
     __param(0, (0, common_1.Query)('district')),
     __param(1, (0, common_1.Query)('season')),
-    __param(2, (0, common_1.Headers)('authorization')),
+    __param(2, (0, common_1.Query)('compareSeason')),
+    __param(3, (0, common_1.Query)('compareMode')),
+    __param(4, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistrictController.prototype, "getPostHarvest", null);
 __decorate([
     (0, common_1.Get)('exports'),
     __param(0, (0, common_1.Query)('district')),
     __param(1, (0, common_1.Query)('season')),
-    __param(2, (0, common_1.Headers)('authorization')),
+    __param(2, (0, common_1.Query)('compareSeason')),
+    __param(3, (0, common_1.Query)('compareMode')),
+    __param(4, (0, common_1.Headers)('authorization')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistrictController.prototype, "getExports", null);
 __decorate([

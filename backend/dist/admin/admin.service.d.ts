@@ -137,7 +137,7 @@ export declare class AdminService {
         success: boolean;
         message: string;
         userId: string;
-        newStatus: "ACTIVE" | "SUSPENDED" | "INACTIVE";
+        newStatus: "ACTIVE" | "INACTIVE" | "SUSPENDED";
     }>;
     resetUserPassword(userId: string, newPassword: string, actorEmail?: string): Promise<{
         success: boolean;

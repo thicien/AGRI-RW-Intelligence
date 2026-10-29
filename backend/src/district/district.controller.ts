@@ -132,10 +132,17 @@ export class DistrictController {
   async getPostHarvest(
     @Query('district') district?: string,
     @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('compareMode') compareMode?: string,
     @Headers('authorization') auth?: string,
   ) {
     const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-    return await this.districtService.getDistrictPostHarvest(verifiedDistrict, season || '2026B');
+    return await this.districtService.getDistrictPostHarvest(
+      verifiedDistrict, 
+      season || '2026B',
+      compareSeason,
+      compareMode
+    );
   }
 
   /**
@@ -145,10 +152,17 @@ export class DistrictController {
   async getExports(
     @Query('district') district?: string,
     @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('compareMode') compareMode?: string,
     @Headers('authorization') auth?: string,
   ) {
     const verifiedDistrict = this.resolveAuthorizedDistrict(auth, district);
-    return await this.districtService.getDistrictExports(verifiedDistrict, season || '2026B');
+    return await this.districtService.getDistrictExports(
+      verifiedDistrict, 
+      season || '2026B',
+      compareSeason,
+      compareMode
+    );
   }
 
   /**

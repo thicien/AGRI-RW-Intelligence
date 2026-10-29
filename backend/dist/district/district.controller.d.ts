@@ -308,23 +308,210 @@ export declare class DistrictController {
             lastObservationDate: string;
         };
     }>;
-    getPostHarvest(district?: string, season?: string, auth?: string): Promise<{
-        districtName: any;
-        facilitiesList: any;
-        lossRatePct: number;
-        storageDeficitTonnes: number;
-        priorityNeeds: string[];
-    }>;
-    getExports(district?: string, season?: string, auth?: string): Promise<{
-        districtName: any;
-        exportCommodities: {
-            product: string;
-            currentProductionMt: number;
-            exportReadinessScore: number;
-            primaryDestinations: string;
-            complianceRequirements: string;
+    getPostHarvest(district?: string, season?: string, compareSeason?: string, compareMode?: string, auth?: string): Promise<{
+        district: {
+            id: any;
+            name: any;
+            code: any;
+            province: any;
+        };
+        season: {
+            active: any;
+            comparison: string | undefined;
+            active_label: any;
+            comparison_label: any;
+        };
+        availableSeasons: any[];
+        summaryKPIs: {
+            documentedFacilitiesCount: any;
+            operationalFacilitiesCount: any;
+            partialFacilitiesCount: any;
+            nonOperationalFacilitiesCount: any;
+            installedStorageCapacityTonnes: any;
+            usableStorageCapacityTonnes: any;
+            occupiedStorageCapacityTonnes: any;
+            storageUtilizationPct: number;
+            totalProductionTonnes: number;
+            productionRequiringHandlingTonnes: number;
+            marketSurplusVolumeTonnes: number;
+            estimatedStorageDemandTonnes: number;
+            potentialStorageGapTonnes: number;
+            lossRatePct: number;
+            documentedLossTonnes: number;
+            coldStorageCapacityTonnes: any;
+            dryingCapacityTonnesDay: any;
+            processingCapacityTonnesDay: any;
+            areasForAssessmentCount: number;
+            avgDistanceToFacilityKm: number;
+            avgDistanceToRoadKm: number;
+        };
+        facilitiesInventory: any;
+        capacityAndDemand: {
+            installedStorageCapacityTonnes: any;
+            usableStorageCapacityTonnes: any;
+            occupiedStorageCapacityTonnes: any;
+            estimatedDemandTonnes: number;
+            potentialCapacityGapTonnes: number;
+            formula: string;
+            cropComparisons: {
+                crop_name: string;
+                production_mt: number;
+                pct_sold: number;
+                pct_stored: number;
+                pct_consumed: number;
+                pct_lost: number;
+                handled_volume_mt: number;
+                estimated_demand_mt: number;
+                compatible_usable_capacity_mt: any;
+                potential_capacity_gap_mt: number;
+                shelf_life_category: string;
+                gap_status: string;
+                handling_notes: string;
+            }[];
+            facilityTypeBreakdown: {
+                type: string;
+                count: any;
+                capacity_tonnes: any;
+            }[];
+            demandMethodologyNotes: string;
+        };
+        postHarvestLosses: {
+            overallLossRatePct: number;
+            totalQuantityLostTonnes: number;
+            stages: {
+                stage_name: string;
+                stage_order: number;
+                loss_rate_pct: number;
+                quantity_lost_mt: number;
+                denominator_definition: string;
+                evidence_type: string;
+                primary_vulnerable_crops: string[];
+                documented_causes: string;
+                recommended_intervention: string;
+            }[];
+            lossFormula: string;
+            scientificSafeguards: {
+                measuredVsEstimatedRule: string;
+                denominatorClarity: string;
+            };
+        };
+        temporalComparison: {
+            indicator: string;
+            unit: string;
+            current_value: any;
+            compare_value: any;
+            abs_change: number;
+            pct_change: string;
+            comparability_status: string;
+            notes: string;
         }[];
-        keyRecommendation: string;
+        accessAndSpatialGaps: {
+            sectors: any;
+            summary: {
+                criticalDeficitSectorsCount: any;
+                moderateDeficitSectorsCount: any;
+                adequateSectorsCount: any;
+                sectorsWithUnknownStatusFacsCount: any;
+                highColdChainDeficitSectorsCount: any;
+            };
+        };
+        priorityInvestmentAreas: {
+            rank: number;
+            site_name: string;
+            sector_name: any;
+            priority_tier: string;
+            focus_crops: any;
+            production_volume_mt: any;
+            market_surplus_mt: any;
+            nearby_facilities_summary: string;
+            available_usable_capacity_mt: any;
+            evidence_of_loss: string;
+            estimated_gap_mt: any;
+            calculation_method: string;
+            missing_data_uncertainty: string;
+            suggested_next_step: string;
+            estimated_budget_rwf: number;
+            target_beneficiaries_households: number;
+        }[];
+        interventionsMonitoring: any;
+        dataCoverageAndQuality: {
+            primarySources: string[];
+            capacityUnitDefinitions: {
+                installedCapacity: string;
+                usableCapacity: string;
+                occupiedCapacity: string;
+                throughput: string;
+                estimatedDemand: string;
+            };
+            safeguards: string[];
+        };
+    }>;
+    getExports(district?: string, season?: string, compareSeason?: string, compareMode?: string, auth?: string): Promise<{
+        district: {
+            id: any;
+            name: any;
+            code: any;
+            province: any;
+        };
+        season: {
+            active: string;
+            comparison: string | null;
+            active_label: any;
+            comparison_label: any;
+        };
+        availableSeasons: any[];
+        summaryKPIs: {
+            totalCropProductionTonnes: any;
+            potentialMarketableSurplusTonnes: any;
+            estimatedExportableVolumeTonnes: any;
+            exportLinkedCropsCount: any;
+            totalRecordedCropsCount: any;
+            areasForExportAssessmentCount: any;
+            exportReadinessScore: number;
+            exportTier: any;
+            nearestExitHub: any;
+            distanceToExitKm: number;
+            exportReadyCooperativesCount: number;
+            qualityCertificationPct: number;
+        };
+        cropExportPortfolio: any;
+        temporalComparison: any;
+        marketableSurplusModel: {
+            formula: string;
+            surplusSummary: {
+                totalProductionMT: any;
+                totalMarketableSurplusMT: any;
+                totalExportableSurplusMT: any;
+                avgSurplusRatioPct: number;
+            };
+            methodologyNotes: string;
+        };
+        marketAndTradeIntelligence: {
+            targetMarkets: {
+                region: string;
+                keyProducts: string;
+                marketEntryRequirements: string;
+                pricingEnvironment: string;
+            }[];
+        };
+        opportunityRanking: any;
+        exportReadinessAndConstraints: {
+            crossModuleConstraints: {
+                domain: string;
+                description: string;
+            }[];
+        };
+        recommendationsAndMonitoring: {
+            districtActionRoadmap: {
+                phase: string;
+                action: string;
+            }[];
+            activeInterventions: any;
+        };
+        dataCoverageAndQuality: {
+            primarySources: string[];
+            safeguardPrinciples: string[];
+        };
     }>;
     getInterventions(district?: string, status?: string, auth?: string): Promise<any>;
     updateInterventionStatus(id: string, body: {

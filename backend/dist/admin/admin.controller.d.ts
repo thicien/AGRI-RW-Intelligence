@@ -134,7 +134,7 @@ export declare class AdminController {
         success: boolean;
         message: string;
         userId: string;
-        newStatus: "ACTIVE" | "SUSPENDED" | "INACTIVE";
+        newStatus: "ACTIVE" | "INACTIVE" | "SUSPENDED";
     }>;
     resetUserPassword(userId: string, newPassword: string, auth?: string): Promise<{
         success: boolean;
