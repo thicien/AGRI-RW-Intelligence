@@ -4,6 +4,7 @@ import {
   ArrowRight, Activity, Database, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import RwandaSignatureMapBanner from './components/RwandaSignatureMapBanner';
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
@@ -30,17 +31,20 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-700">
+            <Link to="/public-portal" className="text-emerald-800 font-bold hover:text-emerald-950 transition-colors flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" /> Public Portal
+            </Link>
+            <a href="#portal-sections" className="hover:text-emerald-700 transition-colors">5 Intelligence Sections</a>
             <a href="#platform" className="hover:text-emerald-700 transition-colors">Platform</a>
-            <a href="#intelligence" className="hover:text-emerald-700 transition-colors">Intelligence</a>
             <a href="#how-it-works" className="hover:text-emerald-700 transition-colors">How It Works</a>
           </div>
 
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-semibold text-slate-700 hover:text-emerald-800 transition-colors hidden sm:block">
-              Sign In
+              Staff Sign In
             </Link>
-            <Link to="/admin/dashboard" className="bg-[#14532d] hover:bg-[#166534] text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-sm shadow-emerald-950/20 cursor-pointer">
-              Access Platform
+            <Link to="/public-portal" className="bg-[#14532d] hover:bg-[#166534] text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-sm shadow-emerald-950/20 cursor-pointer flex items-center gap-1.5">
+              Access the Platform
             </Link>
           </div>
         </div>
@@ -64,11 +68,11 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-wrap items-center gap-4 mb-10">
-              <Link to="/admin/map" className="bg-[#14532d] hover:bg-[#166534] text-white px-6 py-3 rounded-lg font-bold flex items-center transition-all shadow-md shadow-emerald-950/20 group cursor-pointer">
-                Explore Intelligence <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              <Link to="/public-portal" className="bg-[#14532d] hover:bg-[#166534] text-white px-7 py-3.5 rounded-xl font-bold flex items-center transition-all shadow-md shadow-emerald-950/20 group cursor-pointer text-sm">
+                Access the Platform <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link to="/login" className="bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-950 px-6 py-3 rounded-lg font-bold transition-colors shadow-xs cursor-pointer">
-                Sign In
+              <Link to="/login" className="bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-950 px-6 py-3.5 rounded-xl font-bold transition-colors shadow-xs cursor-pointer text-sm">
+                Staff Sign In
               </Link>
             </div>
             
@@ -117,6 +121,148 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Public Agricultural Intelligence Portal Feature Showcase (Open Access) */}
+      <section id="portal-sections" className="py-20 bg-gradient-to-b from-white via-emerald-50/30 to-white border-b border-emerald-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 border border-emerald-600/30 bg-emerald-100 text-emerald-900 text-[11px] font-extrabold tracking-widest uppercase rounded-full">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                Featured Platform Capability
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Public Agricultural <span className="text-[#15803d]">Intelligence Portal</span>
+              </h2>
+              <p className="text-slate-600 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+                Reliable, read-only agricultural intelligence making Rwanda's agricultural performance accessible to researchers, students, development organizations, investors, and members of the public without an account.
+              </p>
+            </div>
+
+            <Link
+              to="/public-portal"
+              className="bg-[#14532d] hover:bg-[#166534] text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-emerald-950/15 cursor-pointer shrink-0 self-start md:self-auto"
+            >
+              Access the Platform <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* 5 Agricultural Sections Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+            <Link 
+              to="/public-portal?section=productivity" 
+              className="p-5 rounded-2xl bg-white border border-emerald-100 hover:border-emerald-400 hover:shadow-lg transition-all group flex flex-col justify-between"
+            >
+              <div>
+                <div className="text-xs font-black text-emerald-700 uppercase tracking-wider mb-2">01</div>
+                <h3 className="font-extrabold text-slate-900 text-base mb-2 group-hover:text-emerald-700 transition-colors">
+                  Productivity Intelligence
+                </h3>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Understand what Rwanda produces, which crops are grown, and how yields change across seasons and districts.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-emerald-800 flex items-center gap-1">
+                Explore Productivity →
+              </div>
+            </Link>
+
+            <Link 
+              to="/public-portal?section=irrigation" 
+              className="p-5 rounded-2xl bg-white border border-cyan-100 hover:border-cyan-400 hover:shadow-lg transition-all group flex flex-col justify-between"
+            >
+              <div>
+                <div className="text-xs font-black text-cyan-700 uppercase tracking-wider mb-2">02</div>
+                <h3 className="font-extrabold text-slate-900 text-base mb-2 group-hover:text-cyan-700 transition-colors">
+                  Irrigation Intelligence
+                </h3>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Explore documented schemes, modern irrigation coverage, and multi-criteria small-scale opportunity screening.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-cyan-800 flex items-center gap-1">
+                Explore Irrigation →
+              </div>
+            </Link>
+
+            <Link 
+              to="/public-portal?section=soil" 
+              className="p-5 rounded-2xl bg-white border border-emerald-100 hover:border-emerald-400 hover:shadow-lg transition-all group flex flex-col justify-between"
+            >
+              <div>
+                <div className="text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">03</div>
+                <h3 className="font-extrabold text-slate-900 text-base mb-2 group-hover:text-emerald-700 transition-colors">
+                  Soil Conservation & Fertility
+                </h3>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Examine documented radical terracing, agroforestry, fertilizer adoption, soil acidity (pH), and erosion risks.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-emerald-800 flex items-center gap-1">
+                Explore Soil Health →
+              </div>
+            </Link>
+
+            <Link 
+              to="/public-portal?section=post-harvest" 
+              className="p-5 rounded-2xl bg-white border border-purple-100 hover:border-purple-400 hover:shadow-lg transition-all group flex flex-col justify-between"
+            >
+              <div>
+                <div className="text-xs font-black text-purple-700 uppercase tracking-wider mb-2">04</div>
+                <h3 className="font-extrabold text-slate-900 text-base mb-2 group-hover:text-purple-700 transition-colors">
+                  Post-Harvest & Storage
+                </h3>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Investigate registered warehouses, cold storage, usable capacity, and market surplus capacity deficits.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-purple-800 flex items-center gap-1">
+                Explore Post-Harvest →
+              </div>
+            </Link>
+
+            <Link 
+              to="/public-portal?section=export" 
+              className="p-5 rounded-2xl bg-white border border-amber-100 hover:border-amber-400 hover:shadow-lg transition-all group flex flex-col justify-between"
+            >
+              <div>
+                <div className="text-xs font-black text-amber-700 uppercase tracking-wider mb-2">05</div>
+                <h3 className="font-extrabold text-slate-900 text-base mb-2 group-hover:text-amber-700 transition-colors">
+                  Export Market Opportunities
+                </h3>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Analyze high-value export commodities (avocado, coffee, tea, chillies), FOB pricing, and destination routes.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-amber-800 flex items-center gap-1">
+                Explore Exports →
+              </div>
+            </Link>
+          </div>
+
+          {/* Banner: How Public Access Works */}
+          <div className="p-6 rounded-2xl bg-emerald-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1">
+              <div className="text-xs font-extrabold text-emerald-300 uppercase tracking-wider">
+                Step 1: Access the Platform · Step 2: Explore the 5 Sections · Step 3: Shared Filters · Step 4: Compare Results
+              </div>
+              <div className="text-lg font-black tracking-tight">
+                Open Agricultural Evidence For Everyone
+              </div>
+              <p className="text-xs text-emerald-100/80 max-w-xl">
+                Distinguishes recorded NISR survey statistics from modelled decision assessments. No account required for public exploration.
+              </p>
+            </div>
+
+            <Link
+              to="/public-portal"
+              className="bg-white text-emerald-950 hover:bg-emerald-100 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer"
+            >
+              Enter Public Portal
+            </Link>
           </div>
         </div>
       </section>
@@ -199,30 +345,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 11. Signature Message - Deep Forest Green Banner */}
-      <section className="py-32 bg-gradient-to-r from-[#072415] via-[#14532d] to-[#0b331f] text-white text-center border-y border-emerald-900/60 shadow-inner">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-8 drop-shadow-md">
-            Know where the problem is.<br/>
-            Understand why it matters.<br/>
-            Decide what to do next.
-          </h2>
-          <p className="text-xl text-emerald-100 max-w-2xl mx-auto font-medium leading-relaxed">
-            AgriLens turns agricultural information into evidence-based intelligence for better decisions.
-          </p>
-        </div>
-      </section>
+      {/* 11. Signature Message - Rwanda Map Intelligence Banner */}
+      <RwandaSignatureMapBanner />
 
       {/* 12. Final Call to Action */}
       <section className="py-24 bg-[#f4f8f5]">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-extrabold mb-6 text-slate-900">Better agricultural decisions start with better intelligence.</h2>
           <p className="text-lg text-slate-600 mb-10 leading-relaxed">
-            Explore agricultural patterns, priority areas and evidence-driven intelligence for Rwanda.
+            Explore agricultural patterns, priority areas and evidence-driven intelligence for Rwanda without creating an account.
           </p>
-          <Link to="/admin/map" className="inline-flex items-center bg-[#14532d] hover:bg-[#166534] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-xl shadow-emerald-950/25 group cursor-pointer">
-            Explore Intelligence <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to="/public-portal" className="inline-flex items-center bg-[#14532d] hover:bg-[#166534] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-xl shadow-emerald-950/25 group cursor-pointer text-sm">
+              Access the Platform <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link to="/login" className="inline-flex items-center bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-950 px-6 py-4 rounded-xl font-bold transition-all shadow-sm cursor-pointer text-sm">
+              Staff Sign In
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -240,9 +380,10 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-emerald-300">Platform</h4>
               <ul className="space-y-3 text-sm text-emerald-100/70">
+                <li><Link to="/public-portal" className="text-emerald-300 font-bold hover:text-white transition-colors">Public Intelligence Portal</Link></li>
                 <li><Link to="/admin/map" className="hover:text-emerald-300 transition-colors">Intelligence Map</Link></li>
                 <li><Link to="/admin/dashboard" className="hover:text-emerald-300 transition-colors">Dashboard</Link></li>
-                <li><Link to="/login" className="hover:text-emerald-300 transition-colors">Sign In</Link></li>
+                <li><Link to="/login" className="hover:text-emerald-300 transition-colors">Staff Sign In</Link></li>
               </ul>
             </div>
             

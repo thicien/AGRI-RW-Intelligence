@@ -56,11 +56,20 @@ import BackupRecoveryPage from '../features/admin/BackupRecoveryPage';
 import AdminNotificationsPage from '../features/admin/AdminNotificationsPage';
 import AdminReportsPage from '../features/admin/AdminReportsPage';
 import AdminProfilePage from '../features/admin/AdminProfilePage';
+import PublicPortalPage from '../features/public-portal/PublicPortalPage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <LandingPage />,
+  },
+  {
+    path: '/public-portal',
+    element: <PublicPortalPage />,
+  },
+  {
+    path: '/public-intelligence',
+    element: <Navigate to="/public-portal" replace />,
   },
   {
     path: '/login',
