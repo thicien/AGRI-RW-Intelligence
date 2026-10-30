@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Droplets, Waves, TrendingUp, AlertTriangle, CheckCircle2, ShieldAlert, 
   MapPin, RefreshCw, FileText, Layers, Thermometer, Filter, Download, 
@@ -30,8 +31,7 @@ export default function Irrigation() {
   useEffect(() => {
     const fetchSeasons = async () => {
       try {
-        const host = window.location.hostname;
-        const res = await fetch(`http://${host}:3000/api/v1/irrigation/seasons`);
+        const res = await fetch(apiUrl('irrigation/seasons'));
         if (res.ok) {
           const list = await res.json();
           if (Array.isArray(list) && list.length > 0) {
@@ -49,8 +49,7 @@ export default function Irrigation() {
   const fetchModuleData = async () => {
     setLoading(true);
     try {
-      const host = window.location.hostname;
-      const apiBase = `http://${host}:3000/api/v1/irrigation`;
+      const apiBase = apiUrl('irrigation');
 
       const [sumRes, distRes, screenRes, schemeRes, dosRes] = await Promise.all([
         fetch(`${apiBase}/summary?season=${selectedSeason}`).catch(() => null),

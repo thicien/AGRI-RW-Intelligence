@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, 
   CartesianGrid, Cell, AreaChart, Area, PieChart, Pie
 } from 'recharts';
+import API_BASE_URL, { apiUrl } from '../../config/api';
 
 const RWANDA_DISTRICTS = [
   'Bugesera', 'Burera', 'Gakenke', 'Gasabo', 'Gatsibo', 'Gicumbi', 'Gisagara',
@@ -74,8 +75,7 @@ export default function AgriculturalIntelligenceHubPage() {
   useEffect(() => {
     const fetchSeasons = async () => {
       try {
-        const host = window.location.hostname;
-        const res = await fetch(`http://${host}:3000/api/v1/irrigation/seasons`).catch(() => null);
+        const res = await fetch(apiUrl('irrigation/seasons')).catch(() => null);
         if (res && res.ok) {
           const seasons = await res.json();
           if (Array.isArray(seasons) && seasons.length > 0) {
@@ -92,8 +92,7 @@ export default function AgriculturalIntelligenceHubPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const host = window.location.hostname;
-      const apiBase = `http://${host}:3000/api/v1`;
+      const apiBase = API_BASE_URL;
 
       // 1. Irrigation
       const irrRes = await fetch(`${apiBase}/irrigation/potential?season=${selectedSeason}`).catch(() => null);
@@ -173,8 +172,7 @@ export default function AgriculturalIntelligenceHubPage() {
   useEffect(() => {
     const fetchCropComparison = async () => {
       try {
-        const host = window.location.hostname;
-        const apiBase = `http://${host}:3000/api/v1`;
+        const apiBase = API_BASE_URL;
         const res = await fetch(`${apiBase}/crop-statistics/district-comparison?crop=${encodeURIComponent(selectedCrop)}&season=${selectedSeason}`).catch(() => null);
         if (res && res.ok) {
           const json = await res.json();

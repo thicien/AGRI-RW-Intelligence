@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Calendar, Layers, MapPin, CheckCircle2, RefreshCw, 
   Search, ShieldCheck, ArrowRight, Download, Filter
@@ -18,7 +19,7 @@ export default function SeasonsCoveragePage() {
         const headers: any = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch('http://localhost:3000/api/v1/data-manager/seasons-coverage', { headers });
+        const res = await fetch(apiUrl('data-manager/seasons-coverage'), { headers });
         if (res.ok) {
           setCoverageData(await res.json());
         }

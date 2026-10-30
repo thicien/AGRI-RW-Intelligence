@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
   Mountain, Shield, ShieldAlert, AlertTriangle, CheckCircle2, RefreshCw, 
@@ -178,7 +179,7 @@ export default function DistrictSoilPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      let url = `http://localhost:3000/api/v1/district/soil?district=${encodeURIComponent(selectedDistrict)}&season=${encodeURIComponent(selectedSeason)}`;
+      let url = apiUrl(`district/soil?district=${encodeURIComponent(selectedDistrict)}&season=${encodeURIComponent(selectedSeason)}`);
       if (compareSeason) url += `&compareSeason=${encodeURIComponent(compareSeason)}`;
       if (compareMode) url += `&compareMode=${encodeURIComponent(compareMode)}`;
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Cog, Play, RefreshCw, CheckCircle2, AlertTriangle, 
   Clock, Layers, Check, Database, Sparkles, Filter 
@@ -17,7 +18,7 @@ export default function ProcessingJobsPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/processing-jobs', { headers });
+      const res = await fetch(apiUrl('data-manager/processing-jobs'), { headers });
       if (res.ok) {
         setJobs(await res.json());
       }
@@ -40,7 +41,7 @@ export default function ProcessingJobsPage() {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/processing-jobs/run', {
+      const res = await fetch(apiUrl('data-manager/processing-jobs/run'), {
         method: 'POST',
         headers,
         body: JSON.stringify({

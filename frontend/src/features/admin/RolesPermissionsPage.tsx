@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   ShieldAlert, ShieldCheck, Check, X, Shield, Lock, 
   MapPin, RefreshCw, Eye, AlertCircle, HelpCircle, FileText
@@ -31,7 +32,7 @@ export default function RolesPermissionsPage() {
   const fetchRolesData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/roles-permissions');
+      const res = await fetch(apiUrl('admin/roles-permissions'));
       if (res.ok) {
         const data = await res.json();
         setRoles(data.roles || []);

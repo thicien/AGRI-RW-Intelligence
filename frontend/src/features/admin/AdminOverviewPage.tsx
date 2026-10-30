@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { Link } from 'react-router-dom';
 import { 
   Users, UserCheck, Database, Activity, ShieldCheck, 
@@ -55,7 +56,7 @@ export default function AdminOverviewPage() {
   const fetchOverview = async (isManual = false) => {
     if (isManual) setRefreshing(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/overview');
+      const res = await fetch(apiUrl('admin/overview'));
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const json = await res.json();
       setData(json);

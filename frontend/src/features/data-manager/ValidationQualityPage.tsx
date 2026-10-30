@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   CheckCircle2, AlertTriangle, Filter, Search, RefreshCw, 
   Sparkles, Check, X, ShieldAlert, ArrowRight, Eye, ShieldCheck
@@ -24,7 +25,7 @@ export default function ValidationQualityPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/data-manager/validation-quality?status=${statusFilter}&severity=${severityFilter}`, { headers });
+      const res = await fetch(apiUrl(`data-manager/validation-quality?status=${statusFilter}&severity=${severityFilter}`), { headers });
       if (res.ok) {
         setIssuesData(await res.json());
       }
@@ -47,7 +48,7 @@ export default function ValidationQualityPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/validation-quality/run', {
+      const res = await fetch(apiUrl('data-manager/validation-quality/run'), {
         method: 'POST',
         headers
       });
@@ -72,7 +73,7 @@ export default function ValidationQualityPage() {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/data-manager/validation-quality/issues/${resolvingIssue.id}/resolve`, {
+      const res = await fetch(apiUrl(`data-manager/validation-quality/issues/${resolvingIssue.id}/resolve`), {
         method: 'PUT',
         headers,
         body: JSON.stringify({ notes: resolutionNotes })

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Database, UploadCloud, Search, Filter, CheckCircle2, 
   AlertTriangle, FileText, FileSpreadsheet, Check, X, 
@@ -35,7 +36,7 @@ export default function DatasetsManagementPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/data-manager/datasets?domain=${selectedDomain}&format=${selectedFormat}`, { headers });
+      const res = await fetch(apiUrl(`data-manager/datasets?domain=${selectedDomain}&format=${selectedFormat}`), { headers });
       if (res.ok) {
         setDatasets(await res.json());
       }
@@ -59,7 +60,7 @@ export default function DatasetsManagementPage() {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/datasets', {
+      const res = await fetch(apiUrl('data-manager/datasets'), {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -99,7 +100,7 @@ export default function DatasetsManagementPage() {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/data-manager/datasets/${publishTarget.id}/publish`, {
+      const res = await fetch(apiUrl(`data-manager/datasets/${publishTarget.id}/publish`), {
         method: 'POST',
         headers,
         body: JSON.stringify({ notes: publishNotes })

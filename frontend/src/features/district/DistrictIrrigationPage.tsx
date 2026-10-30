@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
   Droplets, TrendingUp, TrendingDown, Minus, Filter, RefreshCw, AlertTriangle, 
@@ -125,7 +126,7 @@ export default function DistrictIrrigationPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      let url = `http://localhost:3000/api/v1/district/irrigation?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`;
+      let url = apiUrl(`district/irrigation?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`);
       if (compareMode === 'custom' && customCompareSeason) {
         url += `&compareSeason=${customCompareSeason}`;
       }

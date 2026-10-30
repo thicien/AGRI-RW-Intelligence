@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   FileText, Shield, Search, Filter, RefreshCw, 
   Lock, CheckCircle2, AlertTriangle, Eye, Clock, User
@@ -26,7 +27,7 @@ export default function AuditLogsPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.append('action', search);
-      const res = await fetch(`http://localhost:3000/api/v1/admin/audit-logs?${params.toString()}`);
+      const res = await fetch(apiUrl(`admin/audit-logs?${params.toString()}`));
       if (res.ok) {
         const data = await res.json();
         setLogs(data);

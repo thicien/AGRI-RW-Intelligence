@@ -4,6 +4,7 @@ import {
   CheckCircle2, AlertCircle, Copy, ArrowRight, ExternalLink, RefreshCw, Sparkles 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../../config/api';
 
 const RWANDA_DISTRICTS = [
   'Bugesera', 'Burera', 'Gakenke', 'Gasabo', 'Gatsibo', 'Gicumbi', 'Gisagara', 
@@ -55,7 +56,7 @@ export default function RegisterDistrictOfficerForm({ onSuccess, existingUsers =
     setSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/register-district-officer', {
+      const res = await fetch(apiUrl('auth/register-district-officer'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -105,7 +106,7 @@ export default function RegisterDistrictOfficerForm({ onSuccess, existingUsers =
   const testLoginAsOfficer = async () => {
     if (!successData) return;
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+      const res = await fetch(apiUrl('auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

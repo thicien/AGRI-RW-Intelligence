@@ -1,3 +1,4 @@
+import API_BASE_URL from '../../config/api';
 import type { 
   SeasonInfo, 
   ProductivityOverview, 
@@ -9,8 +10,7 @@ import type {
 } from './types';
 
 function getApiBase(): string {
-  const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  return `http://${host}:3000/api/v1`;
+  return API_BASE_URL;
 }
 
 export const RWANDA_DISTRICTS: string[] = [

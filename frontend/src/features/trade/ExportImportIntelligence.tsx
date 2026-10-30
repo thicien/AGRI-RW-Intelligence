@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Globe, Plane, Ship, TrendingUp, TrendingDown, DollarSign, Scale, 
   ShieldAlert, Award, FileText, CheckCircle2, AlertTriangle, Filter, 
@@ -30,11 +31,7 @@ export default function ExportImportIntelligence() {
   const [screeningData, setScreeningData] = useState<any[]>([]);
   const [dossierData, setDossierData] = useState<any>(null);
 
-  // Host resolution
-  const getApiBase = () => {
-    const host = window.location.hostname || '127.0.0.1';
-    return `http://${host}:3000/api/v1/trade`;
-  };
+  const getApiBase = () => apiUrl('trade');
 
   // 1. Load Seasons Catalog Once on Mount
   useEffect(() => {

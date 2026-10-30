@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { apiUrl } from '../../config/api';
 
 // Rwanda 30 Districts Geo Definition for SVG Map
 interface DistrictGeo {
@@ -108,7 +109,7 @@ export default function AdminDashboardPage() {
         mode: analysisMode,
         mapLayer: mapLayer
       });
-      const res = await fetch(`http://localhost:3000/api/v1/dashboard/overview?${queryParams.toString()}`);
+      const res = await fetch(apiUrl(`dashboard/overview?${queryParams.toString()}`));
       if (res.ok) {
         const json = await res.json();
         setDashboardData(json);

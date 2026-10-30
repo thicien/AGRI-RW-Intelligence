@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   FileSpreadsheet, Download, RefreshCw, CheckCircle2, 
   Users, Activity, ShieldCheck, Database, Calendar
@@ -12,7 +13,7 @@ export default function AdminReportsPage() {
   const fetchReportData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/platform-reports');
+      const res = await fetch(apiUrl('admin/platform-reports'));
       if (res.ok) {
         const data = await res.json();
         setReportData(data);

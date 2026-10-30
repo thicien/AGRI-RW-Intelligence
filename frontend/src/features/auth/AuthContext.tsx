@@ -1,3 +1,4 @@
+import { apiUrl } from '../../config/api';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface UserPersona {
@@ -276,7 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     requestedDistrict?: string
   ): Promise<{ allowed: boolean; auditToken?: string; error?: string }> => {
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/export-check', {
+      const res = await fetch(apiUrl('auth/export-check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

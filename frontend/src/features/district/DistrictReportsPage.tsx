@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext } from 'react-router-dom';
 import { 
   FileText, Download, Printer, CheckCircle2, RefreshCw, 
@@ -20,7 +21,7 @@ export default function DistrictReportsPage() {
         const headers: any = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(`http://localhost:3000/api/v1/district/reports?district=${encodeURIComponent(districtName)}`, {
+        const res = await fetch(apiUrl(`district/reports?district=${encodeURIComponent(districtName)}`), {
           headers
         });
         if (res.ok) {

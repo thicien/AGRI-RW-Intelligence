@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
   Warehouse, Layers, Box, Building2, ThermometerSnowflake, Sun, Flame, 
@@ -228,7 +229,7 @@ export default function DistrictPostHarvestPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      let url = `http://localhost:3000/api/v1/district/post-harvest?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`;
+      let url = apiUrl(`district/post-harvest?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`);
       if (compareMode === 'custom' && customCompareSeason) {
         url += `&compareSeason=${encodeURIComponent(customCompareSeason)}`;
       }
@@ -396,7 +397,7 @@ export default function DistrictPostHarvestPage() {
         end_date: new Date(Date.now() + 180 * 24 * 3600 * 1000).toISOString().split('T')[0]
       };
 
-      const res = await fetch('http://localhost:3000/api/v1/district/interventions', {
+      const res = await fetch(apiUrl('district/interventions'), {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)

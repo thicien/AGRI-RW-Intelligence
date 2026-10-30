@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { MapPin, Globe, CheckCircle2, RefreshCw, Layers, ShieldCheck, Search } from 'lucide-react';
 
 export default function SpatialDataPage() {
@@ -10,7 +11,7 @@ export default function SpatialDataPage() {
     const fetchUnits = async () => {
       setLoading(true);
       try {
-        const res = await fetch('http://localhost:3000/api/v1/administrative-units');
+        const res = await fetch(apiUrl('administrative-units'));
         if (res.ok) {
           const json = await res.json();
           setUnits(Array.isArray(json) ? json : []);

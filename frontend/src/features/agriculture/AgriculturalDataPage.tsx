@@ -1,3 +1,4 @@
+import { apiUrl } from '../../config/api';
 import React, { useState, useEffect } from 'react';
 import { 
   Database, FileText, Search, Filter, Download, 
@@ -31,12 +32,12 @@ export default function AgriculturalDataPage() {
     const fetchRealData = async () => {
       try {
         const [kpiRes, obsRes, trendsRes, seasonsRes, geoRes, matrixRes] = await Promise.all([
-          fetch('http://localhost:3000/api/v1/agricultural-data/kpis'),
-          fetch('http://localhost:3000/api/v1/agricultural-data/observations'),
-          fetch('http://localhost:3000/api/v1/agricultural-data/trends'),
-          fetch('http://localhost:3000/api/v1/agricultural-data/season-comparison'),
-          fetch('http://localhost:3000/api/v1/agricultural-data/geography'),
-          fetch('http://localhost:3000/api/v1/agricultural-data/matrix')
+         fetch(apiUrl('agricultural-data/kpis')),
+         fetch(apiUrl('agricultural-data/observations')),
+         fetch(apiUrl('agricultural-data/trends')),
+         fetch(apiUrl('agricultural-data/season-comparison')),
+         fetch(apiUrl('agricultural-data/geography')),
+         fetch(apiUrl('agricultural-data/matrix'))
         ]);
         
         const kpiData = await kpiRes.json();

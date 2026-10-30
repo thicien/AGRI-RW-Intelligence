@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { Activity, ShieldCheck, RefreshCw, Search, CheckCircle2 } from 'lucide-react';
 
 export default function DataAuditActivityPage() {
@@ -12,7 +13,7 @@ export default function DataAuditActivityPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/audit-logs?limit=40', { headers });
+      const res = await fetch(apiUrl('data-manager/audit-logs?limit=40'), { headers });
       if (res.ok) {
         setLogs(await res.json());
       }

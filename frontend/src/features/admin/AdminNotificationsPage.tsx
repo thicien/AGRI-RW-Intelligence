@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Bell, CheckCircle2, AlertTriangle, Info, ShieldAlert, 
   Trash2, RefreshCw, Check, Clock
@@ -20,7 +21,7 @@ export default function AdminNotificationsPage() {
   const fetchNotifs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/notifications');
+      const res = await fetch(apiUrl('admin/notifications'));
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
   Sprout, Droplets, Mountain, Warehouse, Globe, 
@@ -38,7 +39,7 @@ export default function DistrictOverviewPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/district/overview?district=${encodeURIComponent(districtName)}&season=${seasonCode}`, {
+      const res = await fetch(apiUrl(`district/overview?district=${encodeURIComponent(districtName)}&season=${seasonCode}`), {
         headers
       });
 
@@ -69,7 +70,7 @@ export default function DistrictOverviewPage() {
     if (!updatingIntervention) return;
     setUpdating(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/district/interventions/${updatingIntervention.id}/status`, {
+      const res = await fetch(apiUrl(`district/interventions/${updatingIntervention.id}/status`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, notes: updateNotes })

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { Link } from 'react-router-dom';
 import { 
   Database, CheckCircle2, AlertTriangle, Cog, Layers, 
@@ -21,7 +22,7 @@ export default function DataManagerOverviewPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/overview', { headers });
+      const res = await fetch(apiUrl('data-manager/overview'), { headers });
       if (res.ok) {
         setOverview(await res.json());
       }
@@ -44,7 +45,7 @@ export default function DataManagerOverviewPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/data-manager/validation-quality/run', {
+      const res = await fetch(apiUrl('data-manager/validation-quality/run'), {
         method: 'POST',
         headers
       });

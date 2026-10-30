@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   ShieldAlert, Layers, Sprout, AlertTriangle, CheckCircle2, 
   MapPin, RefreshCw, FileText, Filter, Download, 
@@ -33,8 +34,7 @@ export default function SoilConservation() {
   useEffect(() => {
     const fetchSeasons = async () => {
       try {
-        const host = window.location.hostname;
-        const res = await fetch(`http://${host}:3000/api/v1/soil-fertility/seasons`);
+        const res = await fetch(apiUrl('soil-fertility/seasons'));
         if (res.ok) {
           const list = await res.json();
           if (Array.isArray(list) && list.length > 0) {
@@ -52,8 +52,7 @@ export default function SoilConservation() {
   const fetchModuleData = async () => {
     setLoading(true);
     try {
-      const host = window.location.hostname;
-      const apiBase = `http://${host}:3000/api/v1/soil-fertility`;
+      const apiBase = apiUrl('soil-fertility');
 
       const [sumRes, distRes, rankRes, projRes, dosRes, corrRes] = await Promise.all([
         fetch(`${apiBase}/summary?season=${selectedSeason}`).catch(() => null),

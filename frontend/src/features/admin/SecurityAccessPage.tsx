@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Lock, ShieldCheck, ShieldAlert, CheckCircle2, AlertTriangle, 
   Key, RefreshCw, UserX, Activity, ArrowRight
@@ -11,7 +12,7 @@ export default function SecurityAccessPage() {
   const fetchSecurity = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/security-metrics');
+      const res = await fetch(apiUrl('admin/security-metrics'));
       if (res.ok) {
         const data = await res.json();
         setSecurityData(data);

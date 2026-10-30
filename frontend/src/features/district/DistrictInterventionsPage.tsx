@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext } from 'react-router-dom';
 import { 
   CheckSquare, Plus, RefreshCw, Filter, CheckCircle2, AlertTriangle, 
@@ -35,7 +36,7 @@ export default function DistrictInterventionsPage() {
       const headers: any = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`http://localhost:3000/api/v1/district/interventions?district=${encodeURIComponent(districtName)}&status=${statusFilter}`, {
+      const res = await fetch(apiUrl(`district/interventions?district=${encodeURIComponent(districtName)}&status=${statusFilter}`), {
         headers
       });
       if (res.ok) {
@@ -57,7 +58,7 @@ export default function DistrictInterventionsPage() {
     if (!selectedIntervention) return;
     setUpdating(true);
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/district/interventions/${selectedIntervention.id}/status`, {
+      const res = await fetch(apiUrl(`district/interventions/${selectedIntervention.id}/status`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: targetStatus, notes: statusNotes })
@@ -82,7 +83,7 @@ export default function DistrictInterventionsPage() {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('http://localhost:3000/api/v1/district/field-observations', {
+      const res = await fetch(apiUrl('district/field-observations'), {
         method: 'POST',
         headers,
         body: JSON.stringify({

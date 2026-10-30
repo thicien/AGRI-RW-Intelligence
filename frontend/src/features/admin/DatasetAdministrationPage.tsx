@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Database, ShieldCheck, Lock, AlertTriangle, CheckCircle2, 
   FileText, RefreshCw, XCircle, ShieldAlert, BarChart3, Layers
@@ -24,7 +25,7 @@ export default function DatasetAdministrationPage() {
   const fetchDatasets = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/datasets');
+      const res = await fetch(apiUrl('admin/datasets'));
       if (res.ok) {
         const data = await res.json();
         setDatasets(data.datasets || []);
@@ -46,7 +47,7 @@ export default function DatasetAdministrationPage() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/agricultural-stats', {
+      const res = await fetch(apiUrl('admin/agricultural-stats'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ crop: 'Irish Potato', season: '2025A', yield: 45.0 })
@@ -69,7 +70,7 @@ export default function DatasetAdministrationPage() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/publish-dataset-direct', {
+      const res = await fetch(apiUrl('admin/publish-dataset-direct'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ datasetId: 'ds-test-01' })

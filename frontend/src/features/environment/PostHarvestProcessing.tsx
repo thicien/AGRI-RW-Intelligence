@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiUrl } from '../../config/api';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { 
@@ -43,11 +44,7 @@ export default function PostHarvestProcessing() {
   const [dossierData, setDossierData] = useState<any>(null);
   const [selectedFacility, setSelectedFacility] = useState<any>(null);
 
-  // Host resolution for API calls
-  const getApiBase = () => {
-    const host = window.location.hostname || '127.0.0.1';
-    return `http://${host}:3000/api/v1/post-harvest`;
-  };
+  const getApiBase = () => apiUrl('post-harvest');
 
   // 1. Load Seasons Catalog Once on Mount
   useEffect(() => {

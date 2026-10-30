@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext } from 'react-router-dom';
 import { Bell, CheckCircle2, Clock, ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -15,7 +16,7 @@ export default function DistrictNotificationsPage() {
         const headers: any = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(`http://localhost:3000/api/v1/district/notifications?district=${encodeURIComponent(districtName)}`, {
+        const res = await fetch(apiUrl(`district/notifications?district=${encodeURIComponent(districtName)}`), {
           headers
         });
         if (res.ok) {

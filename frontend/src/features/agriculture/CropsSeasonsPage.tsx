@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Leaf, TrendingUp, AlertTriangle, CheckCircle2, ShieldAlert, 
   ChevronRight, ArrowUpRight, ArrowDownRight, Filter, Download, 
@@ -35,8 +36,7 @@ export default function CropsSeasonsPage() {
   useEffect(() => {
     const fetchCatalogs = async () => {
       try {
-        const host = window.location.hostname;
-        const apiBase = `http://${host}:3000/api/v1/crop-statistics`;
+        const apiBase = apiUrl('crop-statistics');
 
         const [cropsRes, seasonsRes, dqRes] = await Promise.all([
           fetch(`${apiBase}/crops`).catch(() => null),
@@ -74,8 +74,7 @@ export default function CropsSeasonsPage() {
   const fetchModuleData = async () => {
     setLoading(true);
     try {
-      const host = window.location.hostname;
-      const apiBase = `http://${host}:3000/api/v1/crop-statistics`;
+      const apiBase = apiUrl('crop-statistics');
 
       // 1. Overview Summary
       const sumRes = await fetch(`${apiBase}/summary?season=${selectedSeason}`).catch(() => null);

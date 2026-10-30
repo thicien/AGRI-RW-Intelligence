@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   HardDrive, CheckCircle2, ShieldCheck, Download, 
   RefreshCw, Clock, AlertTriangle, ArrowRight, Server, FileText
@@ -11,7 +12,7 @@ export default function BackupRecoveryPage() {
   const fetchBackup = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/backup-status');
+      const res = await fetch(apiUrl('admin/backup-status'));
       if (res.ok) {
         const data = await res.json();
         setBackupData(data);

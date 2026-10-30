@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
   Globe, TrendingUp, TrendingDown, ShieldCheck, AlertTriangle, CheckCircle2, 
@@ -192,7 +193,7 @@ export default function DistrictExportsPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      let url = `http://localhost:3000/api/v1/district/exports?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`;
+      let url = apiUrl(`district/exports?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}`);
       if (compareMode === 'custom' && customCompareSeason) {
         url += `&compareSeason=${encodeURIComponent(customCompareSeason)}`;
       }
@@ -303,7 +304,7 @@ export default function DistrictExportsPage() {
         status: 'PROPOSED'
       };
 
-      const res = await fetch(`http://localhost:3000/api/v1/district/interventions`, {
+      const res = await fetch(apiUrl('district/interventions'), {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)

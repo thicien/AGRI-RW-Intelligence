@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Settings, ShieldCheck, Lock, AlertTriangle, CheckCircle2, 
   Save, RefreshCw, Key, Shield, Clock, Server
@@ -22,7 +23,7 @@ export default function SystemConfigurationPage() {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/configuration');
+      const res = await fetch(apiUrl('admin/configuration'));
       if (res.ok) {
         const data = await res.json();
         if (data.config) setConfig(data.config);
@@ -44,7 +45,7 @@ export default function SystemConfigurationPage() {
     setSaving(true);
     setFeedback(null);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/configuration', {
+      const res = await fetch(apiUrl('admin/configuration'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Activity, Server, Database, HardDrive, ShieldCheck, 
   RefreshCw, CheckCircle2, AlertTriangle, XCircle, Clock, 
@@ -81,7 +82,7 @@ export default function SystemHealthPage() {
   const fetchHealth = async (isManual = false) => {
     if (isManual) setRefreshing(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/health');
+      const res = await fetch(apiUrl('admin/health'));
       if (res.ok) {
         const data = await res.json();
         setHealth(data);

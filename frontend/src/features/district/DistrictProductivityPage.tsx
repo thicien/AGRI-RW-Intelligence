@@ -1,3 +1,4 @@
+import { apiUrl } from '../../config/api';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { 
@@ -123,7 +124,9 @@ export default function DistrictProductivityPage() {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      let url = `http://localhost:3000/api/v1/district/productivity?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}&stabilityThreshold=${stabilityThreshold}`;
+      let url = apiUrl(
+  `district/productivity?district=${encodeURIComponent(selectedDistrict)}&season=${activeSeason}&compareMode=${compareMode}&stabilityThreshold=${stabilityThreshold}`
+);
       if (compareMode === 'custom' && customCompareSeason) {
         url += `&compareSeason=${customCompareSeason}`;
       }

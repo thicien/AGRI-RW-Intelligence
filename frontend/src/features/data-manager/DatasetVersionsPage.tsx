@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   GitBranch, CheckCircle2, RefreshCw, FileText, 
   Search, ShieldCheck, Download, History 
@@ -16,7 +17,7 @@ export default function DatasetVersionsPage() {
         const headers: any = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch('http://localhost:3000/api/v1/data-manager/versions', { headers });
+        const res = await fetch(apiUrl('data-manager/versions'), { headers });
         if (res.ok) {
           setVersions(await res.json());
         }

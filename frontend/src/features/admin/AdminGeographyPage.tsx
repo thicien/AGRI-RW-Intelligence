@@ -1,3 +1,4 @@
+import { apiUrl } from '../../config/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -27,7 +28,7 @@ export default function AdminGeographyPage() {
   const fetchGeography = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/geography');
+      const res = await fetch(apiUrl('admin/geography'));
       if (res.ok) {
         const data = await res.json();
         setDistricts(data.districts || []);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Layers, Search, Filter, Sprout, Droplets, Mountain, 
   Warehouse, Globe, RefreshCw, CheckCircle2, Download 
@@ -28,15 +29,15 @@ export default function AgriculturalDataInspectorPage() {
 
       let url = '';
       if (selectedModule === 'PRODUCTIVITY') {
-        url = `http://localhost:3000/api/v1/district/productivity?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`;
+        url = apiUrl(`district/productivity?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`);
       } else if (selectedModule === 'IRRIGATION') {
-        url = `http://localhost:3000/api/v1/district/irrigation?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`;
+        url = apiUrl(`district/irrigation?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`);
       } else if (selectedModule === 'SOIL') {
-        url = `http://localhost:3000/api/v1/district/soil?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`;
+        url = apiUrl(`district/soil?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`);
       } else if (selectedModule === 'POST_HARVEST') {
-        url = `http://localhost:3000/api/v1/district/post-harvest?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`;
+        url = apiUrl(`district/post-harvest?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`);
       } else {
-        url = `http://localhost:3000/api/v1/district/exports?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`;
+        url = apiUrl(`district/exports?district=${encodeURIComponent(selectedDistrict)}&season=${selectedSeason}`);
       }
 
       const res = await fetch(url, { headers });

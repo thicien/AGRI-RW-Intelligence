@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   Users, UserPlus, Search, Filter, ShieldCheck, ShieldAlert, 
   MapPin, CheckCircle2, XCircle, AlertTriangle, Key, Edit3, 
@@ -72,7 +73,7 @@ export default function UserManagementPage() {
       if (roleFilter) params.append('role', roleFilter);
       if (statusFilter) params.append('status', statusFilter);
 
-      const res = await fetch(`http://localhost:3000/api/v1/admin/users?${params.toString()}`);
+      const res = await fetch(apiUrl(`admin/users?${params.toString()}`));
       if (!res.ok) throw new Error('Failed to fetch user directory');
       const data = await res.json();
       setUsers(data);
@@ -96,7 +97,7 @@ export default function UserManagementPage() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/users', {
+      const res = await fetch(apiUrl('admin/users'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -125,7 +126,7 @@ export default function UserManagementPage() {
   const handleToggleStatus = async (user: UserRecord) => {
     const nextStatus = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/admin/users/${user.id}/status`, {
+      const res = await fetch(apiUrl(`admin/users/${user.id}/status`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
@@ -145,7 +146,7 @@ export default function UserManagementPage() {
     e.preventDefault();
     if (!showResetModal) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/admin/users/${showResetModal.id}/reset-password`, {
+      const res = await fetch(apiUrl(`admin/users/${showResetModal.id}/reset-password`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword }),
@@ -166,7 +167,7 @@ export default function UserManagementPage() {
     e.preventDefault();
     if (!showRoleModal) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/admin/users/${showRoleModal.id}/role-scope`, {
+      const res = await fetch(apiUrl(`admin/users/${showRoleModal.id}/role-scope`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(roleUpdateData),

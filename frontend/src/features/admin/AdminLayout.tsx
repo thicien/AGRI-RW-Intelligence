@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShieldCheck, LayoutDashboard, Users, ShieldAlert, MapPin, 
@@ -47,7 +48,7 @@ export default function AdminLayout() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/v1/admin/health');
+        const res = await fetch(apiUrl('admin/health'));
         if (res.ok) {
           const data = await res.json();
           setSystemHealth({

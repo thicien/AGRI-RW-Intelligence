@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../config/api';
 import { 
   ShieldAlert, Shield, ShieldCheck, Key, Lock, Users, UserPlus,
   Database, MapPin, Search, Filter, Settings, CheckCircle2, 
@@ -46,10 +47,10 @@ export default function RolesPage() {
     setLoading(true);
     try {
       const [rRes, mRes, uRes, aRes] = await Promise.all([
-        fetch('http://localhost:3000/api/v1/auth/roles'),
-        fetch('http://localhost:3000/api/v1/auth/permissions-matrix'),
-        fetch('http://localhost:3000/api/v1/auth/users'),
-        fetch('http://localhost:3000/api/v1/auth/audit-logs?limit=25')
+        fetch(apiUrl('auth/roles')),
+        fetch(apiUrl('auth/permissions-matrix')),
+        fetch(apiUrl('auth/users')),
+        fetch(apiUrl('auth/audit-logs?limit=25'))
       ]);
 
       if (rRes.ok) setBackendRoles(await rRes.json());
@@ -89,7 +90,7 @@ export default function RolesPage() {
     setSimTesting(true);
     setSimResult(null);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/export-check', {
+      const res = await fetch(apiUrl('auth/export-check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,7 +107,7 @@ export default function RolesPage() {
         data
       });
       // Refresh audit logs
-      const aRes = await fetch('http://localhost:3000/api/v1/auth/audit-logs?limit=15');
+      const aRes = await fetch(apiUrl('auth/audit-logs?limit=15'));
       if (aRes.ok) setAuditLogs(await aRes.json());
     } catch (err: any) {
       setSimResult({ status: 500, data: { message: err.message } });
@@ -120,7 +121,7 @@ export default function RolesPage() {
     if (!editingUser) return;
     setSaveStatus('Saving changes...');
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/auth/users/${editingUser.id}`, {
+      const res = await fetch(apiUrl(`auth/users/${editingUser.id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

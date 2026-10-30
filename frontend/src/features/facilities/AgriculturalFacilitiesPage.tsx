@@ -6,6 +6,7 @@ import {
   Sparkles, RefreshCw, BarChart2, Eye, Compass, Info, ArrowUpRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { apiUrl } from '../../config/api';
 
 // Rwanda 30 Districts Geo Definition for SVG Map Background
 interface DistrictGeo {
@@ -142,7 +143,7 @@ export default function AgriculturalFacilitiesPage() {
       if (selectedDistrict !== 'All Districts') params.set('district', selectedDistrict);
       if (searchQuery.trim()) params.set('search', searchQuery.trim());
 
-      const res = await fetch(`http://localhost:3000/api/v1/infrastructure/facilities?${params.toString()}`);
+      const res = await fetch(apiUrl(`infrastructure/facilities?${params.toString()}`));
       if (res.ok) {
         const data = await res.json();
         setFacilities(data.facilities || []);
