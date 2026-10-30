@@ -244,8 +244,8 @@ export class AdminService {
       database: {
         status: latencyMs < 200 ? 'HEALTHY' : 'DEGRADED',
         latencyMs,
-        port: 5433,
-        databaseName: 'agrilens_db',
+        port: Number(process.env.DB_PORT || 5432),
+        databaseName: process.env.DB_NAME || 'postgres',
         size: dbMetrics[0]?.db_size || '38 MB',
         version: dbMetrics[0]?.pg_version?.split(' on ')[0] || 'PostgreSQL 16',
         connections: conns[0] || { total_connections: 7, active_connections: 1, idle_connections: 6 },
@@ -255,7 +255,7 @@ export class AdminService {
         status: 'HEALTHY',
         ...nodeTelemetry,
         environment: process.env.NODE_ENV || 'production',
-        apiPort: 3000,
+        apiPort: Number(process.env.PORT || 3000),
         apiPrefix: '/api/v1',
       },
       storage: {
