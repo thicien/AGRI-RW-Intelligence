@@ -1,1 +1,39 @@
-node_modules
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local database backups
+*.dump
+*.backup
+*.bak
+
+# Local database files
+*.sqlite
+*.db
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+# Database migration artifacts
+*_restore_list.txt

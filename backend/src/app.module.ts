@@ -39,16 +39,22 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5433', 10),
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'Mug2thi4',
-      database: process.env.DB_NAME || 'agrilens_db',
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
+  TypeOrmModule.forRoot({
+  type: 'postgres',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'postgres',
+  autoLoadEntities: true,
+  synchronize: false,
+  ssl: process.env.DB_SSL === 'true'
+    ? { rejectUnauthorized: false }
+    : false,
+
+  retryAttempts: 5,
+  retryDelay: 3000,
+}),
     AuthModule, UsersModule, AdministrativeUnitsModule, CropsModule, SeasonsModule, DatasetsModule, CropStatisticsModule, AgriculturalDataModule, EnvironmentalModule, IrrigationModule, SoilFertilityModule, PostHarvestModule, TradeModule, ClimateModule, SatelliteModule, InfrastructureModule, AnalyticsModule, GisModule, AiModelsModule, ModelRunsModule, PredictionsModule, PriorityZonesModule, EvidenceModule, RecommendationsModule, InterventionsModule, InterventionFeedbackModule, AlertsModule, ReportsModule, DashboardModule, ScenariosModule, IngestionModule, DistrictModule, DataManagerModule, AdminModule],
   controllers: [AppController],
   providers: [AppService],
