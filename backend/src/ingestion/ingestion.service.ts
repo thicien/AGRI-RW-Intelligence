@@ -50,14 +50,19 @@ export class IngestionService implements OnModuleInit {
   }
 
   /**
-   * Automatically runs ingestion when the module initializes (backend startup)
+   * Runs ingestion on startup only when explicitly enabled (preventing CPU locking on cloud deploy)
    */
   async onModuleInit() {
-    this.logger.log('Backend startup detected: Commencing background data ingestion...');
-    // We do not await this so it runs asynchronously without blocking application startup
-    this.runAgriculturalIngestion().catch(err => {
-      this.logger.error(`Automated ingestion failed: ${err.message}`);
-    });
+    if (process.env.RUN_INGESTION_ON_STARTUP === 'true') {
+      this.logger.log('Startup ingestion enabled via RUN_INGESTION_ON_STARTUP. Commencing in background...');
+      setImmediate(() => {
+        this.runAgriculturalIngestion().catch(err => {
+          this.logger.error(`Automated ingestion failed: ${err.message}`);
+        });
+      });
+    } else {
+      this.logger.log('Startup ingestion is disabled by default to maintain fast server readiness. Trigger on demand via POST /api/v1/ingestion/run or set RUN_INGESTION_ON_STARTUP=true.');
+    }
   }
 
   /**
