@@ -371,4 +371,400 @@ export class IrrigationService {
       safeguardNotice: 'CRITICAL SAFEGUARD: Model-generated opportunity scores highlight prospective sites for technical investigation. They do not constitute final engineering design approval. Mandatory water balance verification and environmental impact permits from REMA/RWB must be secured prior to capital commitment.',
     };
   }
+
+  /**
+   * 7. National Irrigation Planning & Opportunity Decision Workspace
+   */
+  async getDecisionWorkspace(
+    seasonCode: string = '2025A',
+    compareSeasonCode?: string,
+    province: string = 'ALL',
+    facilityType: string = 'ALL',
+  ) {
+    // 1. Available Seasons
+    const seasonsRes = await this.dataSource.query(`
+      SELECT DISTINCT s.season_code, s.year, s.name, s.official_label
+      FROM agrilens.seasons s
+      JOIN agrilens.irrigation_season_statistics iss ON iss.season_id = s.id
+      ORDER BY s.year DESC, s.season_code DESC;
+    `);
+
+    const validSeason = seasonsRes.some((s: any) => s.season_code === seasonCode)
+      ? seasonCode
+      : (seasonsRes[0]?.season_code || '2025A');
+
+    // 2. Comparable season
+    let validCompareSeason = compareSeasonCode;
+    if (!validCompareSeason) {
+      const match = validSeason.match(/^(\d{4})([A-Za-z])$/);
+      if (match) {
+        const yr = parseInt(match[1], 10) - 1;
+        const letter = match[2].toUpperCase();
+        const candidate = `${yr}${letter}`;
+        if (seasonsRes.some((s: any) => s.season_code === candidate)) {
+          validCompareSeason = candidate;
+        }
+      }
+      if (!validCompareSeason) {
+        const currIdx = seasonsRes.findIndex((s: any) => s.season_code === validSeason);
+        validCompareSeason = seasonsRes[currIdx + 1]?.season_code || seasonsRes[1]?.season_code || validSeason;
+      }
+    }
+
+    // 3. Facility Types catalog
+    const facilityTypesRes = await this.dataSource.query(`
+      SELECT DISTINCT irrigation_type, COUNT(*) as count
+      FROM agrilens.irrigation_assets
+      GROUP BY irrigation_type
+      ORDER BY count DESC, irrigation_type ASC;
+    `);
+
+    // 4. National summary current season
+    const currentSummaryRes = await this.dataSource.query(`
+      SELECT 
+        ROUND(COALESCE(SUM(iss.area_irrigated_ha), 0)::numeric, 1) AS total_irrigated_ha,
+        ROUND(COALESCE(SUM(iss.total_cultivated_ha), 0)::numeric, 1) AS total_cultivated_ha,
+        ROUND((COALESCE(SUM(iss.area_irrigated_ha), 0) / NULLIF(SUM(iss.total_cultivated_ha), 0) * 100)::numeric, 2) AS coverage_pct,
+        COUNT(DISTINCT iss.admin_unit_id) AS districts_reporting
+      FROM agrilens.irrigation_season_statistics iss
+      JOIN agrilens.seasons s ON s.id = iss.season_id
+      WHERE s.season_code = $1;
+    `, [validSeason]);
+    const currSummary = currentSummaryRes[0] || {};
+
+    // Compare season summary
+    const compareSummaryRes = await this.dataSource.query(`
+      SELECT 
+        ROUND(COALESCE(SUM(iss.area_irrigated_ha), 0)::numeric, 1) AS total_irrigated_ha,
+        ROUND(COALESCE(SUM(iss.total_cultivated_ha), 0)::numeric, 1) AS total_cultivated_ha,
+        ROUND((COALESCE(SUM(iss.area_irrigated_ha), 0) / NULLIF(SUM(iss.total_cultivated_ha), 0) * 100)::numeric, 2) AS coverage_pct
+      FROM agrilens.irrigation_season_statistics iss
+      JOIN agrilens.seasons s ON s.id = iss.season_id
+      WHERE s.season_code = $1;
+    `, [validCompareSeason]);
+    const prevSummary = compareSummaryRes[0] || {};
+
+    const currIrr = Number(currSummary.total_irrigated_ha || 0);
+    const prevIrr = Number(prevSummary.total_irrigated_ha || 0);
+    const currCult = Number(currSummary.total_cultivated_ha || 0);
+    const prevCult = Number(prevSummary.total_cultivated_ha || 0);
+    const currCov = Number(currSummary.coverage_pct || 0);
+    const prevCov = Number(prevSummary.coverage_pct || 0);
+
+    const irrChangePct = prevIrr > 0 ? Math.round(((currIrr - prevIrr) / prevIrr) * 1000) / 10 : null;
+    const cultChangePct = prevCult > 0 ? Math.round(((currCult - prevCult) / prevCult) * 1000) / 10 : null;
+    const covChangePct = prevCov > 0 ? Math.round(((currCov - prevCov) / prevCov) * 1000) / 10 : null;
+
+    // Infrastructure overall summary
+    const assetsSummaryRes = await this.dataSource.query(`
+      SELECT 
+        COUNT(DISTINCT ia.id) AS documented_facilities_count,
+        ROUND(COALESCE(SUM(ia.area_command_ha), 0)::numeric, 1) AS total_command_area_ha,
+        ROUND(COALESCE(SUM(ia.area_irrigable_ha), 0)::numeric, 1) AS total_irrigable_area_ha,
+        COALESCE(SUM(ia.beneficiaries_count), 0) AS total_beneficiaries
+      FROM agrilens.irrigation_assets ia;
+    `);
+    const assetsSummary = assetsSummaryRes[0] || {};
+
+    const nationalSummary = {
+      season: validSeason,
+      compareSeason: validCompareSeason,
+      total_irrigated_ha: currIrr,
+      prev_irrigated_ha: prevIrr > 0 ? prevIrr : null,
+      irrigated_change_pct: irrChangePct,
+      total_cultivated_ha: currCult,
+      prev_cultivated_ha: prevCult > 0 ? prevCult : null,
+      cultivated_change_pct: cultChangePct,
+      national_coverage_pct: currCov,
+      prev_coverage_pct: prevCov > 0 ? prevCov : null,
+      coverage_change_pct: covChangePct,
+      documented_facilities_count: Number(assetsSummary.documented_facilities_count || 0),
+      total_command_area_ha: Number(assetsSummary.total_command_area_ha || 0),
+      total_irrigable_area_ha: Number(assetsSummary.total_irrigable_area_ha || 0),
+      total_beneficiaries: Number(assetsSummary.total_beneficiaries || 0),
+      districts_reporting: Number(currSummary.districts_reporting || 0),
+      districts_expected: 30,
+      data_coverage_pct: Math.round(((Number(currSummary.districts_reporting || 0)) / 30) * 100),
+      calculation_rule_note: 'Irrigation coverage is calculated strictly as Irrigated Area ÷ Cultivated Area within the same seasonal agricultural cycle.',
+    };
+
+    // 5. District Level Statistics (30 Districts) with CTEs
+    const districtStatsQuery = `
+      WITH curr AS (
+        SELECT 
+          iss.admin_unit_id,
+          ROUND(COALESCE(iss.area_irrigated_ha, 0)::numeric, 1) AS area_irrigated_ha,
+          ROUND(COALESCE(iss.total_cultivated_ha, 0)::numeric, 1) AS cultivated_area_ha,
+          ROUND(COALESCE(iss.irrigation_access_pct, 0)::numeric, 2) AS coverage_pct,
+          ROUND(COALESCE(iss.water_deficit_mm, 0)::numeric, 0) AS water_deficit_mm,
+          ROUND(COALESCE(iss.drought_vulnerability_index, 0)::numeric, 2) AS drought_index,
+          ROUND(COALESCE(iss.terrain_slope_pct, 0)::numeric, 1) AS terrain_slope_pct,
+          ROUND(COALESCE(iss.water_source_distance_km, 0)::numeric, 1) AS water_source_distance_km,
+          ROUND(COALESCE(iss.road_distance_km, 0)::numeric, 1) AS road_distance_km,
+          ROUND(COALESCE(iss.opportunity_score, 0)::numeric, 1) AS opportunity_score,
+          iss.feasibility_tier,
+          iss.recommended_technology,
+          iss.irrigation_type_breakdown,
+          iss.soil_texture,
+          ROUND(COALESCE(iss.soil_ph, 0)::numeric, 1) AS soil_ph,
+          iss.feasibility_prerequisites,
+          COUNT(iss.id) AS current_records_count
+        FROM agrilens.irrigation_season_statistics iss
+        WHERE iss.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $1 LIMIT 1)
+        GROUP BY 
+          iss.admin_unit_id, iss.area_irrigated_ha, iss.total_cultivated_ha, iss.irrigation_access_pct,
+          iss.water_deficit_mm, iss.drought_vulnerability_index, iss.terrain_slope_pct,
+          iss.water_source_distance_km, iss.road_distance_km, iss.opportunity_score,
+          iss.feasibility_tier, iss.recommended_technology, iss.irrigation_type_breakdown,
+          iss.soil_texture, iss.soil_ph, iss.feasibility_prerequisites
+      ),
+      prev AS (
+        SELECT 
+          iss.admin_unit_id,
+          ROUND(COALESCE(iss.area_irrigated_ha, 0)::numeric, 1) AS prev_irrigated_ha,
+          ROUND(COALESCE(iss.irrigation_access_pct, 0)::numeric, 2) AS prev_coverage_pct
+        FROM agrilens.irrigation_season_statistics iss
+        WHERE iss.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $2 LIMIT 1)
+      ),
+      facilities AS (
+        SELECT 
+          ia.admin_unit_id,
+          COUNT(ia.id) AS facility_count,
+          ROUND(COALESCE(SUM(ia.area_command_ha), 0)::numeric, 1) AS documented_command_ha,
+          ROUND(COALESCE(SUM(ia.area_irrigable_ha), 0)::numeric, 1) AS documented_irrigable_ha,
+          COALESCE(SUM(ia.beneficiaries_count), 0) AS total_beneficiaries
+        FROM agrilens.irrigation_assets ia
+        GROUP BY ia.admin_unit_id
+      )
+      SELECT 
+        au.id AS district_id,
+        au.name AS district_name,
+        au.code AS district_code,
+        prov.name AS province_name,
+        COALESCE(curr.area_irrigated_ha, 0) AS area_irrigated_ha,
+        COALESCE(curr.cultivated_area_ha, 0) AS cultivated_area_ha,
+        COALESCE(curr.coverage_pct, 0) AS coverage_pct,
+        prev.prev_irrigated_ha,
+        prev.prev_coverage_pct,
+        COALESCE(curr.current_records_count, 0) AS current_records_count,
+        COALESCE(f.facility_count, 0) AS facility_count,
+        COALESCE(f.documented_command_ha, 0) AS documented_command_ha,
+        COALESCE(f.documented_irrigable_ha, 0) AS documented_irrigable_ha,
+        COALESCE(f.total_beneficiaries, 0) AS total_beneficiaries,
+        curr.water_deficit_mm,
+        curr.drought_index,
+        curr.terrain_slope_pct,
+        curr.water_source_distance_km,
+        curr.road_distance_km,
+        curr.opportunity_score,
+        curr.feasibility_tier,
+        curr.recommended_technology,
+        curr.irrigation_type_breakdown,
+        curr.soil_texture,
+        curr.soil_ph,
+        curr.feasibility_prerequisites
+      FROM agrilens.administrative_units au
+      JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+      LEFT JOIN curr ON curr.admin_unit_id = au.id
+      LEFT JOIN prev ON prev.admin_unit_id = au.id
+      LEFT JOIN facilities f ON f.admin_unit_id = au.id
+      WHERE au.unit_type = 'DISTRICT'
+      ORDER BY COALESCE(curr.area_irrigated_ha, 0) DESC;
+    `;
+
+    const districtRows = await this.dataSource.query(districtStatsQuery, [validSeason, validCompareSeason]);
+
+    // Rank by coverage % as well
+    const byCoverage = [...districtRows].sort((a, b) => Number(b.coverage_pct || 0) - Number(a.coverage_pct || 0));
+    const coverageRankMap = new Map<string, number>();
+    byCoverage.forEach((d, idx) => coverageRankMap.set(d.district_id, idx + 1));
+
+    const processedDistricts = districtRows.map((r: any, idx: number) => {
+      const irr = Number(r.area_irrigated_ha || 0);
+      const prevI = Number(r.prev_irrigated_ha || 0);
+      const cov = Number(r.coverage_pct || 0);
+      const prevC = Number(r.prev_coverage_pct || 0);
+      const hasData = Number(r.current_records_count) > 0;
+      const sharePct = currIrr > 0 ? Math.round((irr / currIrr) * 1000) / 10 : 0;
+      const chgPct = (prevI > 0 && hasData) ? Math.round(((irr - prevI) / prevI) * 1000) / 10 : null;
+      const covChgPct = (prevC > 0 && hasData) ? Math.round(((cov - prevC) / prevC) * 1000) / 10 : null;
+
+      return {
+        district_id: r.district_id,
+        district_name: r.district_name,
+        district_code: r.district_code,
+        province_name: r.province_name,
+        area_irrigated_ha: hasData ? irr : null,
+        cultivated_area_ha: hasData ? Number(r.cultivated_area_ha || 0) : null,
+        coverage_pct: hasData ? cov : null,
+        prev_irrigated_ha: prevI > 0 ? prevI : null,
+        prev_coverage_pct: prevC > 0 ? prevC : null,
+        irrigated_change_pct: chgPct,
+        coverage_change_pct: covChgPct,
+        national_share_pct: sharePct,
+        rank: idx + 1,
+        coverage_rank: coverageRankMap.get(r.district_id) || (idx + 1),
+        has_data: hasData,
+        facility_count: Number(r.facility_count || 0),
+        documented_command_ha: Number(r.documented_command_ha || 0),
+        documented_irrigable_ha: Number(r.documented_irrigable_ha || 0),
+        total_beneficiaries: Number(r.total_beneficiaries || 0),
+        water_deficit_mm: Number(r.water_deficit_mm || 0),
+        drought_index: Number(r.drought_index || 0),
+        terrain_slope_pct: Number(r.terrain_slope_pct || 0),
+        water_source_distance_km: Number(r.water_source_distance_km || 0),
+        road_distance_km: Number(r.road_distance_km || 0),
+        opportunity_score: Number(r.opportunity_score || 0),
+        feasibility_tier: r.feasibility_tier || 'TIER_4_MICRO_CATCHMENT_ONLY',
+        recommended_technology: r.recommended_technology || 'Solar Micro-Drip',
+        irrigation_type_breakdown: r.irrigation_type_breakdown || {},
+        soil_texture: r.soil_texture || 'Clay Loam',
+        soil_ph: Number(r.soil_ph || 5.8),
+        feasibility_prerequisites: r.feasibility_prerequisites || [
+          'Verify seasonal stream flow rate with Meteo Rwanda / RWB',
+          'Conduct topographical survey for gravity head alignment',
+          'Assess cooperative willingness to manage O&M tariffs',
+        ],
+      };
+    });
+
+    // 6. Chronological multi-season irrigation trends
+    const trendsQuery = `
+      SELECT 
+        s.season_code,
+        s.year,
+        s.name,
+        ROUND(COALESCE(SUM(iss.area_irrigated_ha), 0)::numeric, 1) AS total_irrigated_ha,
+        ROUND(COALESCE(SUM(iss.total_cultivated_ha), 0)::numeric, 1) AS total_cultivated_ha,
+        ROUND((COALESCE(SUM(iss.area_irrigated_ha), 0) / NULLIF(SUM(iss.total_cultivated_ha), 0) * 100)::numeric, 2) AS coverage_pct
+      FROM agrilens.seasons s
+      JOIN agrilens.irrigation_season_statistics iss ON iss.season_id = s.id
+      GROUP BY s.season_code, s.year, s.name
+      ORDER BY s.year ASC, s.season_code ASC;
+    `;
+    const trendsRes = await this.dataSource.query(trendsQuery);
+    const validTrends = trendsRes.map((r: any) => ({
+      season_code: r.season_code,
+      year: r.year,
+      name: r.name,
+      total_irrigated_ha: Number(r.total_irrigated_ha || 0),
+      total_cultivated_ha: Number(r.total_cultivated_ha || 0),
+      coverage_pct: Number(r.coverage_pct || 0),
+    }));
+
+    // 7. Documented Facilities from agrilens.irrigation_assets
+    const facilitiesQuery = `
+      SELECT 
+        ia.id,
+        ia.name,
+        au.name AS district_name,
+        au.code AS district_code,
+        prov.name AS province_name,
+        ia.irrigation_type,
+        ia.water_source,
+        ia.irrigation_method,
+        ROUND(COALESCE(ia.area_command_ha, 0)::numeric, 1) AS area_command_ha,
+        ROUND(COALESCE(ia.area_irrigable_ha, 0)::numeric, 1) AS area_irrigable_ha,
+        COALESCE(ia.beneficiaries_count, 0) AS beneficiaries_count,
+        ia.operator_name,
+        ia.status,
+        ST_X(ia.location) AS longitude,
+        ST_Y(ia.location) AS latitude
+      FROM agrilens.irrigation_assets ia
+      JOIN agrilens.administrative_units au ON au.id = ia.admin_unit_id
+      JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+      ORDER BY ia.area_command_ha DESC NULLS LAST;
+    `;
+    const facilitiesRows = await this.dataSource.query(facilitiesQuery);
+    const facilitiesList = facilitiesRows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      district_name: r.district_name,
+      district_code: r.district_code,
+      province_name: r.province_name,
+      irrigation_type: r.irrigation_type,
+      water_source: r.water_source,
+      irrigation_method: r.irrigation_method,
+      area_command_ha: Number(r.area_command_ha || 0),
+      area_irrigable_ha: Number(r.area_irrigable_ha || 0),
+      beneficiaries_count: Number(r.beneficiaries_count || 0),
+      operator_name: r.operator_name,
+      status: r.status,
+      longitude: Number(r.longitude || 0),
+      latitude: Number(r.latitude || 0),
+    }));
+
+    // 8. Alerts: Expanding, Declining, Stable
+    const validWithPrev = processedDistricts.filter((d: any) => d.irrigated_change_pct !== null);
+    const alerts = {
+      large_expansions: validWithPrev.filter((d: any) => (d.irrigated_change_pct ?? 0) >= 10),
+      large_declines: validWithPrev.filter((d: any) => (d.irrigated_change_pct ?? 0) <= -10),
+      stable_districts: validWithPrev.filter((d: any) => Math.abs(d.irrigated_change_pct ?? 0) <= 3),
+    };
+
+    // 9. Potential Irrigation Intervention Opportunities (Evidence-Based Screening)
+    const candidateDistricts = processedDistricts
+      .filter((d: any) => d.has_data)
+      .map((d: any) => {
+        const gapHa = Math.max(0, (d.cultivated_area_ha || 0) - (d.area_irrigated_ha || 0));
+        let flagReason = 'Potential Area for Assessment: High cultivated footprint with low recorded irrigation';
+        if ((d.coverage_pct ?? 0) < 2.0) {
+          flagReason = 'Potential Area for Assessment: Critical coverage gap (<2%) in high agricultural zone';
+        } else if ((d.water_deficit_mm ?? 0) > 160) {
+          flagReason = 'Potential Area for Assessment: Severe seasonal water deficit and drought exposure';
+        }
+
+        return {
+          district_id: d.district_id,
+          district_name: d.district_name,
+          province_name: d.province_name,
+          coverage_pct: d.coverage_pct,
+          area_irrigated_ha: d.area_irrigated_ha,
+          cultivated_area_ha: d.cultivated_area_ha,
+          irrigation_gap_ha: gapHa,
+          water_deficit_mm: d.water_deficit_mm,
+          drought_index: d.drought_index,
+          terrain_slope_pct: d.terrain_slope_pct,
+          opportunity_score: d.opportunity_score,
+          feasibility_tier: d.feasibility_tier,
+          recommended_technology: d.recommended_technology,
+          flag_reason: flagReason,
+          existing_facilities_count: d.facility_count,
+          existing_command_ha: d.documented_command_ha,
+          mandatory_checks: [
+            'Verify seasonal stream/river gauge data with Meteo Rwanda & RWB',
+            'Conduct detailed slope and soil infiltration test (<8% gradient optimal)',
+            'Confirm land tenure and environmental safeguard clearance from REMA',
+            'Validate farmers cooperative willingness and water tariff structure',
+          ],
+        };
+      })
+      .sort((a: any, b: any) => b.opportunity_score - a.opportunity_score);
+
+    return {
+      meta: {
+        selectedSeason: validSeason,
+        compareSeason: validCompareSeason,
+        availableSeasons: seasonsRes.map((s: any) => ({ code: s.season_code, label: s.name, year: s.year })),
+        availableFacilityTypes: facilityTypesRes.map((f: any) => ({ type: f.irrigation_type, count: parseInt(f.count, 10) })),
+      },
+      nationalSummary,
+      districts: processedDistricts,
+      seasonalTrends: validTrends,
+      facilitiesList,
+      alerts,
+      opportunityScreening: {
+        candidateDistricts: candidateDistricts.slice(0, 10),
+        criteriaWeights: [
+          { name: 'Agricultural Intensity & Cultivated Area', weightPct: 25, rationale: 'Prioritizes locations where crop production volume is significant.' },
+          { name: 'Seasonal Water Deficit & Drought Risk', weightPct: 25, rationale: 'Identifies where precipitation gaps cause crop failure.' },
+          { name: 'Water Resource Proximity', weightPct: 25, rationale: 'Assesses proximity to perennial water bodies, lakes, and rivers.' },
+          { name: 'Terrain & Slope Suitability', weightPct: 15, rationale: 'Rewards gentle gradients that lower pumping head and erosion.' },
+          { name: 'Road & Post-Harvest Transport Access', weightPct: 10, rationale: 'Ensures harvested irrigated output reaches cold storage or markets.' },
+        ],
+        safeguardNotice: 'CRITICAL PLANNING SAFEGUARD: A map showing low recorded irrigation does not automatically conclude that an area has available water, suitable terrain, or economic viability. Wording is strictly designated as "Potential Area for Assessment" pending technical field investigation.',
+      },
+    };
+  }
 }
+

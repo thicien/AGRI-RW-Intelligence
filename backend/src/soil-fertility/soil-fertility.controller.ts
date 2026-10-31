@@ -5,6 +5,17 @@ import { SoilFertilityService } from './soil-fertility.service';
 export class SoilFertilityController {
   constructor(private readonly soilFertilityService: SoilFertilityService) {}
 
+  @Get('decision-workspace')
+  async getDecisionWorkspace(
+    @Query('season') season: string = '2025A',
+    @Query('compareSeason') compareSeason?: string,
+    @Query('province') province: string = 'ALL',
+    @Query('layer') layer: string = 'ALL',
+    @Query('projectType') projectType: string = 'ALL',
+  ) {
+    return this.soilFertilityService.getDecisionWorkspace(season, compareSeason, province, layer, projectType);
+  }
+
   @Get('summary')
   async getSummary(@Query('season') season: string = '2026B') {
     return this.soilFertilityService.getSummary(season);

@@ -647,5 +647,386 @@ export class CropStatisticsService {
       ],
     };
   }
+
+  /**
+   * 10. National Agricultural Decision-Making Workspace
+   * Powers the unified Crops & Seasons decision workspace with map, summary cards,
+   * seasonal trends, crop comparison table, and district dossiers.
+   */
+  async getDecisionWorkspace(
+    seasonCode: string = '2025A',
+    cropName: string = 'All crops',
+    compareSeasonCode?: string,
+    province: string = 'ALL',
+  ) {
+    // 1. Fetch all available seasons with records
+    const seasonsList = await this.dataSource.query(`
+      SELECT DISTINCT s.season_code, s.year, s.name, s.official_label
+      FROM agrilens.seasons s
+      JOIN agrilens.crop_statistics cs ON cs.season_id = s.id
+      GROUP BY s.season_code, s.year, s.name, s.official_label
+      ORDER BY s.season_code DESC;
+    `);
+
+    const validSeason = seasonsList.some((s: any) => s.season_code === seasonCode)
+      ? seasonCode
+      : (seasonsList[0]?.season_code || '2025A');
+
+    // 2. Derive comparable season (prior year same season letter e.g. 2025A -> 2024A)
+    let validCompareSeason = compareSeasonCode;
+    if (!validCompareSeason) {
+      const match = validSeason.match(/^(\d{4})([A-Za-z])$/);
+      if (match) {
+        const yr = parseInt(match[1], 10) - 1;
+        const letter = match[2].toUpperCase();
+        const candidate = `${yr}${letter}`;
+        if (seasonsList.some((s: any) => s.season_code === candidate)) {
+          validCompareSeason = candidate;
+        }
+      }
+      if (!validCompareSeason) {
+        const currIdx = seasonsList.findIndex((s: any) => s.season_code === validSeason);
+        validCompareSeason = seasonsList[currIdx + 1]?.season_code || seasonsList[1]?.season_code || validSeason;
+      }
+    }
+
+    // 3. Fetch master crops list
+    const cropsList = await this.dataSource.query(`
+      SELECT DISTINCT c.id, c.name, c.category, c.code
+      FROM agrilens.crops c
+      JOIN agrilens.crop_statistics cs ON cs.crop_id = c.id
+      ORDER BY c.name ASC;
+    `);
+
+    const isAllCrops = !cropName || cropName === 'All crops';
+
+    // 4. National Summary for Current Season
+    const currentSummaryQuery = `
+      SELECT 
+        ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS total_production_tonnes,
+        ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS total_cultivated_area_ha,
+        ROUND(COALESCE(SUM(cs.harvested_area_ha), 0)::numeric, 1) AS total_harvested_area_ha,
+        ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS weighted_yield_t_ha,
+        COUNT(DISTINCT cs.admin_unit_id) AS districts_reporting
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      ${!isAllCrops ? 'JOIN agrilens.crops c ON cs.crop_id = c.id' : ''}
+      WHERE s.season_code = $1
+      ${!isAllCrops ? 'AND LOWER(c.name) = LOWER($2)' : ''};
+    `;
+
+    const currentSummaryParams = isAllCrops ? [validSeason] : [validSeason, cropName];
+    const currentSummaryRes = await this.dataSource.query(currentSummaryQuery, currentSummaryParams);
+    const currSummary = currentSummaryRes[0] || {};
+
+    // 5. National Summary for Compare Season
+    const compareSummaryQuery = `
+      SELECT 
+        ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS total_production_tonnes,
+        ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS total_cultivated_area_ha,
+        ROUND(COALESCE(SUM(cs.harvested_area_ha), 0)::numeric, 1) AS total_harvested_area_ha,
+        ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS weighted_yield_t_ha
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      ${!isAllCrops ? 'JOIN agrilens.crops c ON cs.crop_id = c.id' : ''}
+      WHERE s.season_code = $1
+      ${!isAllCrops ? 'AND LOWER(c.name) = LOWER($2)' : ''};
+    `;
+
+    const compareSummaryParams = isAllCrops ? [validCompareSeason] : [validCompareSeason, cropName];
+    const compareSummaryRes = await this.dataSource.query(compareSummaryQuery, compareSummaryParams);
+    const prevSummary = compareSummaryRes[0] || {};
+
+    const currProd = Number(currSummary.total_production_tonnes || 0);
+    const prevProd = Number(prevSummary.total_production_tonnes || 0);
+    const currArea = Number(currSummary.total_cultivated_area_ha || 0);
+    const prevArea = Number(prevSummary.total_cultivated_area_ha || 0);
+    const currYield = Number(currSummary.weighted_yield_t_ha || 0);
+    const prevYield = Number(prevSummary.weighted_yield_t_ha || 0);
+
+    const prodChangePct = prevProd > 0 ? Math.round(((currProd - prevProd) / prevProd) * 1000) / 10 : null;
+    const areaChangePct = prevArea > 0 ? Math.round(((currArea - prevArea) / prevArea) * 1000) / 10 : null;
+    const yieldChangePct = prevYield > 0 ? Math.round(((currYield - prevYield) / prevYield) * 1000) / 10 : null;
+
+    const nationalSummary = {
+      season: validSeason,
+      compareSeason: validCompareSeason,
+      total_production_tonnes: currProd,
+      prev_production_tonnes: prevProd > 0 ? prevProd : null,
+      production_change_pct: prodChangePct,
+      total_cultivated_area_ha: currArea,
+      prev_cultivated_area_ha: prevArea > 0 ? prevArea : null,
+      area_change_pct: areaChangePct,
+      total_harvested_area_ha: Number(currSummary.total_harvested_area_ha || 0),
+      weighted_yield_t_ha: currYield,
+      prev_weighted_yield_t_ha: prevYield > 0 ? prevYield : null,
+      yield_change_pct: yieldChangePct,
+      districts_reporting: Number(currSummary.districts_reporting || 0),
+      districts_expected: 30,
+      data_coverage_pct: Math.round(((Number(currSummary.districts_reporting || 0)) / 30) * 100),
+      calculation_rule_note: 'National yield calculated via area-weighted aggregation (Total Production ÷ Total Harvested Area), not simple average of district yields.',
+    };
+
+    // 6. District Level Statistics (30 Districts) using CTEs to avoid Cartesian join duplication
+    const districtStatsQuery = `
+      WITH curr AS (
+        SELECT 
+          cs.admin_unit_id,
+          ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS production_tonnes,
+          ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS cultivated_area_ha,
+          ROUND(COALESCE(SUM(cs.harvested_area_ha), 0)::numeric, 1) AS harvested_area_ha,
+          ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS yield_t_ha,
+          COUNT(cs.id) AS current_records_count
+        FROM agrilens.crop_statistics cs
+        WHERE cs.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $1 LIMIT 1)
+          ${!isAllCrops ? 'AND cs.crop_id = (SELECT id FROM agrilens.crops WHERE LOWER(name) = LOWER($3) LIMIT 1)' : ''}
+        GROUP BY cs.admin_unit_id
+      ),
+      prev AS (
+        SELECT 
+          cs.admin_unit_id,
+          ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS prev_production_tonnes,
+          ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS prev_cultivated_area_ha,
+          ROUND(COALESCE(SUM(cs.harvested_area_ha), 0)::numeric, 1) AS prev_harvested_area_ha,
+          ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS prev_yield_t_ha,
+          COUNT(cs.id) AS prev_records_count
+        FROM agrilens.crop_statistics cs
+        WHERE cs.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $2 LIMIT 1)
+          ${!isAllCrops ? 'AND cs.crop_id = (SELECT id FROM agrilens.crops WHERE LOWER(name) = LOWER($3) LIMIT 1)' : ''}
+        GROUP BY cs.admin_unit_id
+      )
+      SELECT 
+        au.id AS district_id,
+        au.name AS district_name,
+        au.code AS district_code,
+        prov.name AS province_name,
+        COALESCE(curr.production_tonnes, 0) AS production_tonnes,
+        COALESCE(curr.cultivated_area_ha, 0) AS cultivated_area_ha,
+        COALESCE(curr.harvested_area_ha, 0) AS harvested_area_ha,
+        curr.yield_t_ha,
+        COALESCE(curr.current_records_count, 0) AS current_records_count,
+        prev.prev_production_tonnes,
+        prev.prev_cultivated_area_ha,
+        prev.prev_yield_t_ha,
+        COALESCE(prev.prev_records_count, 0) AS prev_records_count
+      FROM agrilens.administrative_units au
+      JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+      LEFT JOIN curr ON curr.admin_unit_id = au.id
+      LEFT JOIN prev ON prev.admin_unit_id = au.id
+      WHERE au.unit_type = 'DISTRICT'
+      ORDER BY COALESCE(curr.production_tonnes, 0) DESC;
+    `;
+
+    const districtParams = isAllCrops 
+      ? [validSeason, validCompareSeason] 
+      : [validSeason, validCompareSeason, cropName];
+
+    const districtRows = await this.dataSource.query(districtStatsQuery, districtParams);
+
+    // 7. Dominant crops per district for selected season
+    const dominantCropsQuery = `
+      SELECT 
+        au.name AS district_name,
+        c.name AS crop_name,
+        ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS production_tonnes,
+        ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS area_ha,
+        ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS yield_t_ha
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      JOIN agrilens.crops c ON cs.crop_id = c.id
+      JOIN agrilens.administrative_units au ON cs.admin_unit_id = au.id
+      WHERE s.season_code = $1
+      GROUP BY au.name, c.name
+      ORDER BY au.name, SUM(cs.production_tonnes) DESC;
+    `;
+    const dominantCropsRes = await this.dataSource.query(dominantCropsQuery, [validSeason]);
+    const dominantByDistrict: Record<string, any[]> = {};
+    for (const r of dominantCropsRes) {
+      if (!dominantByDistrict[r.district_name]) {
+        dominantByDistrict[r.district_name] = [];
+      }
+      dominantByDistrict[r.district_name].push({
+        crop_name: r.crop_name,
+        production_tonnes: Number(r.production_tonnes),
+        area_ha: Number(r.area_ha),
+        yield_t_ha: Number(r.yield_t_ha || 0),
+      });
+    }
+
+    // Format district records with ranks and shares
+    const processedDistricts = districtRows.map((r: any, idx: number) => {
+      const prod = Number(r.production_tonnes || 0);
+      const prevP = Number(r.prev_production_tonnes || 0);
+      const hasData = Number(r.current_records_count) > 0;
+      const sharePct = currProd > 0 ? Math.round((prod / currProd) * 1000) / 10 : 0;
+      const chgPct = (prevP > 0 && hasData) ? Math.round(((prod - prevP) / prevP) * 1000) / 10 : null;
+
+      const crops = dominantByDistrict[r.district_name] || [];
+      const districtTotalProd = crops.reduce((sum, c) => sum + c.production_tonnes, 0) || prod || 1;
+      const enrichedCrops = crops.slice(0, 5).map(c => ({
+        ...c,
+        share_pct: Math.round((c.production_tonnes / districtTotalProd) * 1000) / 10,
+      }));
+
+      return {
+        district_id: r.district_id,
+        district_name: r.district_name,
+        district_code: r.district_code,
+        province_name: r.province_name,
+        production_tonnes: hasData ? prod : null,
+        prev_production_tonnes: prevP > 0 ? prevP : null,
+        production_change_pct: chgPct,
+        cultivated_area_ha: hasData ? Number(r.cultivated_area_ha || 0) : null,
+        harvested_area_ha: hasData ? Number(r.harvested_area_ha || 0) : null,
+        yield_t_ha: hasData ? Number(r.yield_t_ha || 0) : null,
+        national_share_pct: sharePct,
+        rank: idx + 1,
+        has_data: hasData,
+        dominant_crops: enrichedCrops,
+      };
+    });
+
+    // 8. Multi-Season Trends for Chronological Chart
+    const trendsQuery = `
+      SELECT 
+        s.season_code,
+        s.year,
+        s.name AS season_name,
+        ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS production_tonnes,
+        ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS cultivated_area_ha,
+        ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS yield_t_ha
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      ${!isAllCrops ? 'JOIN agrilens.crops c ON cs.crop_id = c.id' : ''}
+      WHERE s.year >= 2018
+      ${!isAllCrops ? 'AND LOWER(c.name) = LOWER($1)' : ''}
+      GROUP BY s.season_code, s.year, s.name
+      ORDER BY s.season_code ASC;
+    `;
+    const trendsParams = isAllCrops ? [] : [cropName];
+    const trendsRes = await this.dataSource.query(trendsQuery, trendsParams);
+
+    // 9. Crop Comparison Table (All Crops: Current Season vs Compare Season)
+    const cropComparisonQuery = `
+      SELECT 
+        c.name AS crop_name,
+        c.category,
+        ROUND(COALESCE(SUM(curr.production_tonnes), 0)::numeric, 1) AS current_production_tonnes,
+        ROUND(COALESCE(SUM(curr.area_ha), 0)::numeric, 1) AS current_area_ha,
+        ROUND((COALESCE(SUM(curr.production_tonnes), 0) / NULLIF(SUM(curr.harvested_area_ha), 0))::numeric, 2) AS current_yield_t_ha,
+        COUNT(curr.id) AS current_records_count,
+        ROUND(COALESCE(SUM(prev.production_tonnes), 0)::numeric, 1) AS prev_production_tonnes,
+        ROUND(COALESCE(SUM(prev.area_ha), 0)::numeric, 1) AS prev_area_ha,
+        ROUND((COALESCE(SUM(prev.production_tonnes), 0) / NULLIF(SUM(prev.harvested_area_ha), 0))::numeric, 2) AS prev_yield_t_ha,
+        COUNT(prev.id) AS prev_records_count
+      FROM agrilens.crops c
+      LEFT JOIN agrilens.crop_statistics curr 
+        ON curr.crop_id = c.id 
+        AND curr.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $1 LIMIT 1)
+      LEFT JOIN agrilens.crop_statistics prev 
+        ON prev.crop_id = c.id 
+        AND prev.season_id = (SELECT id FROM agrilens.seasons WHERE season_code = $2 LIMIT 1)
+      GROUP BY c.name, c.category
+      HAVING COALESCE(SUM(curr.production_tonnes), 0) > 0 OR COALESCE(SUM(prev.production_tonnes), 0) > 0
+      ORDER BY current_production_tonnes DESC;
+    `;
+
+    const cropComparisonRes = await this.dataSource.query(cropComparisonQuery, [validSeason, validCompareSeason]);
+
+    // Compute leading district for each crop
+    const leadingDistrictQuery = `
+      SELECT DISTINCT ON (c.name)
+        c.name AS crop_name,
+        au.name AS leading_district_name,
+        ROUND(SUM(cs.production_tonnes)::numeric, 1) AS leading_district_production
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.crops c ON cs.crop_id = c.id
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      JOIN agrilens.administrative_units au ON cs.admin_unit_id = au.id
+      WHERE s.season_code = $1
+      GROUP BY c.name, au.name
+      ORDER BY c.name, SUM(cs.production_tonnes) DESC;
+    `;
+    const leadingDistrictRes = await this.dataSource.query(leadingDistrictQuery, [validSeason]);
+    const leadingMap = new Map<string, any>(leadingDistrictRes.map((r: any) => [r.crop_name.toLowerCase(), r]));
+
+    const cropComparisonTable = cropComparisonRes.map((r: any) => {
+      const cProd = Number(r.current_production_tonnes || 0);
+      const pProd = Number(r.prev_production_tonnes || 0);
+      const diff = cProd - pProd;
+      const pct = pProd > 0 ? Math.round((diff / pProd) * 1000) / 10 : null;
+
+      let status: 'GROWING' | 'STABLE' | 'DECLINING' | 'NEW_DATA' = 'STABLE';
+      if (pProd === 0 && cProd > 0) status = 'NEW_DATA';
+      else if (pct !== null && pct >= 5.0) status = 'GROWING';
+      else if (pct !== null && pct <= -5.0) status = 'DECLINING';
+
+      const lead = leadingMap.get(r.crop_name.toLowerCase());
+
+      return {
+        crop_name: r.crop_name,
+        category: r.category || 'Other Crops',
+        current_production_tonnes: cProd,
+        prev_production_tonnes: pProd > 0 ? pProd : null,
+        change_tonnes: pProd > 0 ? diff : null,
+        change_pct: pct,
+        current_area_ha: Number(r.current_area_ha || 0),
+        prev_area_ha: Number(r.prev_area_ha || 0),
+        current_yield_t_ha: Number(r.current_yield_t_ha || 0),
+        prev_yield_t_ha: Number(r.prev_yield_t_ha || 0),
+        national_share_pct: currProd > 0 ? Math.round((cProd / currProd) * 1000) / 10 : 0,
+        trend_status: status,
+        leading_district: lead ? {
+          name: lead.leading_district_name,
+          production_tonnes: Number(lead.leading_district_production || 0),
+        } : null,
+      };
+    });
+
+    // 10. Alerts (Increases, Decreases, Stable)
+    const largeIncreases = cropComparisonTable
+      .filter((c: any) => c.change_pct !== null && c.change_pct >= 15.0)
+      .slice(0, 5);
+
+    const largeDecreases = cropComparisonTable
+      .filter((c: any) => c.change_pct !== null && c.change_pct <= -15.0)
+      .slice(0, 5);
+
+    const stableCrops = cropComparisonTable
+      .filter((c: any) => c.change_pct !== null && Math.abs(c.change_pct) <= 4.0 && c.current_production_tonnes > 5000)
+      .slice(0, 5);
+
+    return {
+      meta: {
+        season: validSeason,
+        compareSeason: validCompareSeason,
+        crop: cropName,
+        province,
+        availableSeasons: seasonsList.map((s: any) => ({
+          code: s.season_code,
+          year: s.year,
+          name: s.name,
+          label: `${s.year} · ${s.name}`,
+        })),
+        availableCrops: cropsList,
+      },
+      nationalSummary,
+      districts: processedDistricts,
+      seasonalTrends: trendsRes.map((t: any) => ({
+        season_code: t.season_code,
+        year: t.year,
+        season_name: t.season_name,
+        production_tonnes: Number(t.production_tonnes || 0),
+        cultivated_area_ha: Number(t.cultivated_area_ha || 0),
+        yield_t_ha: Number(t.yield_t_ha || 0),
+      })),
+      cropComparisonTable,
+      alerts: {
+        large_increases: largeIncreases,
+        large_decreases: largeDecreases,
+        stable_crops: stableCrops,
+      },
+    };
+  }
 }
 

@@ -135,6 +135,17 @@ export class AuthController {
   }
 
   /**
+   * 10.1 PUT /api/v1/auth/profile
+   * Update User Profile & Profile Picture
+   */
+  @Put('profile')
+  async updateProfile(
+    @Body() body: { email: string; fullName?: string; phone?: string; avatarUrl?: string | null; password?: string }
+  ) {
+    return await this.authService.updateProfile(body.email, body);
+  }
+
+  /**
    * 11. POST /api/v1/auth/register-district-officer
    * System Administrator registers an Agricultural District Officer
    */

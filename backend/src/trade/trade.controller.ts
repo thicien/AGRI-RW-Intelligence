@@ -5,6 +5,25 @@ import { TradeService } from './trade.service';
 export class TradeController {
   constructor(private readonly tradeService: TradeService) {}
 
+  @Get('decision-workspace')
+  async getDecisionWorkspace(
+    @Query('season') season: string = '2025A',
+    @Query('compareSeason') compareSeason?: string,
+    @Query('commodity') commodity: string = 'ALL',
+    @Query('destination') destination: string = 'ALL',
+    @Query('province') province: string = 'ALL',
+    @Query('layer') layer: string = 'export_value',
+  ) {
+    return this.tradeService.getDecisionWorkspace(
+      season,
+      compareSeason,
+      commodity,
+      destination,
+      province,
+      layer,
+    );
+  }
+
   @Get('summary')
   async getSummary(@Query('season') season: string = '2026B') {
     return this.tradeService.getSummary(season);

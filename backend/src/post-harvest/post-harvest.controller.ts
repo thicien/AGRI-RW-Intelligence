@@ -5,6 +5,25 @@ import { PostHarvestService } from './post-harvest.service';
 export class PostHarvestController {
   constructor(private readonly postHarvestService: PostHarvestService) {}
 
+  @Get('decision-workspace')
+  async getDecisionWorkspace(
+    @Query('season') season: string = '2025A',
+    @Query('compareSeason') compareSeason?: string,
+    @Query('province') province: string = 'ALL',
+    @Query('layer') layer: string = 'ALL',
+    @Query('facilityType') facilityType: string = 'ALL',
+    @Query('crop') crop: string = 'ALL',
+  ) {
+    return this.postHarvestService.getDecisionWorkspace(
+      season,
+      compareSeason,
+      province,
+      layer,
+      facilityType,
+      crop,
+    );
+  }
+
   @Get('summary')
   async getSummary(@Query('season') season: string = '2026B') {
     return this.postHarvestService.getSummary(season);

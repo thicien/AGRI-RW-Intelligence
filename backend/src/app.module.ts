@@ -58,11 +58,11 @@ const shouldUseSsl = () => {
       ...(process.env.DATABASE_URL
         ? { url: process.env.DATABASE_URL }
         : {
-            host: process.env.DB_HOST,
-            port: parseInt(process.env.DB_PORT || '5432', 10),
-            username: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME || 'postgres',
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT || '5433', 10),
+            username: process.env.DB_USERNAME || 'postgres',
+            password: process.env.DB_PASSWORD || 'Mug2thi4',
+            database: process.env.DB_NAME || 'agrilens_db',
           }),
       autoLoadEntities: true,
       synchronize: false,

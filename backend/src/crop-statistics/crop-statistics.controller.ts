@@ -5,6 +5,21 @@ import { CropStatisticsService } from './crop-statistics.service';
 export class CropStatisticsController {
   constructor(private readonly service: CropStatisticsService) {}
 
+  @Get('decision-workspace')
+  async getDecisionWorkspace(
+    @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('crop') crop?: string,
+    @Query('province') province?: string,
+  ) {
+    return this.service.getDecisionWorkspace(
+      season || '2025A',
+      crop || 'All crops',
+      compareSeason,
+      province || 'ALL',
+    );
+  }
+
   @Get('summary')
   async getSummary(@Query('season') season?: string) {
     return this.service.getSummary(season || '2025A');

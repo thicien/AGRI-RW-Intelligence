@@ -64,7 +64,16 @@ export class AdminService {
          (SELECT COUNT(*) FROM agrilens.irrigation_season_statistics) +
          (SELECT COUNT(*) FROM agrilens.soil_fertility_season_statistics) +
          (SELECT COUNT(*) FROM agrilens.post_harvest_season_statistics) +
-         (SELECT COUNT(*) FROM agrilens.district_export_supply_statistics))::bigint AS total_data_records;
+         (SELECT COUNT(*) FROM agrilens.district_export_supply_statistics) +
+         (SELECT COUNT(*) FROM agrilens.trade_season_statistics) +
+         (SELECT COUNT(*) FROM agrilens.administrative_units) +
+         (SELECT COUNT(*) FROM agrilens.agri_facilities) +
+         (SELECT COUNT(*) FROM agrilens.climate_indicators) +
+         (SELECT COUNT(*) FROM agrilens.practice_observations) +
+         (SELECT COUNT(*) FROM agrilens.soil_observations) +
+         (SELECT COUNT(*) FROM agrilens.irrigation_assets) +
+         (SELECT COUNT(*) FROM agrilens.crops) +
+         (SELECT COUNT(*) FROM agrilens.seasons))::bigint AS total_data_records;
     `);
     const totalDataRecords = Number(recordsCountRes[0]?.total_data_records || 0);
 
@@ -132,6 +141,7 @@ export class AdminService {
         registeredAccounts: accounts.total_accounts,
         activeAccounts: accounts.active_accounts,
         suspendedAccounts: accounts.suspended_accounts,
+        totalDatasets: datasets.total_datasets,
         datasetRecords: datasets.total_datasets,
         totalDataRecords: totalDataRecords,
         systemHealth: healthStatus,
@@ -306,8 +316,8 @@ export class AdminService {
         u.created_at,
         u.updated_at,
         r.id AS role_id,
-        r.code AS role_code,
-        r.name AS role_name,
+        COALESCE(r.code, r.name) AS role_code,
+        COALESCE(r.name, r.code) AS role_name,
         r.scope_type,
         ul.scope_level,
         ul.district_name,
@@ -321,16 +331,31 @@ export class AdminService {
     const params: any[] = [];
 
     if (filters?.role) {
-      params.push(filters.role);
-      query += ` AND r.code = $${params.length}`;
+      const targetRole = filters.role.trim();
+      params.push(targetRole);
+      params.push(`%${targetRole.replace(/_/g, ' ')}%`);
+      query += ` AND (
+        r.code = $${params.length - 1} 
+        OR r.name = $${params.length - 1}
+        OR r.name ILIKE $${params.length}
+        OR ($${params.length - 1} = 'PLATFORM_ADMIN' AND (r.code = 'SYSTEM_ADMIN' OR r.name ILIKE '%SYSTEM_ADMIN%' OR r.name ILIKE '%Platform Administrator%' OR r.name ILIKE '%ADMIN%'))
+        OR ($${params.length - 1} = 'RESEARCHER_ANALYST' AND (r.code = 'RESEARCHER' OR r.name ILIKE '%RESEARCH%'))
+        OR ($${params.length - 1} = 'PARTNER_VIEWER' AND (r.code = 'DEVELOPMENT_PARTNER' OR r.code = 'VIEWER' OR r.name ILIKE '%VIEWER%' OR r.name ILIKE '%PARTNER%'))
+      )`;
     }
     if (filters?.status) {
       params.push(filters.status.toUpperCase());
       query += ` AND u.status = $${params.length}`;
     }
     if (filters?.search) {
-      params.push(`%${filters.search}%`);
-      query += ` AND (u.full_name ILIKE $${params.length} OR u.email ILIKE $${params.length} OR ul.district_name ILIKE $${params.length})`;
+      params.push(`%${filters.search.trim()}%`);
+      query += ` AND (
+        u.full_name ILIKE $${params.length} 
+        OR u.email ILIKE $${params.length} 
+        OR ul.district_name ILIKE $${params.length}
+        OR r.name ILIKE $${params.length}
+        OR r.code ILIKE $${params.length}
+      )`;
     }
 
     query += ` ORDER BY u.created_at DESC;`;
@@ -828,7 +853,7 @@ export class AdminService {
    * 12. AUDIT LOGS: Immutable query
    * Erasing or altering audit history is strictly DENIED.
    */
-  async getAuditLogs(filters?: { limit?: number; action?: string; actor?: string }) {
+  async getAuditLogs(filters?: { limit?: number; action?: string; actor?: string; search?: string }) {
     let query = `
       SELECT id, actor_email, actor_role, action, resource, details, ip_address, created_at
       FROM agrilens.audit_logs
@@ -836,10 +861,52 @@ export class AdminService {
     `;
     const params: any[] = [];
 
-    if (filters?.action) {
-      params.push(`%${filters.action}%`);
-      query += ` AND action ILIKE $${params.length}`;
+    if (filters?.action && filters.action !== 'ALL') {
+      const act = filters.action.trim().toUpperCase();
+      if (act === 'LOGIN') {
+        params.push(`%LOGIN%`);
+        query += ` AND action ILIKE $${params.length}`;
+      } else if (act === 'SCOPE') {
+        params.push(`%SCOPE%`);
+        const p1 = params.length;
+        query += ` AND (action ILIKE $${p1} OR resource ILIKE $${p1})`;
+      } else if (act === 'DENIED') {
+        params.push(`%DENIED%`);
+        const p1 = params.length;
+        params.push(`%VIOLATION%`);
+        const p2 = params.length;
+        params.push(`%UNAUTHORIZED%`);
+        const p3 = params.length;
+        query += ` AND (action ILIKE $${p1} OR action ILIKE $${p2} OR action ILIKE $${p3})`;
+      } else if (act === 'RESET') {
+        params.push(`%RESET%`);
+        query += ` AND action ILIKE $${params.length}`;
+      } else if (act === 'EXPORT REPORT' || act === 'EXPORT' || act === 'REPORT' || act === 'EXPORT_REPORT') {
+        params.push(`%EXPORT%`);
+        const p1 = params.length;
+        params.push(`%REPORT%`);
+        const p2 = params.length;
+        query += ` AND (action ILIKE $${p1} OR action ILIKE $${p2})`;
+      } else {
+        params.push(`%${filters.action.trim()}%`);
+        query += ` AND action ILIKE $${params.length}`;
+      }
     }
+
+    if (filters?.search && filters.search.trim()) {
+      const term = `%${filters.search.trim()}%`;
+      params.push(term);
+      const pIdx = params.length;
+      query += ` AND (
+        action ILIKE $${pIdx} OR 
+        actor_email ILIKE $${pIdx} OR 
+        actor_role ILIKE $${pIdx} OR 
+        resource ILIKE $${pIdx} OR 
+        CAST(details AS TEXT) ILIKE $${pIdx} OR
+        CAST(ip_address AS TEXT) ILIKE $${pIdx}
+      )`;
+    }
+
     if (filters?.actor) {
       params.push(`%${filters.actor}%`);
       query += ` AND actor_email ILIKE $${params.length}`;
@@ -958,12 +1025,21 @@ export class AdminService {
       ORDER BY count DESC;
     `);
 
+    const datasets = await this.dataSource.query(`
+      SELECT id, name, dataset_type, year, season_code, file_format, row_count, status, quality_score, source_organization
+      FROM agrilens.datasets
+      ORDER BY year DESC, season_code DESC, name ASC;
+    `);
+
     return {
       generatedAt: new Date().toISOString(),
       platform: 'AgriLens Rwanda',
       generatedBy: 'System Administration Center',
       kpis: overview.kpis,
       totalUsers: users.length,
+      totalDatasets: datasets.length,
+      totalDataRecords: overview.kpis.totalDataRecords,
+      datasetsList: datasets,
       userList: users.map((u: any) => ({
         id: u.id,
         name: u.full_name,

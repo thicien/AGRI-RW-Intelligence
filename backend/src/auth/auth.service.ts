@@ -554,7 +554,7 @@ export class AuthService {
   async login(email: string, pass: string) {
     const userRes = await this.dataSource.query(`
       SELECT 
-        u.id, u.full_name, u.email, u.password_hash, u.status,
+        u.id, u.full_name, u.email, u.password_hash, u.status, u.avatar_url,
         r.code AS role_code, r.name AS role_name, r.scope_type,
         ul.scope_level, ul.district_name, ul.sector_name
       FROM agrilens.users u
@@ -608,8 +608,83 @@ export class AuthService {
         roleName: user.role_name,
         scopeLevel: user.scope_level || 'NATIONAL',
         district: user.district_name,
-        sector: user.sector_name
+        sector: user.sector_name,
+        avatarUrl: user.avatar_url || null
       }
+    };
+  }
+
+  /**
+   * 11.1 Update User Profile & Profile Picture
+   */
+  async updateProfile(userEmail: string, body: { fullName?: string; phone?: string; avatarUrl?: string | null; password?: string }) {
+    const userRes = await this.dataSource.query(`SELECT id, password_hash, full_name FROM agrilens.users WHERE email = $1 LIMIT 1;`, [userEmail]);
+    if (userRes.length === 0) {
+      return { success: true, avatarUrl: body.avatarUrl || null, email: userEmail, name: body.fullName || userEmail };
+    }
+    const user = userRes[0];
+    const updates: string[] = [];
+    const params: any[] = [];
+
+    if (body.fullName) {
+      params.push(body.fullName);
+      updates.push(`full_name = $${params.length}`);
+    }
+    if (body.phone) {
+      params.push(body.phone);
+      updates.push(`phone = $${params.length}`);
+    }
+    if (body.avatarUrl !== undefined) {
+      params.push(body.avatarUrl);
+      updates.push(`avatar_url = $${params.length}`);
+    }
+    if (body.password) {
+      const hash = await argon2.hash(body.password);
+      params.push(hash);
+      updates.push(`password_hash = $${params.length}`);
+    }
+
+    if (updates.length > 0) {
+      params.push(user.id);
+      await this.dataSource.query(`
+        UPDATE agrilens.users 
+        SET ${updates.join(', ')}, updated_at = NOW() 
+        WHERE id = $${params.length};
+      `, params);
+    }
+
+    await this.logAuditEvent({
+      actorEmail: userEmail,
+      actorRole: 'AUTHORIZED_USER',
+      action: body.avatarUrl ? 'USER_PROFILE_PICTURE_UPDATED' : 'USER_PROFILE_UPDATED',
+      resource: 'USER_PROFILE',
+      details: { updatedFields: Object.keys(body).filter(k => (body as any)[k] !== undefined) }
+    });
+
+    const updatedUserRes = await this.dataSource.query(`
+      SELECT 
+        u.id, u.full_name, u.email, u.phone, u.status, u.avatar_url,
+        r.code AS role_code, r.name AS role_name,
+        ul.scope_level, ul.district_name, ul.sector_name
+      FROM agrilens.users u
+      LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
+      LEFT JOIN agrilens.roles r ON ur.role_id = r.id
+      LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
+      WHERE u.id = $1 LIMIT 1;
+    `, [user.id]);
+
+    const u = updatedUserRes[0] || {};
+    return {
+      id: u.id || user.id,
+      name: u.full_name || body.fullName || user.full_name,
+      email: u.email || userEmail,
+      phone: u.phone,
+      role: u.role_code,
+      roleName: u.role_name,
+      scopeLevel: u.scope_level || 'NATIONAL',
+      district: u.district_name,
+      sector: u.sector_name,
+      avatarUrl: u.avatar_url || body.avatarUrl || null
     };
   }
 

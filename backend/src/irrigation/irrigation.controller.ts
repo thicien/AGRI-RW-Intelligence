@@ -59,6 +59,24 @@ export class IrrigationController {
   }
 
   /**
+   * 7. National Irrigation Planning & Opportunity Decision Workspace
+   */
+  @Get('decision-workspace')
+  async getDecisionWorkspace(
+    @Query('season') season?: string,
+    @Query('compareSeason') compareSeason?: string,
+    @Query('province') province?: string,
+    @Query('facilityType') facilityType?: string,
+  ) {
+    return this.service.getDecisionWorkspace(
+      season || '2025A',
+      compareSeason,
+      province || 'ALL',
+      facilityType || 'ALL',
+    );
+  }
+
+  /**
    * Legacy backward-compatibility endpoints
    */
   @Get('potential')

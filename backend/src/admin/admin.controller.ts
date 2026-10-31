@@ -193,10 +193,11 @@ export class AdminController {
     @Query('limit') limit?: number,
     @Query('action') action?: string,
     @Query('actor') actor?: string,
+    @Query('search') search?: string,
     @Headers('authorization') auth?: string,
   ) {
     this.enforceAdminRole(auth);
-    return await this.adminService.getAuditLogs({ limit: limit ? Number(limit) : 100, action, actor });
+    return await this.adminService.getAuditLogs({ limit: limit ? Number(limit) : 100, action, actor, search });
   }
 
   /**
