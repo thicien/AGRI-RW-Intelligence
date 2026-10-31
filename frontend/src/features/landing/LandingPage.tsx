@@ -381,7 +381,7 @@ export default function LandingPage() {
               <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-emerald-300">Platform</h4>
               <ul className="space-y-3 text-sm text-emerald-100/70">
                 <li><Link to="/public-portal" className="text-emerald-300 font-bold hover:text-white transition-colors">Public Intelligence Portal</Link></li>
-                <li><Link to="/admin/map" className="hover:text-emerald-300 transition-colors">Intelligence Map</Link></li>
+                <li><Link to="/admin/analytics" className="hover:text-emerald-300 transition-colors">Seasonal Analytics</Link></li>
                 <li><Link to="/admin/dashboard" className="hover:text-emerald-300 transition-colors">Dashboard</Link></li>
                 <li><Link to="/login" className="hover:text-emerald-300 transition-colors">Staff Sign In</Link></li>
               </ul>

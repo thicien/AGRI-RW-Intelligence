@@ -230,7 +230,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         '/admin/dashboard',
         '/admin/crops',
         '/admin/post-harvest',
-        '/admin/map',
         '/admin/reports'
       ];
       const match = allowedForFarmer.some(r => routePath.startsWith(r));

@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppShell from './AppShell';
 import AdminDashboardPage from '../features/dashboard/AdminDashboardPage';
-import IntelligenceMapPage from '../features/map/IntelligenceMapPage';
 import LandingPage from '../features/landing/LandingPage';
 import LoginPage from '../features/auth/LoginPage';
 import PriorityZonesPage from '../features/intelligence/PriorityZonesPage';
@@ -47,7 +46,6 @@ import AdminOverviewPage from '../features/admin/AdminOverviewPage';
 import UserManagementPage from '../features/admin/UserManagementPage';
 import RolesPermissionsPage from '../features/admin/RolesPermissionsPage';
 import AdminGeographyPage from '../features/admin/AdminGeographyPage';
-import DatasetAdministrationPage from '../features/admin/DatasetAdministrationPage';
 import SystemConfigurationPage from '../features/admin/SystemConfigurationPage';
 import SystemHealthPage from '../features/admin/SystemHealthPage';
 import AuditLogsPage from '../features/admin/AuditLogsPage';
@@ -70,6 +68,10 @@ export const router = createBrowserRouter([
   {
     path: '/public-intelligence',
     element: <Navigate to="/public-portal" replace />,
+  },
+  {
+    path: '/map',
+    element: <Navigate to="/admin/dashboard" replace />,
   },
   {
     path: '/login',
@@ -212,10 +214,6 @@ export const router = createBrowserRouter([
         element: <AdminGeographyPage />,
       },
       {
-        path: 'datasets',
-        element: <DatasetAdministrationPage />,
-      },
-      {
         path: 'configuration',
         element: <SystemConfigurationPage />,
       },
@@ -278,6 +276,10 @@ export const router = createBrowserRouter([
         element: <SoilConservation />,
       },
       {
+        path: 'soil-fertility',
+        element: <SoilConservation />,
+      },
+      {
         path: 'post-harvest',
         element: <PostHarvestProcessing />,
       },
@@ -319,7 +321,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'map',
-        element: <IntelligenceMapPage />,
+        element: <Navigate to="/admin/dashboard" replace />,
       },
       {
         path: 'field-validation',
@@ -352,11 +354,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'datasets',
-        element: <Navigate to="/system-admin/datasets" replace />,
+        element: <Navigate to="/data-manager/datasets" replace />,
       },
       {
         path: 'data-quality',
-        element: <Navigate to="/system-admin/datasets" replace />,
+        element: <Navigate to="/data-manager/validation-quality" replace />,
       },
     ],
   },

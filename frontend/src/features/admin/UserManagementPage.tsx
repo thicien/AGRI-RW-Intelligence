@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { 
-  Users, UserPlus, Search, Filter, ShieldCheck, ShieldAlert, 
+  Users, UserPlus, Search, Filter, ShieldCheck, 
   MapPin, CheckCircle2, XCircle, AlertTriangle, Key, Edit3, 
   RefreshCw, Power, Lock, Check, X, Shield, Phone, Mail, Clock
 } from 'lucide-react';
@@ -85,8 +85,11 @@ export default function UserManagementPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [roleFilter, statusFilter]);
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [search, roleFilter, statusFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,19 +230,6 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Security Rule Guard Notice */}
-      <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-amber-700 flex-shrink-0" />
-          <span>
-            <strong>Last-Admin Protection Active:</strong> Backend safeguards prevent suspending or deleting the sole remaining active Platform Administrator account.
-          </span>
-        </div>
-        <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-white text-amber-800 border border-amber-300">
-          Enforced
-        </span>
-      </div>
-
       {/* Search & Filter Toolbar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
         <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
@@ -248,9 +238,18 @@ export default function UserManagementPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or district..."
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            placeholder="Search by name, email, role, or district..."
+            className="w-full pl-10 pr-8 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </form>
 
         <div className="flex items-center gap-2.5 w-full md:w-auto">
@@ -369,9 +368,12 @@ export default function UserManagementPage() {
                           user.role_code === 'DATA_MANAGER' ? 'bg-teal-50 text-teal-800 border border-teal-200' :
                           user.role_code === 'NATIONAL_PLANNER' ? 'bg-purple-50 text-purple-800 border border-purple-200' :
                           isOfficer ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                          user.role_code === 'RESEARCHER_ANALYST' ? 'bg-indigo-50 text-indigo-800 border border-indigo-200' :
+                          user.role_code === 'COOPERATIVE_FARMER' ? 'bg-lime-50 text-lime-800 border border-lime-200' :
+                          user.role_code === 'PARTNER_VIEWER' ? 'bg-sky-50 text-sky-800 border border-sky-200' :
                           'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}>
-                          {user.role_name}
+                          {user.role_name || user.role_code}
                         </span>
                       </td>
 

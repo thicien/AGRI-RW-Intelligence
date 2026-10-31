@@ -3,7 +3,7 @@ import { apiUrl } from '../../config/api';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShieldCheck, LayoutDashboard, Users, ShieldAlert, MapPin, 
-  Database, Settings, Activity, FileText, Lock, HardDrive, 
+  Settings, Activity, FileText, Lock, HardDrive, 
   Bell, FileSpreadsheet, UserCheck, LogOut, Menu, X, 
   Search, RefreshCw, AlertTriangle, Shield, Check, ArrowRight,
   ChevronRight, CheckCircle2, Server
@@ -20,12 +20,16 @@ export default function AdminLayout() {
     role: string;
     roleName: string;
     scopeLevel: string;
+    avatarUrl?: string | null;
   }>(() => {
     const saved = localStorage.getItem('agrilens_user');
+    const avatar = localStorage.getItem('agrilens_user_avatar');
     if (saved) {
       try {
         const u = JSON.parse(saved);
-        if (u.role === 'PLATFORM_ADMIN' || u.role === 'SYSTEM_ADMIN') return u;
+        if (u.role === 'PLATFORM_ADMIN' || u.role === 'SYSTEM_ADMIN') {
+          return { ...u, avatarUrl: u.avatarUrl || avatar || null };
+        }
       } catch (e) {}
     }
     return {
@@ -34,7 +38,8 @@ export default function AdminLayout() {
       email: 'admin@agrilens.gov.rw',
       role: 'PLATFORM_ADMIN',
       roleName: 'Platform Administrator',
-      scopeLevel: 'SYSTEM_WIDE'
+      scopeLevel: 'SYSTEM_WIDE',
+      avatarUrl: avatar || null
     };
   });
 
@@ -65,13 +70,35 @@ export default function AdminLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  // Listen for profile image and user updates
+  useEffect(() => {
+    const syncUser = () => {
+      const saved = localStorage.getItem('agrilens_user');
+      const avatar = localStorage.getItem('agrilens_user_avatar');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          setAdminUser({ ...u, avatarUrl: u.avatarUrl || avatar || null });
+        } catch (e) {}
+      } else if (avatar) {
+        setAdminUser(prev => ({ ...prev, avatarUrl: avatar }));
+      }
+    };
+
+    window.addEventListener('agrilens_user_updated', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('agrilens_user_updated', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
+  }, []);
+
   // The 13 Official Pages for System Administrator
   const navItems = [
     { path: '/system-admin/overview', label: 'Overview', icon: LayoutDashboard },
     { path: '/system-admin/users', label: 'User Management', icon: Users, badge: '12 Accounts' },
     { path: '/system-admin/roles', label: 'Roles & Permissions', icon: ShieldAlert },
     { path: '/system-admin/geography', label: 'Administrative Geography', icon: MapPin },
-    { path: '/system-admin/datasets', label: 'Dataset Administration', icon: Database },
     { path: '/system-admin/configuration', label: 'System Configuration', icon: Settings },
     { path: '/system-admin/health', label: 'System Health', icon: Activity, badge: '1ms' },
     { path: '/system-admin/audit-logs', label: 'Audit Logs', icon: FileText },
@@ -164,9 +191,17 @@ export default function AdminLayout() {
         <div className="p-3 border-t border-white/10 relative z-10 bg-[#063124]/90 backdrop-blur-md">
           <div className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-inner">
-                SA
-              </div>
+              {adminUser.avatarUrl ? (
+                <img
+                  src={adminUser.avatarUrl}
+                  alt={adminUser.name}
+                  className="w-8 h-8 rounded-full object-cover border border-emerald-400/50 shadow-sm flex-shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-inner">
+                  {adminUser.name ? adminUser.name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'SA'}
+                </div>
+              )}
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-white truncate leading-tight">
                   {adminUser.name}
@@ -179,9 +214,9 @@ export default function AdminLayout() {
             <button
               onClick={handleLogout}
               title="Sign Out"
-              className="p-1.5 rounded-lg text-white/70 hover:text-rose-300 hover:bg-rose-500/20 transition-colors ml-1"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider text-rose-300 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all ml-1 shrink-0"
             >
-              <LogOut className="w-4 h-4" />
+              LOGOUT
             </button>
           </div>
         </div>

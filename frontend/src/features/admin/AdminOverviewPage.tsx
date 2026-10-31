@@ -5,7 +5,7 @@ import {
   Users, UserCheck, Database, Activity, ShieldCheck, 
   ArrowUpRight, AlertTriangle, CheckCircle2, Clock, 
   ShieldAlert, Server, HardDrive, RefreshCw, Layers,
-  ChevronRight, MapPin, Lock, FileText, Cpu
+  ChevronRight, MapPin, FileText, Cpu
 } from 'lucide-react';
 
 interface OverviewData {
@@ -192,12 +192,12 @@ export default function AdminOverviewPage() {
               </div>
             </div>
             <div className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              {loading ? '—' : data?.kpis.datasetRecords ?? '11'}
+              {loading ? '—' : data?.kpis.datasetRecords ?? '57'}
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
               <span>From registered datasets</span>
               <span className="font-medium text-amber-700">
-                {data?.kpis.totalDataRecords ? `${data.kpis.totalDataRecords.toLocaleString()} rows` : '23,047 rows'}
+                {data?.kpis.totalDataRecords ? `${data.kpis.totalDataRecords.toLocaleString()} rows` : '24,414 rows'}
               </span>
             </div>
           </div>
@@ -455,37 +455,6 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* 5. Platform Security Restrictions Card (Section 6 Compliance Notice) */}
-      <div className="bg-slate-900 text-slate-200 rounded-2xl p-6 border border-slate-800 shadow-md">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 font-bold border border-emerald-400/30">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-white font-bold text-sm">
-              Operational Security & Permissions Boundaries (Enforced by Backend)
-            </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              As System Administrator, you manage users, roles, platform configuration, and system health. By strict design, direct modification of official agricultural statistics and direct unapproved dataset publishing are denied to preserve analytical integrity and data governance separation.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 text-[11px]">
-              <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/40 text-emerald-300">
-                ✓ Manage User Accounts: <span className="font-bold">Allowed</span>
-              </div>
-              <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/40 text-emerald-300">
-                ✓ Configure Settings: <span className="font-bold">Allowed</span>
-              </div>
-              <div className="p-2 rounded-lg bg-rose-950/60 border border-rose-800/40 text-rose-300">
-                ✕ Modify Crop Stats: <span className="font-bold">Denied</span>
-              </div>
-              <div className="p-2 rounded-lg bg-rose-950/60 border border-rose-800/40 text-rose-300">
-                ✕ Erase Audit Trail: <span className="font-bold">Denied</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>

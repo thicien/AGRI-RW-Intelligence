@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { UserCheck, ShieldCheck, Lock, Key, MapPin, CheckCircle2 } from 'lucide-react';
+import ProfilePictureUploader from '../auth/ProfilePictureUploader';
 
 export default function DistrictProfilePage() {
   const { districtName } = useOutletContext<{ districtName: string }>();
 
-  const savedUser = (() => {
-    try {
-      const u = localStorage.getItem('agrilens_user');
-      if (u) return JSON.parse(u);
-    } catch {}
+  const [officerUser, setOfficerUser] = useState(() => {
+    const saved = localStorage.getItem('agrilens_user');
+    const avatar = localStorage.getItem('agrilens_user_avatar');
+    if (saved) {
+      try {
+        const u = JSON.parse(saved);
+        return { ...u, avatarUrl: u.avatarUrl || avatar || null };
+      } catch (e) {}
+    }
     return {
       name: 'Damascene Nkundabagenzi',
       email: 'officer.musanze@minagri.gov.rw',
       phone: '+250 788 567 890',
       role: 'DISTRICT_OFFICER',
-      roleName: 'District Agricultural Officer'
+      roleName: 'District Agricultural Officer',
+      avatarUrl: avatar || null
     };
-  })();
+  });
+
+  useEffect(() => {
+    const syncUser = () => {
+      const saved = localStorage.getItem('agrilens_user');
+      const avatar = localStorage.getItem('agrilens_user_avatar');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          setOfficerUser({ ...u, avatarUrl: u.avatarUrl || avatar || null });
+        } catch (e) {}
+      }
+    };
+    window.addEventListener('agrilens_user_updated', syncUser);
+    return () => window.removeEventListener('agrilens_user_updated', syncUser);
+  }, []);
 
   const [currentPass, setCurrentPass] = useState('');
   const [newPass, setNewPass] = useState('');
@@ -54,14 +75,20 @@ export default function DistrictProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Account Details Card */}
-        <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-4">
           <div>
-            <div className="w-16 h-16 rounded-full bg-emerald-700 text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
-              {savedUser.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+            <div className="mb-4">
+              <ProfilePictureUploader
+                currentAvatar={officerUser.avatarUrl || null}
+                userName={officerUser.name}
+                userEmail={officerUser.email}
+                initials={officerUser.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                onAvatarUpdated={(newAvatar) => setOfficerUser((prev: any) => ({ ...prev, avatarUrl: newAvatar }))}
+              />
             </div>
-            <div className="text-center mb-4">
-              <h2 className="text-base font-bold text-slate-900">{savedUser.name}</h2>
-              <div className="text-xs text-slate-500 font-medium">{savedUser.roleName || 'District Agricultural Officer'}</div>
+            <div className="text-left mb-4 pt-3 border-t border-slate-100">
+              <h2 className="text-base font-bold text-slate-900">{officerUser.name}</h2>
+              <div className="text-xs text-slate-500 font-medium">{officerUser.roleName || 'District Agricultural Officer'}</div>
               <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                 ACTIVE
               </span>
@@ -70,7 +97,7 @@ export default function DistrictProfilePage() {
             <div className="space-y-3 text-xs border-t border-slate-100 pt-4">
               <div>
                 <span className="text-slate-400 block mb-0.5">Official Email:</span>
-                <span className="font-semibold text-slate-800 truncate block">{savedUser.email}</span>
+                <span className="font-semibold text-slate-800 truncate block">{officerUser.email}</span>
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">Assigned District:</span>

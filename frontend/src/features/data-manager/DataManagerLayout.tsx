@@ -19,12 +19,14 @@ export default function DataManagerLayout() {
     role: string;
     roleName: string;
     scopeLevel: string;
+    avatarUrl?: string | null;
   }>(() => {
     const saved = localStorage.getItem('agrilens_user');
+    const avatar = localStorage.getItem('agrilens_user_avatar');
     if (saved) {
       try {
         const u = JSON.parse(saved);
-        if (u.role === 'DATA_MANAGER') return u;
+        if (u.role === 'DATA_MANAGER') return { ...u, avatarUrl: u.avatarUrl || avatar || null };
       } catch (e) {}
     }
     return {
@@ -33,7 +35,8 @@ export default function DataManagerLayout() {
       email: 'datamanager@agrilens.gov.rw',
       role: 'DATA_MANAGER',
       roleName: 'Chief Data Manager & Quality Controller',
-      scopeLevel: 'NATIONAL_DOMAINS'
+      scopeLevel: 'NATIONAL_DOMAINS',
+      avatarUrl: avatar || null
     };
   });
 
@@ -61,6 +64,28 @@ export default function DataManagerLayout() {
     localStorage.removeItem('agrilens_user');
     navigate('/login');
   };
+
+  useEffect(() => {
+    const syncUser = () => {
+      const saved = localStorage.getItem('agrilens_user');
+      const avatar = localStorage.getItem('agrilens_user_avatar');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          setDataManager({ ...u, avatarUrl: u.avatarUrl || avatar || null });
+        } catch (e) {}
+      } else if (avatar) {
+        setDataManager(prev => ({ ...prev, avatarUrl: avatar }));
+      }
+    };
+
+    window.addEventListener('agrilens_user_updated', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('agrilens_user_updated', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
+  }, []);
 
   return (
     <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-800 overflow-hidden">
@@ -139,17 +164,24 @@ export default function DataManagerLayout() {
             <button 
               onClick={handleLogout}
               title="Sign Out"
-              className="text-red-300 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+              className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider text-rose-300 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all"
             >
-              <LogOut className="w-3 h-3" />
-              <span>Logout</span>
+              LOGOUT
             </button>
           </div>
 
           <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/10 border border-white/10">
-            <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow">
-              {dataManager.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            </div>
+            {dataManager.avatarUrl ? (
+              <img
+                src={dataManager.avatarUrl}
+                alt={dataManager.name}
+                className="w-8 h-8 rounded-full object-cover border border-emerald-400/50 shadow flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow">
+                {dataManager.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold text-white truncate leading-snug">
                 {dataManager.name}

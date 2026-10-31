@@ -1,1018 +1,1282 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { apiUrl } from '../../config/api';
 import { 
-  Leaf, TrendingUp, AlertTriangle, CheckCircle2, ShieldAlert, 
+  Sprout, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ShieldAlert, 
   ChevronRight, ArrowUpRight, ArrowDownRight, Filter, Download, 
   MapPin, RefreshCw, FileText, Layers, Droplets, Thermometer, 
   Sparkles, Info, HelpCircle, BarChart3, Calendar, Award, Database,
-  Check, FileSpreadsheet
+  Check, FileSpreadsheet, Search, X, Compass, ExternalLink, Globe,
+  SlidersHorizontal, ArrowRight, Eye, EyeOff
 } from 'lucide-react';
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, 
   CartesianGrid, Cell, AreaChart, Area, LineChart, Line, Legend
 } from 'recharts';
 
+export type MapIndicatorType = 'production_tonnes' | 'cultivated_area_ha' | 'yield_t_ha';
+
+export interface DistrictStat {
+  district_id: string;
+  district_name: string;
+  district_code: string;
+  province_name: string;
+  production_tonnes: number | null;
+  prev_production_tonnes: number | null;
+  production_change_pct: number | null;
+  cultivated_area_ha: number | null;
+  harvested_area_ha: number | null;
+  yield_t_ha: number | null;
+  national_share_pct: number;
+  rank: number;
+  has_data: boolean;
+  dominant_crops: Array<{
+    crop_name: string;
+    production_tonnes: number;
+    area_ha: number;
+    yield_t_ha: number;
+    share_pct: number;
+  }>;
+}
+
 export default function CropsSeasonsPage() {
-  const [activeTab, setActiveTab] = useState<'ranking' | 'seasonal' | 'trends' | 'investigation' | 'dossier' | 'dataquality'>('ranking');
-  const [selectedCrop, setSelectedCrop] = useState('Maize');
-  const [selectedSeason, setSelectedSeason] = useState('2025A');
-  const [selectedDistrict, setSelectedDistrict] = useState('RW-05-07'); // Default Bugesera
-  const [loading, setLoading] = useState(false);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const hoverPopupRef = useRef<maplibregl.Popup | null>(null);
 
-  // Dynamic Metadata Lists
-  const [availableCrops, setAvailableCrops] = useState<any[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
-  const [dataQualityReport, setDataQualityReport] = useState<any>(null);
+  // Filter States
+  const [selectedSeason, setSelectedSeason] = useState<string>('2025A');
+  const [selectedCrop, setSelectedCrop] = useState<string>('All crops');
+  const [activeIndicator, setActiveIndicator] = useState<MapIndicatorType>('production_tonnes');
+  const [selectedProvince, setSelectedProvince] = useState<string>('ALL');
+  const [compareSeason, setCompareSeason] = useState<string>('');
+  const [searchDistrict, setSearchDistrict] = useState<string>('');
+  const [tableSearch, setTableSearch] = useState<string>('');
 
-  // Analytical Data States
-  const [summaryData, setSummaryData] = useState<any>({});
-  const [districtComparison, setDistrictComparison] = useState<any>({ districts: [], nationalBenchmark: {} });
-  const [seasonalComparison, setSeasonalComparison] = useState<any>({ comparisons: [] });
-  const [trendData, setTrendData] = useState<any[]>([]);
-  const [investigationData, setInvestigationData] = useState<any>({ lowerPerformingAreas: [], allDistrictsRanked: [], criteria: [] });
-  const [dossierData, setDossierData] = useState<any>(null);
+  // Selected District for Side Panel
+  const [selectedDistrictName, setSelectedDistrictName] = useState<string>('Nyagatare');
+  const [districtTab, setDistrictTab] = useState<'OVERVIEW' | 'CROPS' | 'TRENDS' | 'QUALITY'>('OVERVIEW');
 
-  // Fetch Crops & Seasons Catalog Once on Mount
-  useEffect(() => {
-    const fetchCatalogs = async () => {
-      try {
-        const apiBase = apiUrl('crop-statistics');
+  // Refs for map callbacks to prevent stale closures
+  const districtsRef = useRef<DistrictStat[]>([]);
+  const selectedDistrictNameRef = useRef<string>('Nyagatare');
+  const geojsonLoadedRef = useRef<boolean>(false);
+  const activeIndicatorRef = useRef<MapIndicatorType>('production_tonnes');
 
-        const [cropsRes, seasonsRes, dqRes] = await Promise.all([
-          fetch(`${apiBase}/crops`).catch(() => null),
-          fetch(`${apiBase}/seasons`).catch(() => null),
-          fetch(`${apiBase}/data-quality`).catch(() => null),
-        ]);
+  // Backend Data States
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [availableSeasons, setAvailableSeasons] = useState<Array<{ code: string; label: string }>>([]);
+  const [availableCrops, setAvailableCrops] = useState<Array<{ id: string; name: string; category: string }>>([]);
+  const [nationalSummary, setNationalSummary] = useState<any>(null);
+  const [districts, setDistricts] = useState<DistrictStat[]>([]);
+  const [seasonalTrends, setSeasonalTrends] = useState<any[]>([]);
+  const [cropComparisonTable, setCropComparisonTable] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any>({ large_increases: [], large_decreases: [], stable_crops: [] });
+  const [tableSortField, setTableSortField] = useState<string>('current_production_tonnes');
+  const [tableSortAsc, setTableSortAsc] = useState<boolean>(false);
 
-        if (cropsRes && cropsRes.ok) {
-          const list = await cropsRes.json();
-          if (Array.isArray(list) && list.length > 0) {
-            setAvailableCrops(list);
-          }
-        }
-
-        if (seasonsRes && seasonsRes.ok) {
-          const list = await seasonsRes.json();
-          if (Array.isArray(list) && list.length > 0) {
-            setAvailableSeasons(list);
-          }
-        }
-
-        if (dqRes && dqRes.ok) {
-          const dq = await dqRes.json();
-          setDataQualityReport(dq);
-        }
-      } catch (e) {
-        console.warn('Error loading crops/seasons catalog:', e);
-      }
-    };
-
-    fetchCatalogs();
-  }, []);
-
-  // Fetch Module Analytical Data when filters change
-  const fetchModuleData = async () => {
-    setLoading(true);
+  // 1. Fetch Decision Workspace Data from Backend
+  const fetchDecisionWorkspace = async () => {
     try {
-      const apiBase = apiUrl('crop-statistics');
+      setLoading(true);
+      setError(null);
 
-      // 1. Overview Summary
-      const sumRes = await fetch(`${apiBase}/summary?season=${selectedSeason}`).catch(() => null);
-      if (sumRes && sumRes.ok) {
-        const json = await sumRes.json();
-        setSummaryData(json.overview || {});
+      const params = new URLSearchParams();
+      params.append('season', selectedSeason);
+      if (selectedCrop) params.append('crop', selectedCrop);
+      if (compareSeason) params.append('compareSeason', compareSeason);
+      if (selectedProvince) params.append('province', selectedProvince);
+
+      const url = apiUrl(`crop-statistics/decision-workspace?${params.toString()}`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load crops intelligence`);
+
+      const data = await res.json();
+
+      setNationalSummary(data.nationalSummary || null);
+      const districtList: DistrictStat[] = data.districts || [];
+      setDistricts(districtList);
+      districtsRef.current = districtList;
+      setSeasonalTrends(data.seasonalTrends || []);
+      setCropComparisonTable(data.cropComparisonTable || []);
+      setAlerts(data.alerts || { large_increases: [], large_decreases: [], stable_crops: [] });
+
+      if (data.meta?.availableSeasons) {
+        setAvailableSeasons(data.meta.availableSeasons);
+      }
+      if (data.meta?.availableCrops) {
+        setAvailableCrops(data.meta.availableCrops);
+      }
+      if (data.meta?.compareSeason && !compareSeason) {
+        setCompareSeason(data.meta.compareSeason);
       }
 
-      // 2. District League Table & Deficits
-      const distRes = await fetch(`${apiBase}/district-comparison?crop=${encodeURIComponent(selectedCrop)}&season=${selectedSeason}`).catch(() => null);
-      if (distRes && distRes.ok) {
-        const json = await distRes.json();
-        setDistrictComparison(json);
+      // If current selected district is not set or not in list, pick the highest producing
+      if (districtList.length > 0) {
+        const exists = districtList.some((d: DistrictStat) => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase());
+        if (!exists) {
+          setSelectedDistrictName(districtList[0].district_name);
+          selectedDistrictNameRef.current = districtList[0].district_name;
+        }
       }
-
-      // 3. Season A vs Season B Comparison
-      const yrMatch = selectedSeason.match(/^\d{4}/);
-      const yr = yrMatch ? parseInt(yrMatch[0], 10) : 2025;
-      const seasRes = await fetch(`${apiBase}/seasonal-comparison?crop=${encodeURIComponent(selectedCrop)}&year=${yr}`).catch(() => null);
-      if (seasRes && seasRes.ok) {
-        const json = await seasRes.json();
-        setSeasonalComparison(json);
-      }
-
-      // 4. Historical Trends (Spanning 2018-2025)
-      const trendRes = await fetch(`${apiBase}/historical-trends?crop=${encodeURIComponent(selectedCrop)}`).catch(() => null);
-      if (trendRes && trendRes.ok) {
-        const json = await trendRes.json();
-        setTrendData(json.trends || []);
-      }
-
-      // 5. Underperforming Areas & Investigation Ranking
-      const invRes = await fetch(`${apiBase}/underperforming-areas?season=${selectedSeason}&crop=${encodeURIComponent(selectedCrop)}`).catch(() => null);
-      if (invRes && invRes.ok) {
-        const json = await invRes.json();
-        setInvestigationData(json);
-      }
-
-      // 6. District Dossier
-      const dosRes = await fetch(`${apiBase}/district-dossier?district=${encodeURIComponent(selectedDistrict)}&crop=${encodeURIComponent(selectedCrop)}&season=${selectedSeason}`).catch(() => null);
-      if (dosRes && dosRes.ok) {
-        const json = await dosRes.json();
-        setDossierData(json);
-      }
-    } catch (e) {
-      console.warn('API error in CropsSeasonsPage:', e);
+    } catch (err: any) {
+      console.error('Error fetching decision workspace data:', err);
+      setError(err.message || 'Unable to connect to crop statistics server.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchModuleData();
-  }, [selectedCrop, selectedSeason, selectedDistrict]);
+    fetchDecisionWorkspace();
+  }, [selectedSeason, selectedCrop, compareSeason]);
 
-  // Grouped Crops for UX Dropdown
-  const groupedCrops = availableCrops.reduce((acc: any, c: any) => {
-    const cat = c.category || 'Other';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(c);
-    return acc;
-  }, {});
+  // Selected district object
+  const selectedDistrict = useMemo(() => {
+    return districts.find(d => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase()) || districts[0] || null;
+  }, [districts, selectedDistrictName]);
 
-  // Fallback crop categories if catalog is still loading
-  const defaultCrops = [
-    'Maize', 'Sorghum', 'Rice', 'Wheat', 'Other Cereals',
-    'Cassava', 'Sweet Potato', 'Irish Potato', 'Yams & Taro',
-    'Cooking Banana', 'Dessert Banana', 'Banana for Beer', 'Banana',
-    'Beans', 'Bush Bean', 'Climbing Bean', 'Peas', 'Groundnuts', 'Soybean',
-    'Vegetables', 'Fruits', 'Fodder Crops', 'Other Crops'
-  ];
-
-  const defaultSeasons = [
-    '2026B', '2026A',
-    '2025C', '2025B', '2025A',
-    '2024C', '2024B', '2024A',
-    '2023C', '2023B', '2023A',
-    '2022C', '2022B', '2022A',
-    '2021C', '2021B', '2021A',
-    '2020C', '2020B', '2020A',
-    '2019C', '2019B', '2019A',
-    '2018C', '2018B', '2018A',
-    '2017C', '2017B', '2017A',
-    '2016C', '2016B', '2016A',
-    '2015C', '2015B', '2015A',
-    '2014B', '2014A'
-  ];
-
-  const getTierBadge = (tier: string) => {
-    switch(tier) {
-      case 'SUPERIOR':
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">SUPERIOR (&gt;+20%)</span>;
-      case 'ABOVE_AVERAGE':
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">ABOVE AVG (+5% to +20%)</span>;
-      case 'AVERAGE':
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">AVERAGE (±5%)</span>;
-      case 'BELOW_AVERAGE':
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">BELOW AVG (-5% to -25%)</span>;
-      case 'CRITICAL_DEFICIT':
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 border border-red-200">CRITICAL DEFICIT (&lt;-25%)</span>;
-      default:
-        return <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">{tier}</span>;
+  // Indicator Label, Unit & Extents
+  const indicatorConfig = useMemo(() => {
+    switch (activeIndicator) {
+      case 'production_tonnes':
+        return {
+          label: 'Total Production',
+          unit: 'Tonnes',
+          getValue: (d: DistrictStat) => d.production_tonnes,
+          format: (v: number | null) => v !== null ? `${Math.round(v).toLocaleString()} MT` : 'No data recorded',
+          description: 'Gross agricultural output harvested in the selected season.',
+        };
+      case 'cultivated_area_ha':
+        return {
+          label: 'Cultivated Area',
+          unit: 'Hectares',
+          getValue: (d: DistrictStat) => d.cultivated_area_ha,
+          format: (v: number | null) => v !== null ? `${Math.round(v).toLocaleString()} ha` : 'No data recorded',
+          description: 'Physical land area under cultivation during the agricultural cycle.',
+        };
+      case 'yield_t_ha':
+        return {
+          label: 'Crop Yield',
+          unit: 't/ha',
+          getValue: (d: DistrictStat) => d.yield_t_ha,
+          format: (v: number | null) => v !== null ? `${v.toFixed(2)} t/ha` : 'No data recorded',
+          description: 'Output per harvested hectare (Biological yield).',
+        };
     }
+  }, [activeIndicator]);
+
+  // Dynamic Quantiles / Thresholds for Legend
+  const extents = useMemo(() => {
+    const validVals = districts
+      .map(d => indicatorConfig.getValue(d))
+      .filter((v): v is number => typeof v === 'number' && !isNaN(v) && v > 0)
+      .sort((a, b) => a - b);
+
+    if (validVals.length === 0) {
+      return { min: 0, p25: 25, p50: 50, p75: 75, max: 100 };
+    }
+
+    const min = validVals[0];
+    const max = validVals[validVals.length - 1];
+    const p25 = validVals[Math.floor(validVals.length * 0.25)] ?? min;
+    const p50 = validVals[Math.floor(validVals.length * 0.50)] ?? (min + max) / 2;
+    const p75 = validVals[Math.floor(validVals.length * 0.75)] ?? max;
+    return { min, p25, p50, p75, max };
+  }, [districts, indicatorConfig]);
+
+  // Color Ramp: 5 sequential green shades + neutral gray for missing data
+  const greenRamp = ['#E8F5E9', '#A5D6A7', '#4CAF50', '#2E7D32', '#1B5E20'];
+  const missingColor = '#94A3B8'; // Neutral slate gray for missing/unreported data
+
+  const getDistrictColor = (d: DistrictStat): string => {
+    const val = indicatorConfig.getValue(d);
+    if (val === null || val === undefined || !d.has_data) {
+      return missingColor;
+    }
+    const { min, max, p25, p50, p75 } = extents;
+    if (max === min) return greenRamp[2];
+    if (val <= p25) return greenRamp[0];
+    if (val <= p50) return greenRamp[1];
+    if (val <= p75) return greenRamp[2];
+    if (val < max) return greenRamp[3];
+    return greenRamp[4];
   };
 
-  const getPriorityBadge = (tier: string) => {
-    switch(tier) {
-      case 'CRITICAL_INVESTIGATION':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-rose-600" /> CRITICAL</span>;
-      case 'MODERATE_CONCERN':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-amber-600" /> MODERATE</span>;
-      case 'WATCHLIST':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300 flex items-center gap-1"><Info className="w-3 h-3 text-blue-600" /> WATCHLIST</span>;
-      default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-600" /> STABLE</span>;
+  // 2. Initialize MapLibre GL JS
+  useEffect(() => {
+    if (!mapContainer.current) return;
+    if (map.current) return;
+
+    // Use OpenStreetMap standard tiles for guaranteed reliability across all environments
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: {
+        version: 8,
+        sources: {
+          'osm-tiles': {
+            type: 'raster',
+            tiles: [
+              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors, NISR Rwanda',
+          },
+        },
+        layers: [
+          {
+            id: 'osm-layer',
+            type: 'raster',
+            source: 'osm-tiles',
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
+      },
+      center: [29.98, -1.94],
+      zoom: 8.3,
+      minZoom: 7.2,
+      maxZoom: 14,
+    });
+
+    map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+    map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
+
+    map.current.on('load', async () => {
+      if (!map.current) return;
+
+      try {
+        const res = await fetch('/rwanda-districts.geojson');
+        const geojson = await res.json();
+        geojsonLoadedRef.current = true;
+
+        if (!map.current.getSource('rwanda-districts')) {
+          map.current.addSource('rwanda-districts', {
+            type: 'geojson',
+            data: geojson,
+          });
+
+          // Build match expression from current districts state if available
+          let initialFill: any = '#4CAF50';
+          const currentList = districtsRef.current;
+          if (currentList && currentList.length > 0) {
+            const matchExpr: any[] = ['match', ['get', 'shapeName']];
+            for (const d of currentList) {
+              matchExpr.push(d.district_name, getDistrictColor(d));
+            }
+            matchExpr.push(missingColor);
+            initialFill = matchExpr;
+          }
+
+          // District Fill Layer
+          map.current.addLayer({
+            id: 'district-fill',
+            type: 'fill',
+            source: 'rwanda-districts',
+            paint: {
+              'fill-color': initialFill,
+              'fill-opacity': 0.82,
+            },
+          });
+
+          // District Boundary Lines
+          map.current.addLayer({
+            id: 'district-borders',
+            type: 'line',
+            source: 'rwanda-districts',
+            paint: {
+              'line-color': '#0F172A',
+              'line-width': 1.3,
+              'line-opacity': 0.75,
+            },
+          });
+
+          // Selected District Glowing Highlight Border
+          map.current.addLayer({
+            id: 'district-selected-border',
+            type: 'line',
+            source: 'rwanda-districts',
+            filter: ['==', 'shapeName', selectedDistrictNameRef.current || ''],
+            paint: {
+              'line-color': '#0D47A1',
+              'line-width': 3.5,
+              'line-opacity': 1.0,
+            },
+          });
+
+          // Fit map bounds to Rwanda territory
+          map.current.fitBounds([
+            [28.86, -2.84],
+            [30.90, -1.05]
+          ], { padding: 25 });
+
+          // Hover interaction
+          map.current.on('mousemove', 'district-fill', (e) => {
+            if (!map.current || !e.features || e.features.length === 0) return;
+            map.current.getCanvas().style.cursor = 'pointer';
+
+            const shapeName = e.features[0].properties?.shapeName;
+            if (!shapeName) return;
+
+            const district = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
+            if (!district) return;
+
+            const val = indicatorConfig.getValue(district);
+            const formatted = indicatorConfig.format(val);
+
+            if (!hoverPopupRef.current) {
+              hoverPopupRef.current = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                offset: 12,
+              });
+            }
+
+            hoverPopupRef.current
+              .setLngLat(e.lngLat)
+              .setHTML(`
+                <div style="font-family: inherit; padding: 6px 10px; min-width: 175px;">
+                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${district.district_name}</span>
+                    <span style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">${district.province_name}</span>
+                  </div>
+                  <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">
+                    ${selectedCrop} · ${indicatorConfig.label}:
+                  </div>
+                  <div style="font-size: 16px; font-weight: 800; color: #166534; margin-bottom: 6px;">
+                    ${formatted}
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">
+                    <span>Rank: <b>#${district.rank} of 30</b></span>
+                    <span>Share: <b>${district.national_share_pct}%</b></span>
+                  </div>
+                </div>
+              `)
+              .addTo(map.current);
+          });
+
+          map.current.on('mouseleave', 'district-fill', () => {
+            if (map.current) map.current.getCanvas().style.cursor = '';
+            if (hoverPopupRef.current) hoverPopupRef.current.remove();
+          });
+
+          // Click on district polygon
+          map.current.on('click', 'district-fill', (e) => {
+            if (!e.features || e.features.length === 0) return;
+            const shapeName = e.features[0].properties?.shapeName;
+            if (shapeName) {
+              setSelectedDistrictName(shapeName);
+              selectedDistrictNameRef.current = shapeName;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load district boundaries GeoJSON:', err);
+      }
+    });
+
+    const handleResize = () => {
+      map.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+    const initialResizeTimer = setTimeout(() => {
+      map.current?.resize();
+    }, 300);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(initialResizeTimer);
+      map.current?.remove();
+      map.current = null;
+    };
+  }, []);
+
+  // 3. Update Choropleth Colors when districts or indicator change
+  useEffect(() => {
+    districtsRef.current = districts;
+    selectedDistrictNameRef.current = selectedDistrictName;
+    activeIndicatorRef.current = activeIndicator;
+
+    if (!map.current || !map.current.isStyleLoaded() || !geojsonLoadedRef.current || districts.length === 0) return;
+    if (!map.current.getLayer('district-fill')) return;
+
+    const matchExpression: any[] = ['match', ['get', 'shapeName']];
+
+    for (const d of districts) {
+      const color = getDistrictColor(d);
+      matchExpression.push(d.district_name, color);
     }
+    matchExpression.push(missingColor);
+
+    map.current.setPaintProperty('district-fill', 'fill-color', matchExpression as any);
+
+    if (map.current.getLayer('district-selected-border')) {
+      map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || ''] as any);
+    }
+
+    map.current.resize();
+  }, [districts, activeIndicator, selectedDistrictName, extents]);
+
+  // Sortable Crop Comparison Table
+  const sortedTableData = useMemo(() => {
+    return [...cropComparisonTable]
+      .filter((c: any) => {
+        if (!tableSearch.trim()) return true;
+        return c.crop_name.toLowerCase().includes(tableSearch.toLowerCase()) ||
+               c.category.toLowerCase().includes(tableSearch.toLowerCase());
+      })
+      .sort((a: any, b: any) => {
+        const valA = a[tableSortField] ?? 0;
+        const valB = b[tableSortField] ?? 0;
+        if (typeof valA === 'string') {
+          return tableSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return tableSortAsc ? valA - valB : valB - valA;
+      });
+  }, [cropComparisonTable, tableSearch, tableSortField, tableSortAsc]);
+
+  // Export Filtered Table to CSV
+  const handleExportCSV = () => {
+    const headers = ['Crop Name', 'Category', `Selected Season (${selectedSeason}) Production MT`, `Compare Season (${compareSeason}) Production MT`, 'Change MT', 'Change %', 'Yield t/ha', 'Cultivated ha', 'National Share %', 'Leading District'];
+    const rows = sortedTableData.map(c => [
+      c.crop_name,
+      c.category,
+      c.current_production_tonnes,
+      c.prev_production_tonnes !== null ? c.prev_production_tonnes : 'N/A',
+      c.change_tonnes !== null ? c.change_tonnes : 'N/A',
+      c.change_pct !== null ? `${c.change_pct}%` : 'N/A',
+      c.current_yield_t_ha,
+      c.current_area_ha,
+      `${c.national_share_pct}%`,
+      c.leading_district ? `${c.leading_district.name} (${c.leading_district.production_tonnes} MT)` : 'N/A',
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + 
+      [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(','))].join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Rwanda_Crops_${selectedCrop}_${selectedSeason}_Comparison.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300">
       
-      {/* Top Banner / Module 1 Header */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-emerald-500/20">
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/15 via-transparent to-transparent pointer-events-none" />
-        
+      {/* 1. Page Header & Planning Workspace Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-3 border border-emerald-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Module 1 — Agricultural Productivity Intelligence
+              National Agricultural Planner · Crops & Seasons
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <Leaf className="w-8 h-8 text-emerald-400" />
-              Crop Productivity & Yield Diagnostics
+              <Sprout className="w-8 h-8 text-emerald-400" />
+              National Crop Production Intelligence
             </h1>
-            <p className="text-emerald-100/70 text-sm mt-1 max-w-2xl leading-relaxed">
-              Identify where agricultural productivity is strong, where it is weak, how it changes across seasons, and rank lower-performing areas for evidence-based agricultural extension support.
+            <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
+              National agricultural decision-making workspace. Assess where Rwanda produces the most, track production variations across seasons, detect expanding or declining crops, and target agricultural interventions with real NISR-derived data.
             </p>
-
-            {/* Quality Badge Counter */}
-            <div className="mt-3 flex items-center gap-3 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 font-medium">
-                <Database className="w-3.5 h-3.5 text-emerald-400" />
-                {Number(dataQualityReport?.foundationOverview?.total_records || 17912).toLocaleString()} Historical Records
-              </span>
-              <span className="text-slate-400">•</span>
-              <span className="text-emerald-300/80">
-                {dataQualityReport?.foundationOverview?.distinct_seasons || '35'} Seasons (2014–2026)
-              </span>
-              <span className="text-slate-400">•</span>
-              <span className="text-emerald-300/80">
-                {dataQualityReport?.foundationOverview?.distinct_crops || '24'} Crops Monitored
-              </span>
-              <span className="text-slate-400">•</span>
-              <span className="text-emerald-400 font-bold">
-                99.3% Quality Verified
-              </span>
-            </div>
           </div>
 
-          {/* Season & Crop Controls */}
-          <div className="flex flex-wrap items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-xl border border-white/10 self-stretch sm:self-auto">
-            {/* Dynamic Crop Selector */}
-            <div className="flex items-center gap-1.5 px-2">
-              <span className="text-xs text-white/70 font-medium">Crop:</span>
-              <select
-                value={selectedCrop}
-                onChange={(e) => setSelectedCrop(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-2.5 py-1 text-xs text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer max-w-[170px]"
-              >
-                {Object.keys(groupedCrops).length > 0 ? (
-                  Object.entries(groupedCrops).map(([cat, list]: [string, any]) => (
-                    <optgroup key={cat} label={cat} className="bg-slate-900 text-emerald-300 font-bold">
-                      {list.map((c: any) => (
-                        <option key={c.name} value={c.name} className="bg-slate-800 text-white font-normal">
-                          {c.name} ({c.total_records || 0})
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))
-                ) : (
-                  defaultCrops.map(c => (
-                    <option key={c} value={c} className="bg-slate-900 text-white">{c}</option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            {/* Dynamic Season Selector */}
-            <div className="flex items-center gap-1.5 px-2 border-l border-white/10">
-              <span className="text-xs text-white/70 font-medium">Season:</span>
-              <select
-                value={selectedSeason}
-                onChange={(e) => setSelectedSeason(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-2.5 py-1 text-xs text-white font-bold focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
-              >
-                {availableSeasons.length > 0 ? (
-                  availableSeasons
-                    .filter((s: any) => s.total_records > 0 || ['2026B', '2026A', '2025A', '2025B', '2024A', '2024B'].includes(s.season_code))
-                    .map((s: any) => (
-                      <option key={s.season_code} value={s.season_code} className="bg-slate-900 text-white">
-                        {s.season_code} ({s.official_label || s.season_code})
-                      </option>
-                    ))
-                ) : (
-                  defaultSeasons.map(s => (
-                    <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            <button 
-              onClick={fetchModuleData}
+          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <button
+              onClick={fetchDecisionWorkspace}
               disabled={loading}
-              className="p-1.5 hover:bg-white/10 rounded-lg text-white/80 hover:text-white transition-colors"
-              title="Refresh Analytics"
+              className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-emerald-300 text-xs font-bold transition-all flex items-center gap-2 border border-slate-700 shadow-md"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              Refresh Data
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-950"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export Dataset
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Analytical Navigation Tabs */}
-        <div className="flex items-center gap-2 mt-8 overflow-x-auto pb-2 scrollbar-none border-t border-white/10 pt-4">
-          {[
-            { id: 'ranking', name: 'District Rankings & Deficits', icon: Award },
-            { id: 'seasonal', name: 'Season A vs Season B Shift', icon: Calendar },
-            { id: 'trends', name: 'Historical Trajectory (2014–2026)', icon: TrendingUp },
-            { id: 'investigation', name: 'Investigation Priority Ranking', icon: ShieldAlert },
-            { id: 'dossier', name: 'Extension Officer Dossier', icon: FileText },
-            { id: 'dataquality', name: 'Data Quality & Foundation', icon: Database },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-white text-slate-900 shadow-lg scale-102 font-bold'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600' : 'text-white/60'}`} />
-                {tab.name}
-              </button>
-            );
-          })}
+      {/* 2. Unified Master Filter Bar */}
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-main">
+          <div className="flex items-center gap-2 text-xs font-bold text-text-main uppercase tracking-wider">
+            <SlidersHorizontal className="w-4 h-4 text-primary" />
+            Decision-Making Parameters (Controls All Visualizations)
+          </div>
+          <span className="text-[11px] text-muted">
+            All maps, charts, comparisons, and district dossiers sync to these 4 parameters.
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          
+          {/* Season Selector */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-primary" /> Monitored Season
+            </label>
+            <select
+              value={selectedSeason}
+              onChange={(e) => setSelectedSeason(e.target.value)}
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+            >
+              {availableSeasons.map(s => (
+                <option key={s.code} value={s.code}>
+                  {s.label} ({s.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Crop Selector */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <Sprout className="w-3 h-3 text-agriculture" /> Crop Focus
+            </label>
+            <select
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="All crops">🌾 All Crops (National Total)</option>
+              {availableCrops.map(c => (
+                <option key={c.id} value={c.name}>
+                  {c.name} ({c.category})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Map Indicator Selector */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <BarChart3 className="w-3 h-3 text-primary" /> Map Indicator
+            </label>
+            <select
+              value={activeIndicator}
+              onChange={(e) => setActiveIndicator(e.target.value as MapIndicatorType)}
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="production_tonnes">Total Production (Tonnes)</option>
+              <option value="cultivated_area_ha">Cultivated Area (Hectares)</option>
+              <option value="yield_t_ha">Biological Yield (t/ha)</option>
+            </select>
+          </div>
+
+          {/* Geographic Scope Filter */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-teal-600" /> Geographic Scope
+            </label>
+            <select
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.target.value)}
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="ALL">All Districts — National View</option>
+              <option value="Northern Province">Northern Province</option>
+              <option value="Southern Province">Southern Province</option>
+              <option value="Eastern Province">Eastern Province</option>
+              <option value="Western Province">Western Province</option>
+              <option value="Kigali City">Kigali City</option>
+            </select>
+          </div>
+
+          {/* Season Comparison Selector */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <TrendingUp className="w-3 h-3 text-amber-600" /> Comparison Season
+            </label>
+            <select
+              value={compareSeason}
+              onChange={(e) => setCompareSeason(e.target.value)}
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+            >
+              {availableSeasons.map(s => (
+                <option key={s.code} value={s.code}>
+                  Compare with {s.code}
+                </option>
+              ))}
+            </select>
+          </div>
+
         </div>
       </div>
 
-      {/* CORE METHODOLOGY & LIMITATION NOTICE */}
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3 text-amber-900">
-        <Info className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-        <div className="text-xs leading-relaxed">
-          <span className="font-bold">Core Methodological Principle & Limitation: </span>
-          Yield is strictly calculated as <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">Yield = Production (MT) / Harvested Area (Ha)</code> to preserve biological accuracy. 
-          Unharvested loss gaps are tracked explicitly. <span className="font-bold">Low yield is an evidence-backed signal for investigation, not definitive proof of a single root cause</span>. AgriLens guides agricultural extension officers to verify soil chemistry, irrigation access, pest pressure, and seed quality before drawing conclusions.
-        </div>
-      </div>
-
-      {/* KPI METRIC CARDS FOR CURRENT SELECTION */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>TOTAL MONITORED PRODUCTION</span>
-            <Layers className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-slate-900">
-            {Number(summaryData.total_production_mt || 0).toLocaleString()} <span className="text-sm font-normal text-slate-500">MT</span>
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            {summaryData.total_crops_monitored || 24} crops across {summaryData.total_districts_monitored || 30} districts
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>MONITORED CULTIVATED AREA</span>
-            <MapPin className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-slate-900">
-            {Number(summaryData.total_cultivated_area_ha || 0).toLocaleString()} <span className="text-sm font-normal text-slate-500">Ha</span>
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Harvested Area: <span className="font-bold text-slate-700">{Number(summaryData.total_harvested_area_ha || 0).toLocaleString()} Ha</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>WEIGHTED HARVESTED YIELD</span>
-            <TrendingUp className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-emerald-700">
-            {summaryData.weighted_national_yield_t_ha || '0.00'} <span className="text-sm font-normal text-slate-500">t/ha</span>
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Calculated on harvested area (compatible units)
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>UNHARVESTED LOSS GAP</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="mt-2 text-2xl font-black text-amber-700">
-            {summaryData.national_unharvested_rate_pct || '0.0'}%
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Planted area lost or abandoned pre-harvest
-          </div>
-        </div>
-      </div>
-
-      {/* ======================================================== */}
-      {/* TAB 1: DISTRICT RANKINGS & DEFICIT ANALYSIS              */}
-      {/* ======================================================== */}
-      {activeTab === 'ranking' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-600" />
-                  30-District Yield Ranking: {selectedCrop} ({selectedSeason})
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Benchmarked against National Mean ({districtComparison.nationalBenchmark?.nationalMean || 0} t/ha). Deficit highlights areas producing below standard.
-                </p>
-              </div>
-              <div className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                National Mean: <span className="font-bold text-slate-900">{districtComparison.nationalBenchmark?.nationalMean} t/ha</span>
-              </div>
+      {/* 3. National Performance Summary Cards */}
+      {nationalSummary && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Total Production Card */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
+              <span>Total Production</span>
+              <Sprout className="w-4 h-4 text-agriculture" />
             </div>
-
-            {/* Yield Distribution Bar Chart */}
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={districtComparison.districts?.slice(0, 15) || []} margin={{ top: 10, right: 10, left: -20, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="district_name" angle={-45} textAnchor="end" interval={0} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} unit=" t" />
-                  <RechartsTooltip 
-                    formatter={(val: any) => [`${val} t/ha`, 'Reported Yield']}
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                  />
-                  <Bar dataKey="yield_t_ha" radius={[4, 4, 0, 0]}>
-                    {districtComparison.districts?.slice(0, 15).map((entry: any, index: number) => {
-                      const deficit = parseFloat(entry.yield_deficit_pct || 0);
-                      const color = deficit >= 15 ? '#10b981' : deficit >= 0 ? '#3b82f6' : deficit >= -20 ? '#f59e0b' : '#ef4444';
-                      return <Cell key={`cell-${index}`} fill={color} />;
-                    })}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="text-2xl font-black text-text-main mt-1">
+              {(nationalSummary.total_production_tonnes).toLocaleString()} <span className="text-sm font-bold text-muted">MT</span>
+            </div>
+            <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
+              <span className="text-muted">vs {nationalSummary.compareSeason}:</span>
+              {nationalSummary.production_change_pct !== null ? (
+                <span className={`font-bold flex items-center gap-0.5 ${
+                  nationalSummary.production_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
+                }`}>
+                  {nationalSummary.production_change_pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {nationalSummary.production_change_pct > 0 ? '+' : ''}{nationalSummary.production_change_pct}%
+                </span>
+              ) : (
+                <span className="text-muted">No comparison</span>
+              )}
             </div>
           </div>
 
-          {/* Detailed District League Table */}
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-200/80 bg-slate-50/50 flex justify-between items-center">
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Comprehensive District Productivity League Table
-              </h4>
-              <span className="text-xs text-slate-500">
-                Showing {districtComparison.districts?.length || 0} Districts
+          {/* Cultivated Area Card */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
+              <span>Cultivated Area</span>
+              <Layers className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-2xl font-black text-text-main mt-1">
+              {(nationalSummary.total_cultivated_area_ha).toLocaleString()} <span className="text-sm font-bold text-muted">ha</span>
+            </div>
+            <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
+              <span className="text-muted">Harvested Area:</span>
+              <span className="font-bold text-text-main">
+                {nationalSummary.total_harvested_area_ha.toLocaleString()} ha
               </span>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                  <tr>
-                    <th className="py-3 px-4">Rank</th>
-                    <th className="py-3 px-4">District</th>
-                    <th className="py-3 px-4">Province</th>
-                    <th className="py-3 px-4 text-right">Yield (t/ha)</th>
-                    <th className="py-3 px-4 text-right">Deficit vs Mean</th>
-                    <th className="py-3 px-4 text-right">Production (MT)</th>
-                    <th className="py-3 px-4 text-right">Harvested Area</th>
-                    <th className="py-3 px-4 text-right">Unharvested %</th>
-                    <th className="py-3 px-4 text-center">Performance Tier</th>
-                    <th className="py-3 px-4 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {districtComparison.districts?.map((d: any) => {
-                    const deficit = parseFloat(d.yield_deficit_pct || 0);
-                    return (
-                      <tr key={d.district_code} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-500">#{d.rank}</td>
-                        <td className="py-3 px-4 font-bold text-slate-900">{d.district_name}</td>
-                        <td className="py-3 px-4 text-slate-600">{d.province_name}</td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">{d.yield_t_ha}</td>
-                        <td className="py-3 px-4 text-right font-mono font-semibold">
-                          <span className={deficit < 0 ? 'text-rose-600' : 'text-emerald-600'}>
-                            {deficit > 0 ? `+${deficit}%` : `${deficit}%`}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right text-slate-600">{Number(d.production_tonnes).toLocaleString()}</td>
-                        <td className="py-3 px-4 text-right text-slate-600">{Number(d.harvested_area_ha).toLocaleString()} Ha</td>
-                        <td className="py-3 px-4 text-right font-mono text-slate-700">{d.unharvested_loss_pct}%</td>
-                        <td className="py-3 px-4 text-center">{getTierBadge(d.performance_tier)}</td>
-                        <td className="py-3 px-4 text-center">
-                          <button
-                            onClick={() => {
-                              setSelectedDistrict(d.district_code);
-                              setActiveTab('dossier');
-                            }}
-                            className="px-2.5 py-1 text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer"
-                          >
-                            Dossier
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          </div>
+
+          {/* Average Yield (Area-Weighted Method) */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
+              <span className="flex items-center gap-1">
+                Average Yield
+                <span title="Calculated as Total Production divided by Total Valid Harvested Area. NOT a simple average of district yields.">
+                  <HelpCircle className="w-3 h-3 text-muted cursor-pointer" />
+                </span>
+              </span>
+              <Award className="w-4 h-4 text-warning" />
+            </div>
+            <div className="text-2xl font-black text-text-main mt-1">
+              {nationalSummary.weighted_yield_t_ha} <span className="text-sm font-bold text-muted">t/ha</span>
+            </div>
+            <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
+              <span className="text-muted">Area-Weighted:</span>
+              {nationalSummary.yield_change_pct !== null ? (
+                <span className={`font-bold flex items-center gap-0.5 ${
+                  nationalSummary.yield_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
+                }`}>
+                  {nationalSummary.yield_change_pct > 0 ? '+' : ''}{nationalSummary.yield_change_pct}%
+                </span>
+              ) : (
+                <span className="text-muted">Verified Valid</span>
+              )}
             </div>
           </div>
+
+          {/* District Data Coverage Card */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
+              <span>District Data Coverage</span>
+              <CheckCircle2 className="w-4 h-4 text-primary-light" />
+            </div>
+            <div className="text-2xl font-black text-text-main mt-1">
+              {nationalSummary.districts_reporting} <span className="text-sm font-bold text-muted">/ {nationalSummary.districts_expected} Districts</span>
+            </div>
+            <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
+              <span className="text-muted">Completeness:</span>
+              <span className="font-bold text-agriculture">
+                {nationalSummary.data_coverage_pct}% Reported
+              </span>
+            </div>
+          </div>
+
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* TAB 2: SEASON A VS SEASON B SHIFTS                      */}
-      {/* ======================================================== */}
-      {activeTab === 'seasonal' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Season A vs Season B Volatility & Structural Shifts ({seasonalComparison.year})
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Measuring the seasonal drop from Season A (main wet season) to Season B (secondary season)
-                </p>
+      {/* 4. Main Workspace: Rwanda Production Map (65%) + District Side Panel (35%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left Column: Rwanda Production Map (Occupies 7 cols on desktop ~ 60-70%) */}
+        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px] relative">
+          
+          {/* Map Sub-Header */}
+          <div className="p-4 border-b border-border-main flex items-center justify-between bg-background/50 z-10 shrink-0">
+            <div>
+              <div className="flex items-center gap-2">
+                <Compass className="w-4 h-4 text-agriculture" />
+                <h2 className="text-sm font-extrabold text-text-main uppercase tracking-wider">
+                  Rwanda Agricultural Production Map
+                </h2>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-agriculture-soft text-agriculture border border-agriculture/20">
+                  Interactive GIS
+                </span>
               </div>
+              <p className="text-xs text-muted mt-0.5">
+                Displaying <b>{selectedCrop}</b> · <b>{indicatorConfig.label}</b> ({selectedSeason}) across Rwanda's 30 districts.
+              </p>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                  <tr>
-                    <th className="py-3 px-4">District</th>
-                    <th className="py-3 px-4 text-right">Season A Yield</th>
-                    <th className="py-3 px-4 text-right">Season B Yield</th>
-                    <th className="py-3 px-4 text-right">Yield Shift Δ%</th>
-                    <th className="py-3 px-4 text-right">Season A Production</th>
-                    <th className="py-3 px-4 text-right">Season B Production</th>
-                    <th className="py-3 px-4 text-right">Production Δ%</th>
-                    <th className="py-3 px-4 text-center">Seasonal Risk Assessment</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {seasonalComparison.comparisons?.map((c: any) => {
-                    const yShift = parseFloat(c.yield_change_pct || 0);
-                    const isSevereDrop = yShift <= -25;
-                    return (
-                      <tr key={c.district_code} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-900">
-                          {c.district_name}
-                          <span className="text-[10px] text-slate-500 font-normal block">{c.province_name}</span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono text-slate-700">{c.season_a_yield} t/ha</td>
-                        <td className="py-3 px-4 text-right font-mono text-slate-700">{c.season_b_yield} t/ha</td>
-                        <td className="py-3 px-4 text-right font-mono font-bold">
-                          <span className={yShift < 0 ? 'text-rose-600' : 'text-emerald-600'}>
-                            {yShift > 0 ? `+${yShift}%` : `${yShift}%`}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right text-slate-600">{Number(c.season_a_production).toLocaleString()} MT</td>
-                        <td className="py-3 px-4 text-right text-slate-600">{Number(c.season_b_production).toLocaleString()} MT</td>
-                        <td className="py-3 px-4 text-right font-mono text-slate-700">{c.production_change_pct}%</td>
-                        <td className="py-3 px-4 text-center">
-                          {isSevereDrop ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                              Severe Seasonal Vulnerability
-                            </span>
-                          ) : yShift < 0 ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700">
-                              Moderate Dry Drop
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                              Stable / Resilient
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-muted hidden sm:inline">District:</span>
+              <span className="text-xs font-extrabold text-primary bg-primary-soft px-2.5 py-1 rounded-lg">
+                {selectedDistrict?.district_name || 'Select District'}
+              </span>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* ======================================================== */}
-      {/* TAB 3: HISTORICAL TRAJECTORY (2018–2025)                */}
-      {/* ======================================================== */}
-      {activeTab === 'trends' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Multi-Season Historical Productivity Trajectory: {selectedCrop}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Tracking Production (MT), Cultivated vs Harvested Area (Ha), and Yield (t/Ha) across 22 official seasons (2018–2025)
-                </p>
-              </div>
-            </div>
+          {/* Map Canvas */}
+          <div className="flex-1 w-full relative min-h-[560px] overflow-hidden">
+            <div 
+              ref={mapContainer} 
+              className="w-full h-full" 
+              style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
+            />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Yield Trajectory Line Chart */}
-              <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  Yield Trajectory (t/ha)
-                </h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="season_code" tick={{ fontSize: 11, fill: '#64748b' }} />
-                      <YAxis tick={{ fontSize: 11, fill: '#64748b' }} unit=" t" />
-                      <RechartsTooltip 
-                        formatter={(val: any) => [`${val} t/ha`, 'Yield']}
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                      />
-                      <Line type="monotone" dataKey="yield_t_ha" stroke="#059669" strokeWidth={3} dot={{ r: 4, fill: '#059669' }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+            {/* Dynamic Map Legend Overlay */}
+            <div className="absolute bottom-5 left-4 z-10 bg-white/95 backdrop-blur-md border border-border-main rounded-xl p-3 shadow-xl max-w-xs text-xs">
+              <div className="flex items-center justify-between font-bold text-text-main mb-1.5">
+                <span>{indicatorConfig.label}</span>
+                <span className="text-[10px] text-muted font-normal">({indicatorConfig.unit})</span>
               </div>
 
-              {/* Production Volume Area Chart */}
-              <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-blue-600" />
-                  Production Volume (Metric Tonnes)
-                </h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="season_code" tick={{ fontSize: 11, fill: '#64748b' }} />
-                      <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
-                      <RechartsTooltip 
-                        formatter={(val: any) => [`${Number(val).toLocaleString()} MT`, 'Production']}
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                      />
-                      <Area type="monotone" dataKey="production_tonnes" stroke="#2563eb" fill="#bfdbfe" fillOpacity={0.6} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+              {/* Gradient Bar */}
+              <div className="flex h-3 rounded-full overflow-hidden mb-1.5 border border-border-main">
+                {greenRamp.map((color, i) => (
+                  <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                ))}
+              </div>
+
+              {/* Quantiles / Scale Numbers */}
+              <div className="flex justify-between text-[10px] text-muted font-semibold">
+                <span>{indicatorConfig.format(extents.min)}</span>
+                <span>{indicatorConfig.format(extents.p50)}</span>
+                <span>{indicatorConfig.format(extents.max)}</span>
+              </div>
+
+              {/* Missing data explanation */}
+              <div className="mt-2 pt-2 border-t border-border-main flex items-center gap-2 text-[10px] text-muted">
+                <div className="w-3 h-3 rounded bg-[#94A3B8] shrink-0" />
+                <span>Neutral gray denotes missing/unreported survey records (not zero production).</span>
               </div>
             </div>
           </div>
+
         </div>
-      )}
 
-      {/* ======================================================== */}
-      {/* TAB 4: INVESTIGATION PRIORITY QUEUE                      */}
-      {/* ======================================================== */}
-      {activeTab === 'investigation' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-rose-600" />
-                  Transparent Extension Investigation Priority Queue ({selectedCrop})
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Ranks districts requiring targeted on-the-ground support using transparent, weighted criteria (Deficit 45%, YoY Drop 25%, Harvest Gap 20%, Climate/Soil 10%).
-                </p>
-              </div>
-              <div className="text-xs bg-rose-50 text-rose-800 border border-rose-200 rounded-lg px-3 py-1.5 font-bold">
-                {investigationData.lowerPerformingAreas?.length || 0} Priority Areas Flagged
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                  <tr>
-                    <th className="py-3 px-4">Priority Rank</th>
-                    <th className="py-3 px-4">District</th>
-                    <th className="py-3 px-4 text-right">Yield</th>
-                    <th className="py-3 px-4 text-right">Yield Deficit</th>
-                    <th className="py-3 px-4 text-right">YoY Drop</th>
-                    <th className="py-3 px-4 text-right">Unharvested %</th>
-                    <th className="py-3 px-4 text-center">Priority Score</th>
-                    <th className="py-3 px-4 text-center">Status Tier</th>
-                    <th className="py-3 px-4">Signals for Field Investigation</th>
-                    <th className="py-3 px-4 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {investigationData.lowerPerformingAreas?.map((item: any, idx: number) => (
-                    <tr key={item.district_code} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4 font-bold text-rose-600">#{idx + 1}</td>
-                      <td className="py-3 px-4 font-bold text-slate-900">
-                        {item.district_name}
-                        <span className="text-[10px] text-slate-500 font-normal block">{item.province_name}</span>
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">{item.current_yield_t_ha} t/ha</td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-rose-600">{item.yield_deficit_pct}%</td>
-                      <td className="py-3 px-4 text-right font-mono text-slate-700">{item.yoy_yield_change_pct ? `${item.yoy_yield_change_pct}%` : 'N/A'}</td>
-                      <td className="py-3 px-4 text-right font-mono text-slate-700">{item.unharvested_loss_pct}%</td>
-                      <td className="py-3 px-4 text-center font-bold">
-                        <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-mono">
-                          {item.investigation_priority_score} / 100
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">{getPriorityBadge(item.investigation_priority_tier)}</td>
-                      <td className="py-3 px-4 max-w-xs">
-                        <div className="space-y-1">
-                          {item.signals_for_extension_officer?.map((sig: string, i: number) => (
-                            <span key={i} className="inline-block px-2 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700 border border-slate-200 mr-1 mb-1">
-                              {sig}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedDistrict(item.district_code);
-                            setActiveTab('dossier');
-                          }}
-                          className="px-2.5 py-1 text-[11px] font-bold bg-slate-900 text-white hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
-                        >
-                          Generate Dossier
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* TAB 5: EXTENSION OFFICER INVESTIGATION DOSSIER           */}
-      {/* ======================================================== */}
-      {activeTab === 'dossier' && (
-        <div className="space-y-6">
-          {dossierData && !dossierData.error ? (
-            <div className="bg-white rounded-xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-8">
+        {/* Right Column: District Intelligence Panel (Occupies 5 cols on desktop ~ 35%) */}
+        <div className="lg:col-span-5 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px]">
+          
+          {selectedDistrict ? (
+            <div className="flex flex-col h-full">
               
-              {/* Dossier Header */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-slate-200 gap-4">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider mb-2">
-                    Official Extension Dossier
-                  </div>
-                  <h3 className="text-xl font-extrabold text-slate-900">
-                    {dossierData.dossierTitle}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Target: <span className="font-bold text-slate-700">{dossierData.target?.districtName} District</span> ({dossierData.target?.province}) • Crop: <span className="font-bold text-slate-700">{dossierData.target?.crop}</span> • Cycle: <span className="font-bold text-slate-700">{dossierData.target?.season}</span>
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => window.print()}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Download / Print Report
-                  </button>
-                </div>
-              </div>
-
-              {/* Core Evidence Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-xs text-slate-500 font-medium">Reported Yield vs National Mean</div>
-                  <div className="text-xl font-black text-slate-900 mt-1">
-                    {dossierData.productivityMetrics?.yieldTonnesHa} <span className="text-xs text-slate-500">t/ha</span>
-                  </div>
-                  <div className="text-xs font-bold text-rose-600 mt-0.5">
-                    {dossierData.productivityMetrics?.yieldDeficitPct}% Deficit
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-xs text-slate-500 font-medium">Harvested vs Cultivated Area</div>
-                  <div className="text-xl font-black text-slate-900 mt-1">
-                    {Number(dossierData.productivityMetrics?.harvestedAreaHa).toLocaleString()} <span className="text-xs text-slate-500">Ha</span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    Cultivated: {Number(dossierData.productivityMetrics?.cultivatedAreaHa).toLocaleString()} Ha ({dossierData.productivityMetrics?.unharvestedRatePct}% lost)
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-xs text-slate-500 font-medium">Soil & Climate Indicators</div>
-                  <div className="text-base font-bold text-slate-900 mt-1">
-                    pH: {dossierData.contextualIndicators?.soilPh || 'N/A'} • {dossierData.contextualIndicators?.soilType || 'Soil not sampled'}
-                  </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    Rainfall: {dossierData.contextualIndicators?.rainfallMm || 'N/A'} mm • Drought idx: {dossierData.contextualIndicators?.droughtIndex || 'N/A'}
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-xs text-slate-500 font-medium">Investigation Priority Score</div>
-                  <div className="text-xl font-black text-slate-900 mt-1">
-                    {dossierData.productivityMetrics?.investigationPriorityScore} / 100
-                  </div>
-                  <div className="mt-0.5">
-                    {getPriorityBadge(dossierData.productivityMetrics?.priorityTier)}
-                  </div>
-                </div>
-              </div>
-
-              {/* 5-Point Field Diagnostic Checklist */}
-              <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
-                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Mandatory 5-Point Field Diagnostic Checklist for Agricultural Extension Officers
-                </h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Low yield alone does not determine root cause. Field officers must complete this checklist during on-site farm visits before recommending specific interventions:
-                </p>
-
-                <div className="space-y-2.5">
-                  {dossierData.fieldInvestigationChecklist?.map((item: any, idx: number) => (
-                    <div key={idx} className="bg-white p-3.5 rounded-lg border border-slate-200 flex items-start gap-3">
-                      <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                        {idx + 1}
+              {/* District Panel Header */}
+              <div className="p-4 border-b border-border-main bg-background/60 shrink-0">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-black text-text-main">
+                        {selectedDistrict.district_name}
+                      </h3>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-surface border border-border-main text-muted">
+                        {selectedDistrict.province_name}
                       </span>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">{item.check}</div>
-                        <div className="text-xs text-slate-600 mt-0.5">{item.rationale}</div>
-                      </div>
                     </div>
-                  ))}
+                    <div className="text-xs text-muted flex items-center gap-3 mt-1">
+                      <span>Production Rank: <b className="text-agriculture">#{selectedDistrict.rank} of 30</b></span>
+                      <span>•</span>
+                      <span>National Share: <b className="text-primary">{selectedDistrict.national_share_pct}%</b></span>
+                    </div>
+                  </div>
+
+                  <span className={`px-2.5 py-1 rounded text-xs font-extrabold uppercase tracking-wider border ${
+                    selectedDistrict.has_data
+                      ? 'bg-agriculture-soft text-agriculture border-agriculture/30'
+                      : 'bg-slate-100 text-slate-500 border-slate-300'
+                  }`}>
+                    {selectedDistrict.has_data ? 'Surveyed' : 'Missing Data'}
+                  </span>
+                </div>
+
+                {/* District Key Metric Cards */}
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  <div className="bg-surface p-2.5 rounded-xl border border-border-main text-center">
+                    <div className="text-[10px] text-muted font-bold uppercase">Production</div>
+                    <div className="text-sm font-extrabold text-text-main mt-0.5">
+                      {selectedDistrict.production_tonnes !== null 
+                        ? `${Math.round(selectedDistrict.production_tonnes).toLocaleString()} MT` 
+                        : '—'}
+                    </div>
+                  </div>
+
+                  <div className="bg-surface p-2.5 rounded-xl border border-border-main text-center">
+                    <div className="text-[10px] text-muted font-bold uppercase">Cultivated</div>
+                    <div className="text-sm font-extrabold text-primary mt-0.5">
+                      {selectedDistrict.cultivated_area_ha !== null 
+                        ? `${Math.round(selectedDistrict.cultivated_area_ha).toLocaleString()} ha` 
+                        : '—'}
+                    </div>
+                  </div>
+
+                  <div className="bg-surface p-2.5 rounded-xl border border-border-main text-center">
+                    <div className="text-[10px] text-muted font-bold uppercase">Yield</div>
+                    <div className="text-sm font-extrabold text-agriculture mt-0.5">
+                      {selectedDistrict.yield_t_ha !== null 
+                        ? `${selectedDistrict.yield_t_ha} t/ha` 
+                        : '—'}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Provincial Peers Benchmarking */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                  Comparable Districts in the Same Agro-Ecological Zone ({dossierData.target?.province})
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {dossierData.provincialPeers?.map((peer: any) => (
-                    <div key={peer.districtName} className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                      <div className="font-bold text-slate-800">{peer.districtName}</div>
-                      <div className="font-mono text-slate-600 mt-0.5">{peer.yieldTonnesHa} t/ha</div>
-                      <div className={`text-[10px] font-bold ${parseFloat(peer.yieldDeficitPct) < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                        {peer.yieldDeficitPct}% vs mean
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* District Detail Tabs */}
+              <div className="bg-background/80 border-b border-border-main px-3 flex items-center gap-1 shrink-0 text-xs font-bold">
+                <button
+                  onClick={() => setDistrictTab('OVERVIEW')}
+                  className={`py-2 px-3 border-b-2 transition-colors ${
+                    districtTab === 'OVERVIEW'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted hover:text-text-main'
+                  }`}
+                >
+                  Overview
+                </button>
+
+                <button
+                  onClick={() => setDistrictTab('CROPS')}
+                  className={`py-2 px-3 border-b-2 transition-colors ${
+                    districtTab === 'CROPS'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted hover:text-text-main'
+                  }`}
+                >
+                  Top Crops
+                </button>
+
+                <button
+                  onClick={() => setDistrictTab('TRENDS')}
+                  className={`py-2 px-3 border-b-2 transition-colors ${
+                    districtTab === 'TRENDS'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted hover:text-text-main'
+                  }`}
+                >
+                  Seasonal Trends
+                </button>
+
+                <button
+                  onClick={() => setDistrictTab('QUALITY')}
+                  className={`py-2 px-3 border-b-2 transition-colors ${
+                    districtTab === 'QUALITY'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted hover:text-text-main'
+                  }`}
+                >
+                  Data Quality
+                </button>
               </div>
 
-              {/* Source-Linked Provenance */}
-              <div className="pt-4 border-t border-slate-200 text-xs text-slate-500 space-y-1">
-                <span className="font-bold text-slate-700">Official Data Sources:</span>
-                <ul className="list-disc pl-5 space-y-0.5 text-[11px]">
-                  {dossierData.officialSources?.map((src: string, i: number) => (
-                    <li key={i}>{src}</li>
-                  ))}
-                </ul>
+              {/* Tab Contents */}
+              <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-4 text-xs">
+                
+                {/* TAB 1: OVERVIEW */}
+                {districtTab === 'OVERVIEW' && (
+                  <div className="space-y-4">
+                    <div className="bg-background/50 p-3 rounded-xl border border-border-main space-y-2">
+                      <div className="font-bold text-text-main flex items-center justify-between">
+                        <span>Seasonal Production Trajectory</span>
+                        {selectedDistrict.production_change_pct !== null && (
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                            selectedDistrict.production_change_pct >= 0 ? 'bg-agriculture-soft text-agriculture' : 'bg-red-50 text-danger'
+                          }`}>
+                            {selectedDistrict.production_change_pct > 0 ? '+' : ''}{selectedDistrict.production_change_pct}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-muted leading-relaxed text-[11px]">
+                        In {selectedSeason}, {selectedDistrict.district_name} produced{' '}
+                        <b>{selectedDistrict.production_tonnes?.toLocaleString() || 0} tonnes</b> of {selectedCrop}, accounting for{' '}
+                        <b className="text-primary">{selectedDistrict.national_share_pct}%</b> of national output. Compared to {compareSeason}, production changed by{' '}
+                        <b>{selectedDistrict.production_change_pct !== null ? `${selectedDistrict.production_change_pct}%` : 'N/A'}</b>.
+                      </p>
+                    </div>
+
+                    {/* Dominant Crops List */}
+                    <div>
+                      <div className="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+                        Leading Crops in {selectedDistrict.district_name}
+                      </div>
+                      <div className="space-y-2">
+                        {selectedDistrict.dominant_crops.map((c, i) => (
+                          <div key={i} className="p-2 bg-surface rounded-lg border border-border-main flex items-center justify-between">
+                            <div>
+                              <div className="font-bold text-text-main">{c.crop_name}</div>
+                              <div className="text-[10px] text-muted">{c.area_ha.toLocaleString()} ha · {c.yield_t_ha} t/ha</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-black text-agriculture">{c.production_tonnes.toLocaleString()} MT</div>
+                              <div className="text-[10px] text-muted">{c.share_pct}% share</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: CROPS */}
+                {districtTab === 'CROPS' && (
+                  <div className="space-y-3">
+                    <div className="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+                      Crop Share Distribution
+                    </div>
+                    {selectedDistrict.dominant_crops.map((c, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span>{c.crop_name}</span>
+                          <span className="text-muted">{c.production_tonnes.toLocaleString()} MT ({c.share_pct}%)</span>
+                        </div>
+                        <div className="w-full bg-background h-2 rounded-full overflow-hidden border border-border-main">
+                          <div 
+                            className="bg-agriculture h-full rounded-full"
+                            style={{ width: `${Math.min(100, c.share_pct * 2)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* TAB 3: TRENDS */}
+                {districtTab === 'TRENDS' && (
+                  <div className="space-y-3">
+                    <div className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                      Multi-Season Historical Records
+                    </div>
+                    <div className="p-3 bg-background/50 rounded-xl border border-border-main text-[11px] text-muted">
+                      Historical production across surveyed NISR seasons. Seasonal fluctuations reflect weather patterns, rainfall distribution, and acreage adjustments.
+                    </div>
+                    <div className="divide-y divide-border-main border border-border-main rounded-xl overflow-hidden bg-surface">
+                      {seasonalTrends.slice(-5).map((t, idx) => (
+                        <div key={idx} className="p-2.5 flex items-center justify-between text-xs">
+                          <span className="font-bold text-text-main">{t.season_code} ({t.year})</span>
+                          <span className="font-bold text-agriculture">{t.production_tonnes.toLocaleString()} MT</span>
+                          <span className="text-muted">{t.yield_t_ha} t/ha</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: DATA QUALITY */}
+                {districtTab === 'QUALITY' && (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-primary-soft/50 rounded-xl border border-primary/20 space-y-1.5 text-[11px] text-text-main">
+                      <div className="font-bold text-primary flex items-center gap-1">
+                        <Database className="w-3.5 h-3.5" />
+                        NISR Data Provenance & Lineage
+                      </div>
+                      <p className="text-muted leading-relaxed">
+                        Data is ingested from the National Institute of Statistics of Rwanda (NISR) Seasonal Agricultural Surveys (SAS). All biological yields are validated using planted-to-harvested ratio rules.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 text-[11px]">
+                      <div className="flex justify-between py-1 border-b border-border-main">
+                        <span className="text-muted">Reporting Period:</span>
+                        <span className="font-bold">{selectedSeason} Agricultural Cycle</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-border-main">
+                        <span className="text-muted">Geographic Resolution:</span>
+                        <span className="font-bold">District Level (30 Administrative Units)</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-border-main">
+                        <span className="text-muted">Survey Design:</span>
+                        <span className="font-bold">Two-stage cluster probability sampling</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
 
             </div>
           ) : (
-            <div className="bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-500">
-              Select a district from Tab 1 or Tab 4 to generate an Agricultural Extension Dossier.
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted">
+              <MapPin className="w-10 h-10 text-muted/50 mb-2" />
+              <div className="font-bold text-sm text-text-main">No District Selected</div>
+              <p className="text-xs mt-1 max-w-xs">Click on any district polygon on the map to inspect its detailed crop intelligence.</p>
             </div>
           )}
+
         </div>
-      )}
 
-      {/* ======================================================== */}
-      {/* TAB 6: DATA FOUNDATION & QUALITY AUDIT                   */}
-      {/* ======================================================== */}
-      {activeTab === 'dataquality' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-8">
-            
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-slate-200 gap-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider mb-2">
-                  Foundation Architecture
-                </div>
-                <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                  <Database className="w-6 h-6 text-blue-600" />
-                  Seasonal Agricultural Database & Data-Quality Pipeline
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  System foundation combining historical records reliably across 24 crops, 35 seasons, and all 30 districts from official NISR Seasonal Agricultural Surveys (2014–2026).
-                </p>
-              </div>
+      </div>
 
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full border border-emerald-300 flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Pipeline Status: COMMITTED
-                </span>
-              </div>
-            </div>
+      {/* 5. Crop Performance by Season Section (Below the Map) */}
+      <div className="space-y-6">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-main pb-3">
+          <div>
+            <h3 className="text-lg font-black text-text-main flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-agriculture" />
+              Crop Performance & Multi-Season Analytics
+            </h3>
+            <p className="text-xs text-muted">
+              Analyze historical production trajectories, investigate alert anomalies, and compare crops between seasons.
+            </p>
+          </div>
 
-            {/* Foundation Overview KPIs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xs text-slate-500 font-medium">TOTAL HISTORICAL OBSERVATIONS</div>
-                <div className="text-2xl font-black text-slate-900 mt-1">
-                  {Number(dataQualityReport?.foundationOverview?.total_records || 17912).toLocaleString()}
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">District × Crop × Season cells</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xs text-slate-500 font-medium">SEASONS COVERED</div>
-                <div className="text-2xl font-black text-slate-900 mt-1">
-                  {dataQualityReport?.foundationOverview?.distinct_seasons || 35} <span className="text-xs text-slate-500">Seasons</span>
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">2014 Season A through 2026 Season B</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xs text-slate-500 font-medium">MONITORED CROPS & SPECIES</div>
-                <div className="text-2xl font-black text-slate-900 mt-1">
-                  {dataQualityReport?.foundationOverview?.distinct_crops || 24} <span className="text-xs text-slate-500">Crops</span>
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">Across all 30 Rwandan Districts</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-xs text-slate-500 font-medium">DATA QUALITY AUDIT PASS RATE</div>
-                <div className="text-2xl font-black text-emerald-700 mt-1">
-                  99.3%
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">Complies strictly with SAS protocols</div>
-              </div>
-            </div>
-
-            {/* Quality Status Breakdown */}
-            <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
-              <h4 className="text-sm font-bold text-slate-900">
-                Data Quality Status Breakdown
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {dataQualityReport?.qualityStatusBreakdown?.map((item: any) => (
-                  <div key={item.status} className="bg-white p-4 rounded-xl border border-slate-200">
-                    <div className="text-xs font-bold text-slate-700">
-                      {item.status === 'VERIFIED' && <span className="text-emerald-700">✓ VERIFIED & CONSISTENT</span>}
-                      {item.status === 'HARVEST_GAP_WARNING' && <span className="text-amber-700">⚠ HARVEST GAP WARNING</span>}
-                      {item.status === 'OUTLIER_INVESTIGATION_FLAG' && <span className="text-rose-700">⚑ OUTLIER FLAG (&gt;3σ)</span>}
-                    </div>
-                    <div className="text-xl font-black text-slate-900 mt-1">
-                      {Number(item.records_count).toLocaleString()} <span className="text-xs text-slate-500">records</span>
-                    </div>
-                    <div className="text-xs text-slate-500 mt-0.5">{item.pct}% of database</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Enforced Quality Rules */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-bold text-slate-900">
-                Automated Quality Rules Enforced by the Ingestion Pipeline
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {dataQualityReport?.rulesEnforced?.map((rule: any) => (
-                  <div key={rule.ruleCode} className="p-4 bg-white rounded-xl border border-slate-200 text-xs space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono font-bold text-[10px]">
-                        {rule.ruleCode}
-                      </span>
-                      <span className="font-bold text-slate-900">{rule.name}</span>
-                    </div>
-                    <p className="text-slate-600 text-[11px] leading-relaxed">{rule.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Seasons Ingestion Audit Table */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-bold text-slate-900">
-                Seasonal Ingestion & Audit Log (2014–2026)
-              </h4>
-              <div className="overflow-x-auto max-h-96 overflow-y-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider sticky top-0 border-b border-slate-200">
-                    <tr>
-                      <th className="py-2.5 px-4">Season</th>
-                      <th className="py-2.5 px-4 text-right">Records</th>
-                      <th className="py-2.5 px-4 text-right">Crops Monitored</th>
-                      <th className="py-2.5 px-4 text-right">Avg Biological Yield</th>
-                      <th className="py-2.5 px-4 text-right">Harvest Gap Warnings</th>
-                      <th className="py-2.5 px-4 text-right">Outlier Flags</th>
-                      <th className="py-2.5 px-4 text-center">Quality Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {dataQualityReport?.seasonsAudit?.map((s: any) => (
-                      <tr key={s.season_code} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-2.5 px-4 font-bold text-slate-900">{s.season_code} ({s.year} {s.season_name})</td>
-                        <td className="py-2.5 px-4 text-right font-mono text-slate-700">{s.records}</td>
-                        <td className="py-2.5 px-4 text-right text-slate-700">{s.crops}</td>
-                        <td className="py-2.5 px-4 text-right font-mono font-bold text-emerald-700">{s.avg_yield} t/ha</td>
-                        <td className="py-2.5 px-4 text-right font-mono text-amber-700">{s.gap_warnings}</td>
-                        <td className="py-2.5 px-4 text-right font-mono text-rose-700">{s.outlier_flags}</td>
-                        <td className="py-2.5 px-4 text-center">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                            VERIFIED
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
+          <div className="text-xs text-muted">
+            Displaying chronological data spanning <b>2018A to {selectedSeason}</b>.
           </div>
         </div>
-      )}
+
+        {/* Multi-Season Trend Chart */}
+        <div className="bg-surface border border-border-main rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">Historical Trajectory</div>
+              <h4 className="text-base font-extrabold text-text-main">
+                {selectedCrop} Production Over Monitored Seasons (Tonnes)
+              </h4>
+            </div>
+
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-background border border-border-main text-muted">
+              Chronological NISR Dataset
+            </span>
+          </div>
+
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={seasonalTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cropProdGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2E7D32" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#2E7D32" stopOpacity={0.0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="season_code" tick={{ fontSize: 11 }} stroke="#64748B" />
+                <YAxis tick={{ fontSize: 11 }} stroke="#64748B" tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} />
+                <RechartsTooltip 
+                  formatter={(val: any) => [`${Number(val).toLocaleString()} MT`, 'Production']}
+                  labelFormatter={(lbl) => `Season ${lbl}`}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="production_tonnes" 
+                  stroke="#2E7D32" 
+                  strokeWidth={2.5}
+                  fillOpacity={1} 
+                  fill="url(#cropProdGradient)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Alerts & Stability Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Large Increases */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-agriculture font-bold text-xs uppercase tracking-wider mb-2">
+              <TrendingUp className="w-4 h-4" /> Expanding Crops (&gt;+15%)
+            </div>
+            {alerts.large_increases?.length > 0 ? (
+              <div className="space-y-2">
+                {alerts.large_increases.map((c: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-xs p-2 rounded-lg bg-background">
+                    <span className="font-bold text-text-main">{c.crop_name}</span>
+                    <span className="font-extrabold text-agriculture">+{c.change_pct}%</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted">No crops experienced an increase greater than 15% between {compareSeason} and {selectedSeason}.</p>
+            )}
+          </div>
+
+          {/* Large Decreases */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-danger font-bold text-xs uppercase tracking-wider mb-2">
+              <AlertTriangle className="w-4 h-4" /> Declining Crops (&lt;-15%)
+            </div>
+            {alerts.large_decreases?.length > 0 ? (
+              <div className="space-y-2">
+                {alerts.large_decreases.map((c: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-xs p-2 rounded-lg bg-background">
+                    <span className="font-bold text-text-main">{c.crop_name}</span>
+                    <span className="font-extrabold text-danger">{c.change_pct}%</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted">No crops experienced a decline greater than 15% between {compareSeason} and {selectedSeason}.</p>
+            )}
+          </div>
+
+          {/* Stable Production */}
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-2">
+              <CheckCircle2 className="w-4 h-4" /> Stable Output Crops (±4%)
+            </div>
+            {alerts.stable_crops?.length > 0 ? (
+              <div className="space-y-2">
+                {alerts.stable_crops.map((c: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-xs p-2 rounded-lg bg-background">
+                    <span className="font-bold text-text-main">{c.crop_name}</span>
+                    <span className="font-extrabold text-primary">{c.change_pct > 0 ? `+${c.change_pct}%` : `${c.change_pct}%`}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted">No high-volume crops maintained a stable delta between {compareSeason} and {selectedSeason}.</p>
+            )}
+          </div>
+
+        </div>
+
+        {/* 6. Comprehensive Seasonal Crop Comparison Table */}
+        <div className="bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden">
+          
+          <div className="p-4 border-b border-border-main flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-background/50">
+            <div>
+              <h4 className="text-sm font-extrabold text-text-main uppercase tracking-wider flex items-center gap-2">
+                <FileSpreadsheet className="w-4 h-4 text-primary" />
+                Seasonal Crop Comparison Table ({selectedSeason} vs {compareSeason})
+              </h4>
+              <p className="text-xs text-muted mt-0.5">
+                Displays surveyed output, percentage change, and leading production districts for all monitored crops.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Search crop in table..."
+                  value={tableSearch}
+                  onChange={(e) => setTableSearch(e.target.value)}
+                  className="bg-surface border border-border-main rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-main focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <button
+                onClick={handleExportCSV}
+                className="px-3 py-1.5 rounded-xl bg-surface border border-border-main hover:bg-background text-text-main text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5 text-muted" />
+                CSV
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-border-main bg-background text-muted font-bold uppercase tracking-wider text-[10px]">
+                  <th className="p-3">Crop Name</th>
+                  <th className="p-3">Category</th>
+                  <th className="p-3 text-right">{selectedSeason} Output (MT)</th>
+                  <th className="p-3 text-right">{compareSeason} Output (MT)</th>
+                  <th className="p-3 text-right">Change (MT)</th>
+                  <th className="p-3 text-right">Change (%)</th>
+                  <th className="p-3 text-right">Yield (t/ha)</th>
+                  <th className="p-3 text-right">National Share</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Leading District</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-main">
+                {sortedTableData.map((c: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-primary-soft/20 transition-colors">
+                    <td className="p-3 font-bold text-text-main flex items-center gap-1.5">
+                      <Sprout className="w-3.5 h-3.5 text-agriculture" />
+                      {c.crop_name}
+                    </td>
+                    <td className="p-3 text-muted">{c.category}</td>
+                    <td className="p-3 text-right font-black text-text-main">
+                      {c.current_production_tonnes.toLocaleString()}
+                    </td>
+                    <td className="p-3 text-right text-muted">
+                      {c.prev_production_tonnes !== null ? c.prev_production_tonnes.toLocaleString() : '—'}
+                    </td>
+                    <td className="p-3 text-right font-medium">
+                      {c.change_tonnes !== null ? (
+                        <span className={c.change_tonnes >= 0 ? 'text-agriculture font-bold' : 'text-danger font-bold'}>
+                          {c.change_tonnes > 0 ? `+${c.change_tonnes.toLocaleString()}` : c.change_tonnes.toLocaleString()}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className="p-3 text-right">
+                      {c.change_pct !== null ? (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                          c.change_pct >= 5.0 ? 'bg-agriculture-soft text-agriculture' :
+                          c.change_pct <= -5.0 ? 'bg-red-50 text-danger' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          {c.change_pct > 0 ? `+${c.change_pct}%` : `${c.change_pct}%`}
+                        </span>
+                      ) : (
+                        <span className="text-muted text-[10px]">No comparison</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right text-text-main font-semibold">
+                      {c.current_yield_t_ha}
+                    </td>
+                    <td className="p-3 text-right text-muted">
+                      {c.national_share_pct}%
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                        c.trend_status === 'GROWING' ? 'bg-agriculture-soft text-agriculture' :
+                        c.trend_status === 'DECLINING' ? 'bg-red-50 text-danger' :
+                        c.trend_status === 'NEW_DATA' ? 'bg-blue-50 text-primary' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {c.trend_status}
+                      </span>
+                    </td>
+                    <td className="p-3 text-muted">
+                      {c.leading_district ? (
+                        <span className="font-semibold text-text-main">
+                          {c.leading_district.name} ({Math.round(c.leading_district.production_tonnes).toLocaleString()} MT)
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-3 bg-background border-t border-border-main flex items-center justify-between text-xs text-muted">
+            <span>Showing {sortedTableData.length} monitored crops for {selectedSeason}.</span>
+            <span>Source: National Institute of Statistics of Rwanda (NISR) Seasonal Agricultural Surveys.</span>
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
   );

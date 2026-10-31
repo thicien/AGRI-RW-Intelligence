@@ -27,7 +27,6 @@ export default function AppShell() {
       items: [
         { to: '/admin/dashboard', label: 'Executive Dashboard', icon: LayoutDashboard, minRoles: [] },
         { to: '/admin/analytics', label: 'Seasonal Analytics', icon: BarChart3, minRoles: [] },
-        { to: '/admin/map', label: 'Interactive Agricultural Map', icon: MapIcon, minRoles: [] },
       ]
     },
     {

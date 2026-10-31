@@ -9,8 +9,8 @@ export default function AnalyticsReportsPage() {
 
   const reportMetrics = [
     { label: 'Overall Pipeline Quality Pass Rate', value: '98.4%', trend: '+1.2% vs baseline' },
-    { label: 'Historical Datasets Preserved', value: '11 Datasets', trend: '13 Years (2014-2026)' },
-    { label: 'Total Verified Records in Database', value: '21,767 Records', trend: '100% Non-destructive' },
+    { label: 'Historical Datasets Preserved', value: '57 Datasets', trend: '13 Years (2014-2026)' },
+    { label: 'Total Verified Records in Database', value: '24,414 Records', trend: '100% Non-destructive' },
     { label: 'Geographic Completeness Index', value: '100.0%', trend: '30 of 30 Districts' },
     { label: 'Open Data Quality Anomalies', value: '3 Open', trend: '0 Critical Blockers' },
     { label: 'Automated Processing Jobs', value: '6 Executed', trend: 'Average duration 38s' }

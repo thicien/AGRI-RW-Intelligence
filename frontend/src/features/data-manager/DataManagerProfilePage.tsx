@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   UserCheck, Shield, Key, Lock, CheckCircle2, 
   AlertTriangle, XCircle, ShieldAlert, Check 
 } from 'lucide-react';
+import ProfilePictureUploader from '../auth/ProfilePictureUploader';
 
 export default function DataManagerProfilePage() {
-  const [dataManager] = useState(() => {
+  const [dataManager, setDataManager] = useState(() => {
     const saved = localStorage.getItem('agrilens_user');
+    const avatar = localStorage.getItem('agrilens_user_avatar');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const u = JSON.parse(saved);
+        return { ...u, avatarUrl: u.avatarUrl || avatar || null };
+      } catch (e) {}
     }
     return {
       name: 'Jean-Paul Habimana',
       email: 'datamanager@agrilens.gov.rw',
       role: 'DATA_MANAGER',
       roleName: 'Chief Data Manager & Quality Controller',
-      scopeLevel: 'NATIONAL_DOMAINS'
+      scopeLevel: 'NATIONAL_DOMAINS',
+      avatarUrl: avatar || null
     };
   });
+
+  useEffect(() => {
+    const syncUser = () => {
+      const saved = localStorage.getItem('agrilens_user');
+      const avatar = localStorage.getItem('agrilens_user_avatar');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          setDataManager({ ...u, avatarUrl: u.avatarUrl || avatar || null });
+        } catch (e) {}
+      }
+    };
+    window.addEventListener('agrilens_user_updated', syncUser);
+    return () => window.removeEventListener('agrilens_user_updated', syncUser);
+  }, []);
 
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -62,11 +83,22 @@ export default function DataManagerProfilePage() {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
         <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">
-          Account Credentials
+          Profile Photo & Identity
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+
+        <ProfilePictureUploader
+          currentAvatar={dataManager.avatarUrl || null}
+          userName={dataManager.name}
+          userEmail={dataManager.email}
+          initials={dataManager.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+          onAvatarUpdated={(newAvatar) => setDataManager((prev: any) => ({ ...prev, avatarUrl: newAvatar }))}
+        />
+
+        <div className="pt-3 border-t border-slate-100">
+          <h4 className="font-bold text-slate-800 text-xs mb-3">Account Credentials</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-slate-500 block">Full Name</span>
             <span className="font-bold text-slate-900 text-sm mt-0.5 block">{dataManager.name}</span>
@@ -89,6 +121,7 @@ export default function DataManagerProfilePage() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* Permissions Matrix & Restrictions (Section 4 of requirements) */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
