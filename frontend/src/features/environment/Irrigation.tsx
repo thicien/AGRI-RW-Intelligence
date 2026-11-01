@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { 
+  RWANDA_DISTRICTS_GEOJSON, 
+  DISTRICT_CENTROIDS, 
+  enrichRwandaGeoJSON, 
+  type DistrictChoroplethData,
+  type PerformanceTier 
+} from '../../data/rwandaMapData';
 import { apiUrl } from '../../config/api';
 import { 
   Droplets, Waves, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ShieldAlert, 
@@ -228,23 +235,64 @@ export default function Irrigation() {
     return { min, p25, p50, p75, max };
   }, [districts, indicatorConfig]);
 
-  // Color Ramps: Modern Cyan-Teal for Irrigation + Slate Gray for Missing Data
-  const cyanRamp = ['#E0F2FE', '#BAE6FD', '#38BDF8', '#0284C7', '#0369A1'];
-  const missingColor = '#94A3B8'; // Neutral slate gray for missing/unreported data
-
-  const getDistrictColor = (d: DistrictIrrigationStat): string => {
-    const val = indicatorConfig.getValue(d);
-    if (val === null || val === undefined || !d.has_data) {
-      return missingColor;
-    }
-    const { min, max, p25, p50, p75 } = extents;
-    if (max === min) return cyanRamp[2];
-    if (val <= p25) return cyanRamp[0];
-    if (val <= p50) return cyanRamp[1];
-    if (val <= p75) return cyanRamp[2];
-    if (val < max) return cyanRamp[3];
-    return cyanRamp[4];
+  // 3-Tier Classification Colors for Irrigation
+  const tierColors = {
+    HIGH: '#0284C7',      // Rich Sky Blue / Deep Cyan
+    MODERATE: '#38BDF8',  // Bright Cyan
+    LOW: '#BAE6FD',       // Soft Light Powder Blue
+    NO_DATA: '#CBD5E1',   // Slate Gray
   };
+
+  // Build Choropleth Data Map (High, Moderate, Low 3-Tier Classification)
+  const choroplethDataMap = useMemo(() => {
+    const mapData: Record<string, DistrictChoroplethData> = {};
+    const validVals = districts
+      .map(d => indicatorConfig.getValue(d))
+      .filter((v): v is number => typeof v === 'number' && !isNaN(v) && v > 0)
+      .sort((a, b) => a - b);
+
+    const min = validVals[0] ?? 0;
+    const max = validVals[validVals.length - 1] ?? 100;
+    const p33 = validVals[Math.floor(validVals.length * 0.33)] ?? (min + (max - min) * 0.33);
+    const p66 = validVals[Math.floor(validVals.length * 0.66)] ?? (min + (max - min) * 0.66);
+
+    for (const d of districts) {
+      const val = indicatorConfig.getValue(d);
+      let tier: PerformanceTier = 'NO_DATA';
+      let tierLabel = 'Unreported';
+      let color = tierColors.NO_DATA;
+
+      if (val !== null && val !== undefined && d.has_data) {
+        if (val >= p66) {
+          tier = 'HIGH';
+          tierLabel = 'High Irrigation';
+          color = tierColors.HIGH;
+        } else if (val >= p33) {
+          tier = 'MODERATE';
+          tierLabel = 'Moderate Tier';
+          color = tierColors.MODERATE;
+        } else {
+          tier = 'LOW';
+          tierLabel = 'Low Coverage';
+          color = tierColors.LOW;
+        }
+      }
+
+      mapData[d.district_name] = {
+        districtName: d.district_name,
+        numericValue: val,
+        formattedValue: indicatorConfig.format(val),
+        tier,
+        tierLabel,
+        color,
+        rank: d.coverage_rank || d.rank,
+        hasData: d.has_data,
+        facilitiesCount: d.facility_count || 0,
+      };
+    }
+
+    return { mapData, min, p33, p66, max };
+  }, [districts, indicatorConfig]);
 
   // 2. Initialize MapLibre GL JS
   useEffect(() => {
@@ -285,31 +333,17 @@ export default function Irrigation() {
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', async () => {
+    map.current.on('load', () => {
       if (!map.current) return;
 
       try {
-        const res = await fetch('/rwanda-districts.geojson');
-        const geojson = await res.json();
-        geojsonLoadedRef.current = true;
+        const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, tierColors.NO_DATA);
 
         if (!map.current.getSource('rwanda-districts')) {
           map.current.addSource('rwanda-districts', {
             type: 'geojson',
-            data: geojson,
+            data: initialEnriched,
           });
-
-          // Build match expression from current districts state if available
-          let initialFill: any = '#38BDF8';
-          const currentList = districtsRef.current;
-          if (currentList && currentList.length > 0) {
-            const matchExpr: any[] = ['match', ['get', 'shapeName']];
-            for (const d of currentList) {
-              matchExpr.push(d.district_name, getDistrictColor(d));
-            }
-            matchExpr.push(missingColor);
-            initialFill = matchExpr;
-          }
 
           // District Fill Layer
           map.current.addLayer({
@@ -317,20 +351,20 @@ export default function Irrigation() {
             type: 'fill',
             source: 'rwanda-districts',
             paint: {
-              'fill-color': initialFill,
+              'fill-color': ['coalesce', ['get', 'choroplethColor'], '#BAE6FD'],
               'fill-opacity': 0.82,
             },
           });
 
-          // District Boundary Lines
+          // District Boundary Lines - Distinct dark borders for clear visibility
           map.current.addLayer({
             id: 'district-borders',
             type: 'line',
             source: 'rwanda-districts',
             paint: {
               'line-color': '#0F172A',
-              'line-width': 1.3,
-              'line-opacity': 0.75,
+              'line-width': 1.6,
+              'line-opacity': 0.85,
             },
           });
 
@@ -358,14 +392,11 @@ export default function Irrigation() {
             if (!map.current || !e.features || e.features.length === 0) return;
             map.current.getCanvas().style.cursor = 'pointer';
 
-            const shapeName = e.features[0].properties?.shapeName;
-            if (!shapeName) return;
-
-            const district = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
-            if (!district) return;
-
-            const val = indicatorConfig.getValue(district);
-            const formatted = indicatorConfig.format(val);
+            const props = e.features[0].properties;
+            const name = props?.districtName || props?.shapeName;
+            const tier = props?.tierLabel || 'Recorded';
+            const val = props?.formattedValue || '';
+            const rank = props?.rank ? `#${props.rank} of 30` : '';
 
             if (!hoverPopupRef.current) {
               hoverPopupRef.current = new maplibregl.Popup({
@@ -380,19 +411,16 @@ export default function Irrigation() {
               .setHTML(`
                 <div style="font-family: inherit; padding: 6px 10px; min-width: 180px;">
                   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${district.district_name}</span>
-                    <span style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">${district.province_name}</span>
+                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${name}</span>
+                    <span style="font-size: 10px; font-weight: 700; color: #0284C7; text-transform: uppercase;">${tier}</span>
                   </div>
                   <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">
                     ${indicatorConfig.label} (${selectedSeason}):
                   </div>
                   <div style="font-size: 16px; font-weight: 800; color: #0369A1; margin-bottom: 6px;">
-                    ${formatted}
+                    ${val}
                   </div>
-                  <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">
-                    <span>Irrigated: <b>${Math.round(district.area_irrigated_ha || 0).toLocaleString()} ha</b></span>
-                    <span>Rank: <b>#${district.rank} of 30</b></span>
-                  </div>
+                  ${rank ? `<div style="font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">National Rank: <b>${rank}</b></div>` : ''}
                 </div>
               `)
               .addTo(map.current);
@@ -403,18 +431,22 @@ export default function Irrigation() {
             if (hoverPopupRef.current) hoverPopupRef.current.remove();
           });
 
-          // Click on district polygon
+          // Click on district polygon -> Highlights and zooms
           map.current.on('click', 'district-fill', (e) => {
             if (!e.features || e.features.length === 0) return;
-            const shapeName = e.features[0].properties?.shapeName;
+            const shapeName = e.features[0].properties?.shapeName || e.features[0].properties?.districtName;
             if (shapeName) {
               setSelectedDistrictName(shapeName);
               selectedDistrictNameRef.current = shapeName;
+              const coords = DISTRICT_CENTROIDS[shapeName];
+              if (coords && map.current) {
+                map.current.flyTo({ center: coords, zoom: 9.8, duration: 1000 });
+              }
             }
           });
         }
       } catch (err) {
-        console.error('Failed to load district boundaries GeoJSON:', err);
+        console.error('Error initializing Rwanda irrigation map layers:', err);
       }
     });
 
@@ -436,31 +468,24 @@ export default function Irrigation() {
     };
   }, []);
 
-  // 3. Update Choropleth Colors when districts or indicator change
+  // 3. Update Choropleth Colors when data or indicator changes
   useEffect(() => {
     districtsRef.current = districts;
     selectedDistrictNameRef.current = selectedDistrictName;
     activeIndicatorRef.current = activeIndicator;
 
-    if (!map.current || !map.current.isStyleLoaded() || !geojsonLoadedRef.current || districts.length === 0) return;
-    if (!map.current.getLayer('district-fill')) return;
+    if (!map.current || !map.current.isStyleLoaded()) return;
 
-    const matchExpression: any[] = ['match', ['get', 'shapeName']];
-
-    for (const d of districts) {
-      const color = getDistrictColor(d);
-      matchExpression.push(d.district_name, color);
+    const source = map.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
+    if (source) {
+      const enriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, tierColors.NO_DATA);
+      source.setData(enriched);
     }
-    matchExpression.push(missingColor);
-
-    map.current.setPaintProperty('district-fill', 'fill-color', matchExpression as any);
 
     if (map.current.getLayer('district-selected-border')) {
       map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || ''] as any);
     }
-
-    map.current.resize();
-  }, [districts, activeIndicator, selectedDistrictName, extents]);
+  }, [choroplethDataMap, selectedDistrictName]);
 
   // 4. Update Documented Facility Markers on the Map
   useEffect(() => {
@@ -868,37 +893,54 @@ export default function Irrigation() {
               style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
             />
 
-            {/* Dynamic Map Legend Overlay */}
+            {/* Dynamic Map Legend Overlay: 3-Tier Classification */}
             <div className="absolute bottom-5 left-4 z-10 bg-white/95 backdrop-blur-md border border-border-main rounded-xl p-3 shadow-xl max-w-xs text-xs">
-              <div className="flex items-center justify-between font-bold text-text-main mb-1.5">
-                <span>{indicatorConfig.label}</span>
-                <span className="text-[10px] text-muted font-normal">({indicatorConfig.unit})</span>
+              <div className="flex items-center justify-between font-bold text-text-main mb-2">
+                <span>{indicatorConfig.label} ({indicatorConfig.unit})</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200">
+                  Performance Tiers
+                </span>
               </div>
 
-              {/* Gradient Bar */}
-              <div className="flex h-3 rounded-full overflow-hidden mb-1.5 border border-border-main">
-                {cyanRamp.map((color, i) => (
-                  <div key={i} className="flex-1" style={{ backgroundColor: color }} />
-                ))}
-              </div>
-
-              {/* Quantiles / Scale Numbers */}
-              <div className="flex justify-between text-[10px] text-muted font-semibold">
-                <span>{indicatorConfig.format(extents.min)}</span>
-                <span>{indicatorConfig.format(extents.p50)}</span>
-                <span>{indicatorConfig.format(extents.max)}</span>
-              </div>
-
-              {/* Missing data explanation & pins note */}
-              <div className="mt-2 pt-2 border-t border-border-main space-y-1 text-[10px] text-muted">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded bg-[#94A3B8] shrink-0" />
-                  <span>Neutral gray = missing/unreported survey records.</span>
+              {/* 3-Tier Scale */}
+              <div className="space-y-1.5 text-[11px]">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#0284C7] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">High Irrigation</b>
+                  </span>
+                  <span className="text-muted font-semibold">≥ {indicatorConfig.format(choroplethDataMap.p66)}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#38BDF8] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">Moderate Tier</b>
+                  </span>
+                  <span className="text-muted font-semibold">{indicatorConfig.format(choroplethDataMap.p33)} - {indicatorConfig.format(choroplethDataMap.p66)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#BAE6FD] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">Low Coverage</b>
+                  </span>
+                  <span className="text-muted font-semibold">&lt; {indicatorConfig.format(choroplethDataMap.p33)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-border-main text-[10px] text-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#CBD5E1] inline-block border border-black/10 shrink-0"></span>
+                    <span>Unreported / Gap</span>
+                  </span>
+                  <span>Missing survey records</span>
+                </div>
+              </div>
+
+              {/* Irrigation Schemes Pins Note */}
+              <div className="mt-2 pt-2 border-t border-border-main flex items-center justify-between text-[10px] text-muted">
+                <span className="flex items-center gap-1.5">
                   <span className="text-cyan-600 font-bold">💧 Pins:</span>
-                  <span>Documented irrigation schemes (click for capacity & water source).</span>
-                </div>
+                  <span>Documented Irrigation Schemes:</span>
+                </span>
+                <span className="font-bold text-text-main">{facilitiesList.length} mapped</span>
               </div>
             </div>
           </div>

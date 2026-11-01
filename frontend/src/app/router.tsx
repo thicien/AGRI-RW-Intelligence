@@ -3,11 +3,8 @@ import AppShell from './AppShell';
 import AdminDashboardPage from '../features/dashboard/AdminDashboardPage';
 import LandingPage from '../features/landing/LandingPage';
 import LoginPage from '../features/auth/LoginPage';
-import PriorityZonesPage from '../features/intelligence/PriorityZonesPage';
-import FarmersPage from '../features/agriculture/FarmersPage';
-import FarmsPage from '../features/agriculture/FarmsPage';
 import CropsSeasonsPage from '../features/agriculture/CropsSeasonsPage';
-import AgriculturalDataPage from '../features/agriculture/AgriculturalDataPage';
+import ProfilePage from '../features/profile/ProfilePage';
 import RolesPage from '../features/admin/RolesPage';
 import AgriculturalIntelligenceHubPage from '../features/intelligence/AgriculturalIntelligenceHubPage';
 import Irrigation from '../features/environment/Irrigation';
@@ -300,40 +297,16 @@ export const router = createBrowserRouter([
         element: <ExportImportIntelligence />,
       },
       {
-        path: 'farmers',
-        element: <FarmersPage />,
-      },
-      {
-        path: 'farms',
-        element: <FarmsPage />,
-      },
-      {
         path: 'crops',
         element: <CropsSeasonsPage />,
       },
       {
-        path: 'agricultural-data',
-        element: <AgriculturalDataPage />,
-      },
-      {
-        path: 'priority-zones',
-        element: <PriorityZonesPage />,
+        path: 'profile',
+        element: <ProfilePage />,
       },
       {
         path: 'map',
         element: <Navigate to="/admin/dashboard" replace />,
-      },
-      {
-        path: 'field-validation',
-        element: <AdminDashboardPage />,
-      },
-      {
-        path: 'recommendations',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Recommendations & Policy Briefs</h2></div>,
-      },
-      {
-        path: 'interventions',
-        element: <div className="p-8"><h2 className="text-2xl font-bold">Agricultural Interventions</h2></div>,
       },
       {
         path: 'reports',

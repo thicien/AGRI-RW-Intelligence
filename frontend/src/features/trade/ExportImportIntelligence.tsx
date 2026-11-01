@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { 
+  RWANDA_DISTRICTS_GEOJSON, 
+  DISTRICT_CENTROIDS, 
+  enrichRwandaGeoJSON, 
+  type DistrictChoroplethData,
+  type PerformanceTier 
+} from '../../data/rwandaMapData';
 import { apiUrl } from '../../config/api';
 import { 
   Globe, Plane, Ship, TrendingUp, TrendingDown, DollarSign, Scale, 
@@ -299,28 +306,59 @@ export default function ExportImportIntelligence() {
     }
   }, [selectedLayer]);
 
-  // Color Calculation for District Choropleth
-  const getDistrictChoroplethColor = (d: DistrictExportStat | undefined): string => {
-    if (!d) return '#334155';
-    const val = layerConfig.getValue(d);
-    const allVals = districts.map(x => layerConfig.getValue(x)).sort((a, b) => a - b);
-    if (allVals.length === 0) return '#334155';
+  // Synchronous 3-tier High/Moderate/Low Choropleth Classification
+  const choroplethDataMap = useMemo(() => {
+    const mapData: Record<string, DistrictChoroplethData> = {};
+    if (!districts || districts.length === 0) return { mapData, highThreshold: 0, lowThreshold: 0 };
 
-    const min = allVals[0];
-    const max = allVals[allVals.length - 1];
-    if (max === min) return layerConfig.colorRamp[2];
+    const vals = districts.map(d => Number(layerConfig.getValue(d)) || 0).sort((a, b) => a - b);
+    const lowThresh = vals[Math.floor(vals.length * 0.33)] || 0;
+    const highThresh = vals[Math.floor(vals.length * 0.67)] || 0;
 
-    const p20 = allVals[Math.floor(allVals.length * 0.2)];
-    const p40 = allVals[Math.floor(allVals.length * 0.4)];
-    const p60 = allVals[Math.floor(allVals.length * 0.6)];
-    const p80 = allVals[Math.floor(allVals.length * 0.8)];
+    districts.forEach(d => {
+      const val = Number(layerConfig.getValue(d)) || 0;
+      let tier: PerformanceTier = 'MODERATE';
+      let color = '#4ADE80';
 
-    if (val <= p20) return layerConfig.colorRamp[0];
-    if (val <= p40) return layerConfig.colorRamp[1];
-    if (val <= p60) return layerConfig.colorRamp[2];
-    if (val <= p80) return layerConfig.colorRamp[3];
-    return layerConfig.colorRamp[4];
-  };
+      if (selectedLayer === 'exit_distance') {
+        // Lower distance is better / high performance
+        if (val <= lowThresh) {
+          tier = 'HIGH';
+          color = '#15803D'; // Deep green
+        } else if (val >= highThresh) {
+          tier = 'LOW';
+          color = '#BBF7D0'; // Light mint
+        } else {
+          tier = 'MODERATE';
+          color = '#4ADE80'; // Emerald
+        }
+      } else {
+        // Higher value is better / high performance
+        if (val >= highThresh) {
+          tier = 'HIGH';
+          color = '#15803D'; // Deep green
+        } else if (val <= lowThresh) {
+          tier = 'LOW';
+          color = '#BBF7D0'; // Light green
+        } else {
+          tier = 'MODERATE';
+          color = '#4ADE80'; // Emerald
+        }
+      }
+
+      mapData[d.district_name.toLowerCase()] = {
+        districtName: d.district_name,
+        numericValue: val,
+        formattedValue: `${val.toLocaleString()} ${layerConfig.unit}`,
+        tier,
+        tierLabel: tier === 'HIGH' ? 'High' : tier === 'MODERATE' ? 'Moderate' : 'Low',
+        color,
+        hasData: true
+      };
+    });
+
+    return { mapData, highThreshold: highThresh, lowThreshold: lowThresh };
+  }, [districts, selectedLayer, layerConfig]);
 
   // Initialize MapLibre GL Map
   useEffect(() => {
@@ -357,137 +395,124 @@ export default function ExportImportIntelligence() {
     mapInstance.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     mapInstance.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    mapInstance.current.on('load', async () => {
+    mapInstance.current.on('load', () => {
       if (!mapInstance.current) return;
 
-      try {
-        const res = await fetch('/rwanda-districts.geojson');
-        const geojson = await res.json();
-        geojsonLoadedRef.current = true;
+      const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#BBF7D0');
+      geojsonLoadedRef.current = true;
 
-        if (!mapInstance.current.getSource('rwanda-districts')) {
-          mapInstance.current.addSource('rwanda-districts', {
-            type: 'geojson',
-            data: geojson,
-          });
+      if (!mapInstance.current.getSource('rwanda-districts')) {
+        mapInstance.current.addSource('rwanda-districts', {
+          type: 'geojson',
+          data: initialEnriched as any,
+        });
 
-          // Build Match Expression for Choropleth Fill
-          let initialFill: any = '#10b981';
-          const list = districtsRef.current;
-          if (list && list.length > 0) {
-            const matchExpr: any[] = ['match', ['get', 'shapeName']];
-            for (const d of list) {
-              matchExpr.push(d.district_name, getDistrictChoroplethColor(d));
-            }
-            matchExpr.push('#334155');
-            initialFill = matchExpr;
-          }
+        // 1. District Fill Layer (3-Tier Performance Choropleth)
+        mapInstance.current.addLayer({
+          id: 'district-fill',
+          type: 'fill',
+          source: 'rwanda-districts',
+          paint: {
+            'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
+            'fill-opacity': 0.82,
+          },
+        });
 
-          // 1. District Fill Layer
-          mapInstance.current.addLayer({
-            id: 'district-fill',
-            type: 'fill',
-            source: 'rwanda-districts',
-            paint: {
-              'fill-color': initialFill as any,
-              'fill-opacity': 0.82,
-            },
-          });
+        // 2. High-Contrast District Boundary Lines
+        mapInstance.current.addLayer({
+          id: 'district-borders',
+          type: 'line',
+          source: 'rwanda-districts',
+          paint: {
+            'line-color': '#0f172a',
+            'line-width': 1.6,
+            'line-opacity': 0.95,
+          },
+        });
 
-          // 2. District Boundary Lines
-          mapInstance.current.addLayer({
-            id: 'district-borders',
-            type: 'line',
-            source: 'rwanda-districts',
-            paint: {
-              'line-color': '#0f172a',
-              'line-width': 1.5,
-              'line-opacity': 0.9,
-            },
-          });
+        // 3. Highlighted District Boundary
+        mapInstance.current.addLayer({
+          id: 'district-selected-line',
+          type: 'line',
+          source: 'rwanda-districts',
+          paint: {
+            'line-color': '#0D47A1',
+            'line-width': 3.5,
+            'line-opacity': [
+              'case',
+              ['==', ['get', 'shapeName'], selectedDistrictRef.current],
+              1.0,
+              0.0,
+            ],
+          },
+        });
 
-          // 3. Highlighted District Boundary
-          mapInstance.current.addLayer({
-            id: 'district-selected-line',
-            type: 'line',
-            source: 'rwanda-districts',
-            paint: {
-              'line-color': '#fbbf24',
-              'line-width': 3.5,
-              'line-opacity': [
-                'case',
-                ['==', ['get', 'shapeName'], selectedDistrictRef.current],
-                1.0,
-                0.0,
-              ],
-            },
-          });
+        // Tooltip Popup
+        popupRef.current = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          className: 'export-tooltip',
+        });
 
-          // Tooltip Popup
-          popupRef.current = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false,
-            className: 'export-tooltip',
-          });
+        // Hover Interactivity
+        mapInstance.current.on('mousemove', 'district-fill', (e) => {
+          if (!mapInstance.current || !e.features || e.features.length === 0) return;
+          mapInstance.current.getCanvas().style.cursor = 'pointer';
 
-          // Hover Interactivity
-          mapInstance.current.on('mousemove', 'district-fill', (e) => {
-            if (!mapInstance.current || !e.features || e.features.length === 0) return;
-            mapInstance.current.getCanvas().style.cursor = 'pointer';
+          const shapeName = e.features[0].properties?.shapeName || '';
+          const match = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
 
-            const shapeName = e.features[0].properties?.shapeName || '';
-            const match = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
+          const valStr = match ? layerConfig.format(layerConfig.getValue(match)) : 'No data recorded';
+          const surpStr = match ? `${match.estimated_exportable_volume_mt.toLocaleString()} MT` : '—';
+          const hubStr = match ? match.nearest_exit_hub : '—';
 
-            const valStr = match ? layerConfig.format(layerConfig.getValue(match)) : 'No data recorded';
-            const surpStr = match ? `${match.estimated_exportable_volume_mt.toLocaleString()} MT` : '—';
-            const hubStr = match ? match.nearest_exit_hub : '—';
-
-            popupRef.current?.setLngLat(e.lngLat).setHTML(`
-              <div class="p-3 bg-slate-900/95 text-slate-100 rounded-lg shadow-2xl border border-slate-700/80 backdrop-blur-md min-w-[210px] text-xs space-y-1.5 font-sans">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-1">
-                  <span class="font-bold text-sm text-emerald-400">${shapeName} District</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${match?.province_name || 'Rwanda'}</span>
-                </div>
-                <div class="pt-1 space-y-1">
-                  <div class="flex justify-between items-center text-slate-300">
-                    <span class="text-slate-400">${layerConfig.title}:</span>
-                    <span class="font-bold text-amber-400 font-mono">${valStr}</span>
-                  </div>
-                  <div class="flex justify-between items-center text-slate-300">
-                    <span class="text-slate-400">Exportable Surplus:</span>
-                    <span class="font-mono text-slate-200">${surpStr}</span>
-                  </div>
-                  <div class="flex justify-between items-center text-slate-300">
-                    <span class="text-slate-400">Nearest Exit Hub:</span>
-                    <span class="text-[11px] text-cyan-300 truncate max-w-[120px]">${hubStr}</span>
-                  </div>
-                  <div class="flex justify-between items-center text-slate-300">
-                    <span class="text-slate-400">Readiness Score:</span>
-                    <span class="font-bold text-emerald-400 font-mono">${match?.export_readiness_score || 0}/100</span>
-                  </div>
-                </div>
-                <div class="text-[9px] text-slate-500 italic pt-1 border-t border-slate-800/80 text-right">Click district to inspect full dossier</div>
+          popupRef.current?.setLngLat(e.lngLat).setHTML(`
+            <div class="p-3 bg-slate-900/95 text-slate-100 rounded-lg shadow-2xl border border-slate-700/80 backdrop-blur-md min-w-[210px] text-xs space-y-1.5 font-sans">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-1">
+                <span class="font-bold text-sm text-emerald-400">${shapeName} District</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${match?.province_name || 'Rwanda'}</span>
               </div>
-            `).addTo(mapInstance.current);
-          });
+              <div class="pt-1 space-y-1">
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-400">${layerConfig.title}:</span>
+                  <span class="font-bold text-amber-400 font-mono">${valStr}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-400">Exportable Surplus:</span>
+                  <span class="font-mono text-slate-200">${surpStr}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-400">Nearest Exit Hub:</span>
+                  <span class="text-[11px] text-cyan-300 truncate max-w-[120px]">${hubStr}</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300">
+                  <span class="text-slate-400">Readiness Score:</span>
+                  <span class="font-bold text-emerald-400 font-mono">${match?.export_readiness_score || 0}/100</span>
+                </div>
+              </div>
+              <div class="text-[9px] text-slate-500 italic pt-1 border-t border-slate-800/80 text-right">Click district to zoom & inspect dossier</div>
+            </div>
+          `).addTo(mapInstance.current);
+        });
 
-          mapInstance.current.on('mouseleave', 'district-fill', () => {
-            if (!mapInstance.current) return;
-            mapInstance.current.getCanvas().style.cursor = '';
-            popupRef.current?.remove();
-          });
+        mapInstance.current.on('mouseleave', 'district-fill', () => {
+          if (!mapInstance.current) return;
+          mapInstance.current.getCanvas().style.cursor = '';
+          popupRef.current?.remove();
+        });
 
-          // Click Interactivity
-          mapInstance.current.on('click', 'district-fill', (e) => {
-            if (!e.features || e.features.length === 0) return;
-            const clickedName = e.features[0].properties?.shapeName;
-            if (clickedName) {
-              setSelectedDistrictName(clickedName);
+        // Click Interactivity: Select district & flyTo centroid
+        mapInstance.current.on('click', 'district-fill', (e) => {
+          if (!e.features || e.features.length === 0) return;
+          const clickedName = e.features[0].properties?.shapeName;
+          if (clickedName) {
+            setSelectedDistrictName(clickedName);
+            const coords = DISTRICT_CENTROIDS[clickedName];
+            if (coords) {
+              focusOnCoordinates(coords[0], coords[1], 10.2);
             }
-          });
-        }
-      } catch (err) {
-        console.error('Error loading Rwanda district geojson in export map:', err);
+          }
+        });
       }
     });
 
@@ -497,17 +522,13 @@ export default function ExportImportIntelligence() {
     };
   }, []);
 
-  // Update Choropleth Colors and Highlight when Layer or Districts Change
+  // Update GeoJSON and highlighted boundary reactively
   useEffect(() => {
-    if (!mapInstance.current || !geojsonLoadedRef.current || !mapInstance.current.getLayer('district-fill')) return;
-
-    if (districts.length > 0) {
-      const matchExpr: any[] = ['match', ['get', 'shapeName']];
-      for (const d of districts) {
-        matchExpr.push(d.district_name, getDistrictChoroplethColor(d));
-      }
-      matchExpr.push('#334155');
-      mapInstance.current.setPaintProperty('district-fill', 'fill-color', matchExpr as any);
+    if (!mapInstance.current) return;
+    const source = mapInstance.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
+    if (source) {
+      const enriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#BBF7D0');
+      source.setData(enriched as any);
     }
 
     if (mapInstance.current.getLayer('district-selected-line')) {
@@ -518,7 +539,7 @@ export default function ExportImportIntelligence() {
         0.0,
       ] as any);
     }
-  }, [districts, selectedLayer, selectedDistrictName]);
+  }, [choroplethDataMap, selectedDistrictName]);
 
   // Update Export Hub Markers on Map
   useEffect(() => {
@@ -552,6 +573,10 @@ export default function ExportImportIntelligence() {
         .setLngLat(hub.coordinates)
         .setPopup(popup)
         .addTo(mapInstance.current!);
+
+      el.addEventListener('click', () => {
+        focusOnCoordinates(hub.coordinates[0], hub.coordinates[1], 11.5);
+      });
 
       hubMarkersRef.current.push(marker);
     });
@@ -587,6 +612,13 @@ export default function ExportImportIntelligence() {
         .setLngLat([f.longitude!, f.latitude!])
         .setPopup(popup)
         .addTo(mapInstance.current!);
+
+      el.addEventListener('click', () => {
+        setSelectedDistrictName(f.district_name);
+        if (f.longitude && f.latitude) {
+          focusOnCoordinates(f.longitude, f.latitude, 11.5);
+        }
+      });
 
       facilityMarkersRef.current.push(marker);
     });
@@ -670,102 +702,101 @@ export default function ExportImportIntelligence() {
   }, [exportFacilities, facilityTypeFilter, facilitySearch]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* 1. INSTITUTIONAL HEADER & BANNER */}
-      <header className="border-b border-slate-800 bg-slate-900/95 sticky top-0 z-30 backdrop-blur-md px-6 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-xs font-semibold tracking-wider uppercase text-emerald-400">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>National Agricultural Planner · Module 5: Export Opportunities</span>
-              <span className="text-slate-600">|</span>
-              <span className="text-slate-400">NAEB · MINICOM · NISR Trade Statistics</span>
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 px-4 sm:px-6 pt-6 font-sans select-none animate-in fade-in duration-300">
+      {/* 1. Top Header Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              National Agricultural Planner · Export Opportunities
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center space-x-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <Plane className="w-8 h-8 text-emerald-400" />
               <span>National Export Opportunities Intelligence</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Planning & Intelligence Centre
               </span>
             </h1>
-            <p className="text-xs text-slate-400 max-w-4xl">
+            <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
               National planning focus: export crops, product quality, market access, seasonal supply, district contributions and infrastructure readiness.
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 self-end lg:self-center">
+          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <button
+              onClick={handleExportCSV}
+              className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-emerald-300 text-xs font-bold transition-all flex items-center gap-2 border border-slate-700 shadow-md"
+              title="Download nationwide agricultural export dataset"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export CSV</span>
+            </button>
             <button
               onClick={fetchWorkspaceData}
               disabled={loading}
-              className="inline-flex items-center px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-md disabled:opacity-50"
               title="Refresh intelligence records"
             >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
-              Refresh Data
-            </button>
-            <button
-              onClick={handleExportCSV}
-              className="inline-flex items-center px-3.5 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition"
-              title="Download nationwide agricultural export dataset"
-            >
-              <Download className="w-3.5 h-3.5 mr-1.5" />
-              Export CSV Dataset
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Workspace Quick-Jump Navigation Tabs */}
-        <div className="max-w-7xl mx-auto mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between overflow-x-auto gap-2 no-scrollbar">
-          <div className="flex items-center space-x-1.5 text-xs">
-            {[
-              { id: 'overview', label: '1. National Overview & Map', icon: Compass },
-              { id: 'catalogue', label: '2. Export Commodity Catalogue & Quality', icon: Package },
-              { id: 'markets', label: '3. International Destination Markets', icon: Globe },
-              { id: 'trends', label: '4. Seasonal Export Comparisons', icon: TrendingUp },
-              { id: 'hubs', label: '5. Export Exit Hubs & Infrastructure', icon: Plane },
-              { id: 'districts', label: '6. District Export Contributions', icon: Award },
-              { id: 'rankings', label: '7. Commodity Earnings Rankings', icon: DollarSign },
-              { id: 'facilities', label: '8. Export Supporting Facilities', icon: Building2 },
-              { id: 'readiness', label: '9. Supply, Quality & Readiness', icon: ShieldCheck },
-              { id: 'opportunities', label: '10. Strategic Opportunities & Reports', icon: Target },
-            ].map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeSection === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveSection(tab.id);
-                    const el = document.getElementById(tab.id);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className={`inline-flex items-center px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition ${
-                    isActive
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 mr-1.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+      {/* Workspace Quick-Jump Navigation Tabs */}
+      <div className="bg-surface border border-border-main rounded-2xl p-2.5 shadow-sm flex items-center justify-between overflow-x-auto gap-2 no-scrollbar text-xs">
+        <div className="flex items-center space-x-1.5">
+          {[
+            { id: 'overview', label: '1. National Overview & Map', icon: Compass },
+            { id: 'catalogue', label: '2. Export Commodity Catalogue & Quality', icon: Package },
+            { id: 'markets', label: '3. International Destination Markets', icon: Globe },
+            { id: 'trends', label: '4. Seasonal Export Comparisons', icon: TrendingUp },
+            { id: 'hubs', label: '5. Export Exit Hubs & Infrastructure', icon: Plane },
+            { id: 'districts', label: '6. District Export Contributions', icon: Award },
+            { id: 'rankings', label: '7. Commodity Earnings Rankings', icon: DollarSign },
+            { id: 'facilities', label: '8. Export Supporting Facilities', icon: Building2 },
+            { id: 'readiness', label: '9. Supply, Quality & Readiness', icon: ShieldCheck },
+            { id: 'opportunities', label: '10. Strategic Opportunities & Reports', icon: Target },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveSection(tab.id);
+                  const el = document.getElementById(tab.id);
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className={`inline-flex items-center px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                  isActive
+                    ? 'bg-emerald-50 text-agriculture border border-emerald-200 shadow-sm font-semibold'
+                    : 'text-muted hover:text-text-main hover:bg-slate-100'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 mr-1.5" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
-      </header>
+      </div>
 
       {/* 2. UNIFIED MASTER FILTER BAR */}
-      <section className="bg-slate-900 border-b border-slate-800 px-6 py-3.5">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
           {/* A. Agricultural Season */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <Calendar className="w-3 h-3 mr-1 text-emerald-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <Calendar className="w-3 h-3 mr-1 text-agriculture" />
               Reporting Season
             </label>
             <select
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(e.target.value)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               {availableSeasons.map(s => (
                 <option key={s.code} value={s.code}>
@@ -777,14 +808,14 @@ export default function ExportImportIntelligence() {
 
           {/* B. Commodity Selector */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <Package className="w-3 h-3 mr-1 text-amber-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <Package className="w-3 h-3 mr-1 text-amber-600" />
               Export Commodity
             </label>
             <select
               value={selectedCommodity}
               onChange={(e) => setSelectedCommodity(e.target.value)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-amber-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               <option value="ALL">All Commodities (National Total)</option>
               {commoditiesCatalogue.map(c => (
@@ -797,14 +828,14 @@ export default function ExportImportIntelligence() {
 
           {/* C. Commodity Category */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <Layers className="w-3 h-3 mr-1 text-cyan-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <Layers className="w-3 h-3 mr-1 text-primary" />
               Product Category
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-cyan-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               <option value="ALL">All Categories</option>
               <option value="TRADITIONAL_EXPORT">Traditional Exports (Tea, Coffee)</option>
@@ -816,14 +847,14 @@ export default function ExportImportIntelligence() {
 
           {/* D. Destination Market */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <Globe className="w-3 h-3 mr-1 text-purple-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <Globe className="w-3 h-3 mr-1 text-purple-600" />
               Destination Market
             </label>
             <select
               value={selectedDestination}
               onChange={(e) => setSelectedDestination(e.target.value)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-purple-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               <option value="ALL">All International Markets</option>
               {internationalMarkets.map(m => (
@@ -836,14 +867,14 @@ export default function ExportImportIntelligence() {
 
           {/* E. Geographic Scope */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <MapPin className="w-3 h-3 mr-1 text-emerald-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <MapPin className="w-3 h-3 mr-1 text-agriculture" />
               Geographic Scope
             </label>
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               <option value="ALL">All Districts (National View)</option>
               <option value="Kigali City">Kigali City</option>
@@ -856,14 +887,14 @@ export default function ExportImportIntelligence() {
 
           {/* F. Intelligence Layer */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400 flex items-center">
-              <SlidersHorizontal className="w-3 h-3 mr-1 text-blue-400" />
+            <label className="text-[11px] font-semibold text-muted flex items-center">
+              <SlidersHorizontal className="w-3 h-3 mr-1 text-primary" />
               Intelligence Layer
             </label>
             <select
               value={selectedLayer}
               onChange={(e) => setSelectedLayer(e.target.value as IntelligenceLayerType)}
-              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-agriculture focus:outline-none"
             >
               <option value="export_value">Export Earnings (USD)</option>
               <option value="export_volume">Export Volume (MT)</option>
@@ -874,45 +905,45 @@ export default function ExportImportIntelligence() {
             </select>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* MAIN ANALYTICAL BODY */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6 space-y-10 flex-1">
+      <div className="space-y-10">
         {/* SECTION 1: NATIONAL EXPORT PERFORMANCE OVERVIEW */}
         <section id="overview" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span>
+            <h2 className="text-sm font-bold text-text-main uppercase tracking-wider flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-agriculture rounded-sm"></span>
               <span>1. National Agricultural Export Performance Overview</span>
             </h2>
-            <div className="text-xs text-slate-400 flex items-center space-x-3">
+            <div className="text-xs text-muted flex items-center space-x-3">
               <span className="flex items-center">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                Contributing Districts: <strong className="ml-1 text-slate-200">30 of 30 Districts (100%)</strong>
+                <CheckCircle2 className="w-3.5 h-3.5 text-agriculture mr-1" />
+                Contributing Districts: <strong className="ml-1 text-text-main">30 of 30 Districts (100%)</strong>
               </span>
-              <span className="text-slate-600">|</span>
+              <span className="text-border-main">|</span>
               <span className="flex items-center">
-                <Globe className="w-3.5 h-3.5 text-purple-400 mr-1" />
-                Destination Markets: <strong className="ml-1 text-slate-200">{nationalSummary?.destination_countries_count || 17} Countries</strong>
+                <Globe className="w-3.5 h-3.5 text-primary mr-1" />
+                Destination Markets: <strong className="ml-1 text-text-main">{nationalSummary?.destination_countries_count || 17} Countries</strong>
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Total Export Income */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+              <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Total Export Income</span>
-                <DollarSign className="w-4 h-4 text-emerald-400" />
+                <DollarSign className="w-4 h-4 text-agriculture" />
               </div>
-              <div className="mt-2 text-2xl font-black text-white font-mono">
+              <div className="mt-2 text-2xl font-black text-text-main font-mono">
                 ${nationalSummary?.total_export_value_usd ? (nationalSummary.total_export_value_usd / 1000000).toFixed(1) : '—'}{' '}
-                <span className="text-sm font-sans font-normal text-slate-400">Million USD</span>
+                <span className="text-sm font-sans font-normal text-muted">Million USD</span>
               </div>
-              <div className="mt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
-                <span>Equivalent: <strong className="text-slate-200 font-mono">{nationalSummary?.total_export_value_rwf ? (nationalSummary.total_export_value_rwf / 1000000000).toFixed(1) : '—'}B RWF</strong></span>
+              <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main/80 pt-2">
+                <span>Equivalent: <strong className="text-text-main font-mono">{nationalSummary?.total_export_value_rwf ? (nationalSummary.total_export_value_rwf / 1000000000).toFixed(1) : '—'}B RWF</strong></span>
                 {nationalSummary?.export_value_change_pct !== undefined && (
-                  <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.export_value_change_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.export_value_change_pct >= 0 ? 'text-agriculture' : 'text-rose-600'}`}>
                     {nationalSummary.export_value_change_pct >= 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
                     {Math.abs(nationalSummary.export_value_change_pct)}% vs {compareSeason}
                   </span>
@@ -921,19 +952,19 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Card 2: Exported Quantity Volume */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+              <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Exported Quantity</span>
-                <Scale className="w-4 h-4 text-cyan-400" />
+                <Scale className="w-4 h-4 text-primary" />
               </div>
-              <div className="mt-2 text-2xl font-black text-white font-mono">
+              <div className="mt-2 text-2xl font-black text-text-main font-mono">
                 {nationalSummary?.total_export_quantity_mt?.toLocaleString() || '—'}{' '}
-                <span className="text-sm font-sans font-normal text-slate-400">tonnes</span>
+                <span className="text-sm font-sans font-normal text-muted">tonnes</span>
               </div>
-              <div className="mt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
-                <span>Avg Unit Value: <strong className="text-slate-200 font-mono">${nationalSummary?.avg_unit_export_value_usd_per_mt}/MT</strong></span>
+              <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main/80 pt-2">
+                <span>Avg Unit Value: <strong className="text-text-main font-mono">${nationalSummary?.avg_unit_export_value_usd_per_mt}/MT</strong></span>
                 {nationalSummary?.export_quantity_change_pct !== undefined && (
-                  <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.export_quantity_change_pct >= 0 ? 'text-cyan-400' : 'text-rose-400'}`}>
+                  <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.export_quantity_change_pct >= 0 ? 'text-primary' : 'text-rose-600'}`}>
                     {nationalSummary.export_quantity_change_pct >= 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
                     {Math.abs(nationalSummary.export_quantity_change_pct)}% vs {compareSeason}
                   </span>
@@ -942,55 +973,55 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Card 3: Exporting Commodities */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+              <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Exporting Commodities</span>
-                <Package className="w-4 h-4 text-amber-400" />
+                <Package className="w-4 h-4 text-amber-600" />
               </div>
-              <div className="mt-2 text-2xl font-black text-white font-mono">
+              <div className="mt-2 text-2xl font-black text-text-main font-mono">
                 {nationalSummary?.active_export_commodities_count || commoditiesCatalogue.length || '—'}{' '}
-                <span className="text-sm font-sans font-normal text-slate-400">commodities</span>
+                <span className="text-sm font-sans font-normal text-muted">commodities</span>
               </div>
-              <div className="mt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
-                <span>Top earner: <strong className="text-slate-200">Tea ($91.4M) & Coffee ($74.4M)</strong></span>
-                <span className="text-emerald-400 font-medium">100% Documented</span>
+              <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main/80 pt-2">
+                <span>Top earner: <strong className="text-text-main">Tea ($91.4M) & Coffee ($74.4M)</strong></span>
+                <span className="text-agriculture font-medium">100% Documented</span>
               </div>
             </div>
 
             {/* Card 4: Documented Export Hubs */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+              <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Documented Export Hubs</span>
-                <Plane className="w-4 h-4 text-purple-400" />
+                <Plane className="w-4 h-4 text-purple-600" />
               </div>
-              <div className="mt-2 text-2xl font-black text-white font-mono">
+              <div className="mt-2 text-2xl font-black text-text-main font-mono">
                 {nationalSummary?.documented_export_hubs_count || exportHubs.length || '—'}{' '}
-                <span className="text-sm font-sans font-normal text-slate-400">verified hubs</span>
+                <span className="text-sm font-sans font-normal text-muted">verified hubs</span>
               </div>
-              <div className="mt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2">
+              <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main/80 pt-2">
                 <span>Air cargo, border posts & ports</span>
-                <span className="text-purple-400 font-medium font-mono">Geocoded</span>
+                <span className="text-purple-600 font-medium font-mono">Geocoded</span>
               </div>
             </div>
           </div>
 
           {/* Value vs. Volume Decoupling Callout Banner */}
-          <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+          <div className="bg-surface border border-border-main rounded-xl p-3.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs shadow-sm">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-amber-950/60 text-amber-400 border border-amber-800/30">
+              <div className="p-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <span className="font-semibold text-white">Value vs. Volume Growth Decoupling Analysis: </span>
-                <span className="text-emerald-400 font-semibold">{nationalSummary?.value_vs_volume_decoupling || 'Balanced growth across revenue and physical volume'}</span>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <span className="font-semibold text-text-main">Value vs. Volume Growth Decoupling Analysis: </span>
+                <span className="text-agriculture font-semibold">{nationalSummary?.value_vs_volume_decoupling || 'Balanced growth across revenue and physical volume'}</span>
+                <p className="text-[11px] text-muted mt-0.5">
                   A planner can distinguish growth in export quantity from growth in export income. Income can rise from price premiums even when exported volume remains stable.
                 </p>
               </div>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-slate-400 text-[11px]">Net Agricultural Trade Balance:</span>
-              <div className="font-mono font-bold text-emerald-400 text-sm">
+              <span className="text-muted text-[11px]">Net Agricultural Trade Balance:</span>
+              <div className="font-mono font-bold text-agriculture text-sm">
                 +${((nationalSummary?.net_trade_balance_usd || 185000000) / 1000000).toFixed(1)}M USD
               </div>
             </div>
@@ -999,99 +1030,99 @@ export default function ExportImportIntelligence() {
           {/* INTERACTIVE RWANDA EXPORT HUB MAP & DISTRICT EXPORT DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Left Column: Rwanda Export Map (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
-              <div className="p-3.5 border-b border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="lg:col-span-7 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+              <div className="p-3.5 border-b border-border-main bg-surface flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div>
-                  <h3 className="font-bold text-slate-100 flex items-center space-x-2">
-                    <Plane className="w-4 h-4 text-emerald-400" />
+                  <h3 className="font-bold text-text-main flex items-center space-x-2">
+                    <Plane className="w-4 h-4 text-agriculture" />
                     <span>National Export Hub & Supply Infrastructure Map</span>
                   </h3>
-                  <p className="text-[11px] text-slate-400">
-                    National view · District boundaries · Indicator: <span className="text-amber-400 font-semibold">{layerConfig.title}</span>
+                  <p className="text-[11px] text-muted">
+                    National view · District boundaries · Indicator: <span className="text-amber-700 font-semibold">{layerConfig.title}</span>
                   </p>
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <label className="flex items-center space-x-1.5 cursor-pointer bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-[11px] border border-slate-700">
+                  <label className="flex items-center space-x-1.5 cursor-pointer bg-surface hover:bg-background px-2 py-1 rounded text-[11px] border border-border-main text-text-main">
                     <input
                       type="checkbox"
                       checked={showExitHubs}
                       onChange={(e) => setShowExitHubs(e.target.checked)}
-                      className="rounded text-amber-500 focus:ring-0 w-3 h-3"
+                      className="rounded text-amber-600 focus:ring-0 w-3 h-3"
                     />
-                    <span className="text-amber-300 font-medium">Exit Hubs ({exportHubs.length})</span>
+                    <span className="text-amber-800 font-medium">Exit Hubs ({exportHubs.length})</span>
                   </label>
-                  <label className="flex items-center space-x-1.5 cursor-pointer bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-[11px] border border-slate-700">
+                  <label className="flex items-center space-x-1.5 cursor-pointer bg-surface hover:bg-background px-2 py-1 rounded text-[11px] border border-border-main text-text-main">
                     <input
                       type="checkbox"
                       checked={showFacilityMarkers}
                       onChange={(e) => setShowFacilityMarkers(e.target.checked)}
-                      className="rounded text-cyan-500 focus:ring-0 w-3 h-3"
+                      className="rounded text-primary focus:ring-0 w-3 h-3"
                     />
-                    <span className="text-cyan-300 font-medium">Export Facilities ({exportFacilities.length})</span>
+                    <span className="text-primary font-medium">Export Facilities ({exportFacilities.length})</span>
                   </label>
                 </div>
               </div>
 
               {/* Map Canvas */}
-              <div className="relative flex-1 bg-slate-950">
+              <div className="relative flex-1 bg-slate-50">
                 <div ref={mapContainer} className="w-full h-full" />
 
                 {/* Map Choropleth Legend (Bottom Left) */}
-                <div className="absolute bottom-4 left-4 bg-slate-900/95 border border-slate-700/80 rounded-lg p-3 shadow-2xl backdrop-blur-md text-[11px] max-w-[240px] space-y-2 pointer-events-auto">
-                  <div className="font-bold text-slate-200 flex items-center justify-between">
+                <div className="absolute bottom-4 left-4 bg-surface/95 border border-border-main rounded-lg p-3 shadow-xl backdrop-blur-md text-[11px] max-w-[240px] space-y-2 pointer-events-auto">
+                  <div className="font-bold text-text-main flex items-center justify-between">
                     <span>{layerConfig.badge}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">{layerConfig.unit}</span>
+                    <span className="text-[10px] text-muted font-mono">{layerConfig.unit}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     {layerConfig.colorRamp.map((col, idx) => (
                       <div key={idx} className="flex-1 h-2.5 rounded-sm" style={{ backgroundColor: col }} />
                     ))}
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                  <div className="flex justify-between text-[10px] text-muted font-mono">
                     <span>Low / Limited</span>
                     <span>Moderate</span>
                     <span>High / Favorable</span>
                   </div>
-                  <div className="pt-1.5 border-t border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+                  <div className="pt-1.5 border-t border-border-main text-[10px] text-muted flex items-center justify-between">
                     <span className="flex items-center">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1.5"></span>
                       Verified Exit Hub
                     </span>
-                    <span className="text-amber-400 font-medium">Selected: {selectedDistrictName}</span>
+                    <span className="text-agriculture font-medium">Selected: {selectedDistrictName}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right Column: District Export Profile Dossier (5 cols) */}
-            <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+            <div className="lg:col-span-5 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
               {/* Dossier Header */}
-              <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+              <div className="p-4 border-b border-border-main bg-surface flex items-center justify-between">
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-lg text-white">{selectedDistrictData?.district_name || 'Select District'}</h3>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                    <h3 className="font-bold text-lg text-text-main">{selectedDistrictData?.district_name || 'Select District'}</h3>
+                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-background text-text-main border border-border-main">
                       {selectedDistrictData?.province_name}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">Export Sourcing Profile · Season {selectedSeason}</p>
+                  <p className="text-xs text-muted">Export Sourcing Profile · Season {selectedSeason}</p>
                 </div>
 
                 <div className="text-right">
                   <span className={`px-2 py-0.5 rounded text-xs font-bold border ${
                     selectedDistrictData?.export_tier === 'TIER_1_GLOBAL_EXPORT_HUB'
-                      ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                      : 'bg-amber-950 text-amber-400 border-amber-800'
+                      ? 'bg-emerald-50 text-agriculture border-emerald-300'
+                      : 'bg-amber-50 text-amber-700 border-amber-300'
                   }`}>
                     {selectedDistrictData?.export_tier?.replace(/_/g, ' ') || 'EXPORT_PRODUCER'}
                   </span>
-                  <div className="text-[10px] text-slate-500 mt-1">Export Readiness: {selectedDistrictData?.export_readiness_score || 0}/100</div>
+                  <div className="text-[10px] text-muted mt-1">Export Readiness: {selectedDistrictData?.export_readiness_score || 0}/100</div>
                 </div>
               </div>
 
               {/* Dossier Tabs */}
-              <div className="flex border-b border-slate-800 bg-slate-950/60 text-xs font-medium">
+              <div className="flex border-b border-border-main bg-background text-xs font-medium">
                 {[
                   { id: 'overview', label: 'Overview' },
                   { id: 'crops', label: 'Export Crops' },
@@ -1104,8 +1135,8 @@ export default function ExportImportIntelligence() {
                     onClick={() => setActiveDossierTab(tab.id as any)}
                     className={`flex-1 py-2 text-center border-b-2 transition ${
                       activeDossierTab === tab.id
-                        ? 'border-emerald-500 text-emerald-400 font-bold bg-slate-900'
-                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                        ? 'border-agriculture text-agriculture font-bold bg-surface'
+                        : 'border-transparent text-muted hover:text-text-main'
                     }`}
                   >
                     {tab.label}
@@ -1114,53 +1145,53 @@ export default function ExportImportIntelligence() {
               </div>
 
               {/* Dossier Content */}
-              <div className="p-4 flex-1 overflow-y-auto space-y-4 text-xs text-slate-300">
+              <div className="p-4 flex-1 overflow-y-auto space-y-4 text-xs text-text-main">
                 {activeDossierTab === 'overview' && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <span className="text-[11px] text-slate-400">Exportable Surplus Volume</span>
-                        <div className="text-lg font-bold text-emerald-400 font-mono mt-1">
+                      <div className="bg-background p-3 rounded-lg border border-border-main">
+                        <span className="text-[11px] text-muted">Exportable Surplus Volume</span>
+                        <div className="text-lg font-bold text-agriculture font-mono mt-1">
                           {selectedDistrictData?.estimated_exportable_volume_mt?.toLocaleString()} MT
                         </div>
-                        <div className="text-[10px] text-slate-500">Commercial export flow</div>
+                        <div className="text-[10px] text-muted">Commercial export flow</div>
                       </div>
 
-                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <span className="text-[11px] text-slate-400">Total Crop Production</span>
-                        <div className="text-lg font-bold text-white font-mono mt-1">
+                      <div className="bg-background p-3 rounded-lg border border-border-main">
+                        <span className="text-[11px] text-muted">Total Crop Production</span>
+                        <div className="text-lg font-bold text-text-main font-mono mt-1">
                           {selectedDistrictData?.total_crop_production_mt?.toLocaleString()} MT
                         </div>
-                        <div className="text-[10px] text-slate-500">Seasonal district total</div>
+                        <div className="text-[10px] text-muted">Seasonal district total</div>
                       </div>
 
-                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <span className="text-[11px] text-slate-400">Export-Ready Cooperatives</span>
-                        <div className="text-lg font-bold text-cyan-400 font-mono mt-1">
+                      <div className="bg-background p-3 rounded-lg border border-border-main">
+                        <span className="text-[11px] text-muted">Export-Ready Cooperatives</span>
+                        <div className="text-lg font-bold text-primary font-mono mt-1">
                           {selectedDistrictData?.cooperatives_export_ready_count || 0} Coops
                         </div>
-                        <div className="text-[10px] text-slate-500">Formally registered aggregators</div>
+                        <div className="text-[10px] text-muted">Formally registered aggregators</div>
                       </div>
 
-                      <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <span className="text-[11px] text-slate-400">Quality Certified Share</span>
-                        <div className="text-lg font-bold text-purple-400 font-mono mt-1">
+                      <div className="bg-background p-3 rounded-lg border border-border-main">
+                        <span className="text-[11px] text-muted">Quality Certified Share</span>
+                        <div className="text-lg font-bold text-purple-700 font-mono mt-1">
                           {selectedDistrictData?.quality_certification_pct || 0}%
                         </div>
-                        <div className="text-[10px] text-slate-500">Certified smallholder plots</div>
+                        <div className="text-[10px] text-muted">Certified smallholder plots</div>
                       </div>
                     </div>
 
                     {/* Exit Hub Distance */}
-                    <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                      <div className="font-semibold text-slate-200">Logistics & Exit Connectivity</div>
+                    <div className="bg-background p-3 rounded-lg border border-border-main space-y-2">
+                      <div className="font-semibold text-text-main">Logistics & Exit Connectivity</div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Nearest Exit Terminal:</span>
-                        <span className="font-bold text-amber-400">{selectedDistrictData?.nearest_exit_hub}</span>
+                        <span className="text-muted">Nearest Exit Terminal:</span>
+                        <span className="font-bold text-amber-700">{selectedDistrictData?.nearest_exit_hub}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Haulage Distance:</span>
-                        <span className="font-bold font-mono text-white">{selectedDistrictData?.distance_to_exit_km} km</span>
+                        <span className="text-muted">Haulage Distance:</span>
+                        <span className="font-bold font-mono text-text-main">{selectedDistrictData?.distance_to_exit_km} km</span>
                       </div>
                     </div>
                   </div>
@@ -1168,22 +1199,22 @@ export default function ExportImportIntelligence() {
 
                 {activeDossierTab === 'crops' && (
                   <div className="space-y-3">
-                    <div className="font-semibold text-slate-200">Export-Oriented Commodities Produced</div>
+                    <div className="font-semibold text-text-main">Export-Oriented Commodities Produced</div>
                     <div className="space-y-2">
                       {Array.isArray(selectedDistrictData?.primary_export_crops) && selectedDistrictData.primary_export_crops.length > 0 ? (
                         selectedDistrictData.primary_export_crops.map((crop: string, idx: number) => (
-                          <div key={idx} className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between">
-                            <span className="font-bold text-emerald-400">{crop}</span>
+                          <div key={idx} className="bg-background p-2.5 rounded-lg border border-border-main flex items-center justify-between">
+                            <span className="font-bold text-agriculture">{crop}</span>
                             <button
                               onClick={() => setInspectedCommodityName(crop)}
-                              className="text-[10px] text-cyan-400 hover:underline"
+                              className="text-[10px] text-primary hover:underline"
                             >
                               Inspect Quality Specs →
                             </button>
                           </div>
                         ))
                       ) : (
-                        <div className="p-3 bg-slate-950 border border-slate-800 rounded text-slate-400">
+                        <div className="p-3 bg-background border border-border-main rounded text-muted">
                           Traditional food crop supply zone.
                         </div>
                       )}
@@ -1193,10 +1224,10 @@ export default function ExportImportIntelligence() {
 
                 {activeDossierTab === 'logistics' && (
                   <div className="space-y-3">
-                    <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                      <div className="font-semibold text-slate-200">Corridor & Exit Hub Alignment</div>
-                      <p className="text-[11px] text-slate-400">
-                        Primary export routing from {selectedDistrictName} connects to <strong className="text-amber-400">{selectedDistrictData?.nearest_exit_hub}</strong> over a transport radius of <strong className="text-white">{selectedDistrictData?.distance_to_exit_km} km</strong>.
+                    <div className="bg-background p-3 rounded-lg border border-border-main space-y-2">
+                      <div className="font-semibold text-text-main">Corridor & Exit Hub Alignment</div>
+                      <p className="text-[11px] text-muted">
+                        Primary export routing from {selectedDistrictName} connects to <strong className="text-amber-700">{selectedDistrictData?.nearest_exit_hub}</strong> over a transport radius of <strong className="text-text-main">{selectedDistrictData?.distance_to_exit_km} km</strong>.
                       </p>
                     </div>
                   </div>
@@ -1204,15 +1235,15 @@ export default function ExportImportIntelligence() {
 
                 {activeDossierTab === 'quality' && (
                   <div className="space-y-3">
-                    <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                      <div className="font-semibold text-slate-200">Phytosanitary & Audit Compliance</div>
+                    <div className="bg-background p-3 rounded-lg border border-border-main space-y-2">
+                      <div className="font-semibold text-text-main">Phytosanitary & Audit Compliance</div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Certified Smallholders:</span>
-                        <span className="font-mono text-emerald-400 font-bold">{selectedDistrictData?.quality_certification_pct}%</span>
+                        <span className="text-muted">Certified Smallholders:</span>
+                        <span className="font-mono text-agriculture font-bold">{selectedDistrictData?.quality_certification_pct}%</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Traceability Compliance:</span>
-                        <span className="font-bold text-cyan-300">GPS Polygon Ready</span>
+                        <span className="text-muted">Traceability Compliance:</span>
+                        <span className="font-bold text-primary">GPS Polygon Ready</span>
                       </div>
                     </div>
                   </div>
@@ -1220,14 +1251,14 @@ export default function ExportImportIntelligence() {
 
                 {activeDossierTab === 'assessment' && (
                   <div className="space-y-3">
-                    <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                      <div className="font-semibold text-slate-200">Strategic Export Assessment Focus</div>
-                      <div className="p-2.5 rounded bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-xs">
+                    <div className="bg-background p-3 rounded-lg border border-border-main space-y-2">
+                      <div className="font-semibold text-text-main">Strategic Export Assessment Focus</div>
+                      <div className="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-agriculture text-xs">
                         Expand certified cold-chain collection hubs and smallholder GlobalGAP certification to accelerate air-freight horticulture exports.
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded bg-blue-950/40 border border-blue-800/40 text-[10px] text-blue-300 leading-relaxed">
+                    <div className="p-2.5 rounded bg-blue-50 border border-blue-200 text-[10px] text-blue-900 leading-relaxed">
                       <strong>Institutional Safeguard:</strong> District export figures reflect traceable sourcing origins. A producing district is not assumed to clear all customs locally without verifiable exit records.
                     </div>
                   </div>
@@ -1238,19 +1269,19 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 2: EXPORT COMMODITY CATALOGUE & QUALITY SPECIFICATIONS */}
-        <section id="catalogue" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <section id="catalogue" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Package className="w-5 h-5 text-amber-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Package className="w-5 h-5 text-amber-600" />
                 <span>2. Export Commodity Catalogue & Quality Requirements</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Each commodity profile links product form, quality grades, moisture limits, certifications, phytosanitary rules, and market readiness.
               </p>
             </div>
-            <div className="text-xs text-slate-400 font-mono">
-              Catalogue: <strong className="text-amber-400">{commoditiesCatalogue.length} Export Commodities</strong>
+            <div className="text-xs text-muted font-mono">
+              Catalogue: <strong className="text-agriculture">{commoditiesCatalogue.length} Export Commodities</strong>
             </div>
           </div>
 
@@ -1264,18 +1295,18 @@ export default function ExportImportIntelligence() {
                   onClick={() => setInspectedCommodityName(c.product_name)}
                   className={`p-3 rounded-xl border text-left transition flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-amber-950/40 border-amber-500/80 shadow-md ring-1 ring-amber-500'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      ? 'bg-emerald-50 border-agriculture shadow-md ring-1 ring-agriculture'
+                      : 'bg-background border-border-main hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-xs truncate">{c.product_name}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">{c.income_share_pct}%</span>
+                    <span className="font-bold text-text-main text-xs truncate">{c.product_name}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface text-muted border border-border-main font-mono">{c.income_share_pct}%</span>
                   </div>
-                  <div className="mt-2 text-sm font-bold font-mono text-emerald-400">
+                  <div className="mt-2 text-sm font-bold font-mono text-agriculture">
                     ${(c.export_value_usd / 1000000).toFixed(1)}M
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-1">
+                  <div className="text-[10px] text-muted mt-1">
                     {c.export_quantity_mt.toLocaleString()} MT (${c.unit_value_usd_per_mt}/MT)
                   </div>
                 </button>
@@ -1285,28 +1316,28 @@ export default function ExportImportIntelligence() {
 
           {/* Detailed Inspected Commodity Profile Card */}
           {inspectedCommodity && (
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="bg-background border border-border-main rounded-xl p-5 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <h3 className="text-lg font-bold text-white">{inspectedCommodity.product_name}</h3>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-cyan-300 border border-slate-700">
+                    <h3 className="text-lg font-bold text-text-main">{inspectedCommodity.product_name}</h3>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface text-primary border border-border-main">
                       HS Code: {inspectedCommodity.hs_code}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-agriculture border border-emerald-200">
                       {inspectedCommodity.product_category.replace(/_/g, ' ')}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">
-                    Product Form: <strong className="text-slate-200">{inspectedCommodity.quality_standards.exportProductForm}</strong>
+                  <p className="text-xs text-muted">
+                    Product Form: <strong className="text-text-main">{inspectedCommodity.quality_standards.exportProductForm}</strong>
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs text-slate-400">Unit Export Valuation:</span>
-                  <div className="text-xl font-bold font-mono text-emerald-400">
+                  <span className="text-xs text-muted">Unit Export Valuation:</span>
+                  <div className="text-xl font-bold font-mono text-agriculture">
                     ${inspectedCommodity.unit_value_usd_per_mt.toLocaleString()}{' '}
-                    <span className="text-xs font-sans text-slate-400">/ MT</span>
+                    <span className="text-xs font-sans text-muted">/ MT</span>
                   </div>
                 </div>
               </div>
@@ -1314,76 +1345,76 @@ export default function ExportImportIntelligence() {
               {/* 4 Technical Quality Specification Blocks */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                 {/* 1. Quality Grade & Defect Limits */}
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3.5 space-y-1.5">
-                  <span className="font-semibold text-amber-400 uppercase text-[11px] tracking-wider">Required Quality Grade</span>
-                  <div className="font-bold text-white text-xs">{inspectedCommodity.quality_standards.qualityGrade}</div>
-                  <div className="text-slate-400 text-[11px] pt-1 border-t border-slate-800">
-                    Moisture Specification: <strong className="text-slate-200">{inspectedCommodity.quality_standards.moistureLimit}</strong>
+                <div className="bg-surface border border-border-main rounded-lg p-3.5 space-y-1.5">
+                  <span className="font-semibold text-amber-700 uppercase text-[11px] tracking-wider">Required Quality Grade</span>
+                  <div className="font-bold text-text-main text-xs">{inspectedCommodity.quality_standards.qualityGrade}</div>
+                  <div className="text-muted text-[11px] pt-1 border-t border-border-main">
+                    Moisture Specification: <strong className="text-text-main">{inspectedCommodity.quality_standards.moistureLimit}</strong>
                   </div>
                 </div>
 
                 {/* 2. Packaging & Packaging Liners */}
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3.5 space-y-1.5">
-                  <span className="font-semibold text-cyan-400 uppercase text-[11px] tracking-wider">Export Packaging Standards</span>
-                  <p className="text-slate-300 text-xs">{inspectedCommodity.quality_standards.packaging}</p>
-                  <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-800">Preserves cargo integrity in transit</div>
+                <div className="bg-surface border border-border-main rounded-lg p-3.5 space-y-1.5">
+                  <span className="font-semibold text-primary uppercase text-[11px] tracking-wider">Export Packaging Standards</span>
+                  <p className="text-text-main text-xs">{inspectedCommodity.quality_standards.packaging}</p>
+                  <div className="text-[10px] text-muted pt-1 border-t border-border-main">Preserves cargo integrity in transit</div>
                 </div>
 
                 {/* 3. Mandatory Certifications */}
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3.5 space-y-1.5">
-                  <span className="font-semibold text-emerald-400 uppercase text-[11px] tracking-wider">Required Certifications</span>
+                <div className="bg-surface border border-border-main rounded-lg p-3.5 space-y-1.5">
+                  <span className="font-semibold text-agriculture uppercase text-[11px] tracking-wider">Required Certifications</span>
                   <div className="flex flex-wrap gap-1">
                     {inspectedCommodity.quality_standards.certifications.map((cert: string, i: number) => (
-                      <span key={i} className="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-semibold text-[10px] border border-emerald-800/40">
+                      <span key={i} className="px-1.5 py-0.5 rounded bg-emerald-50 text-agriculture font-semibold text-[10px] border border-emerald-200">
                         {cert}
                       </span>
                     ))}
                   </div>
-                  <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-800">Required by international buyers</div>
+                  <div className="text-[10px] text-muted pt-1 border-t border-border-main">Required by international buyers</div>
                 </div>
 
                 {/* 4. Phytosanitary Protocols */}
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-3.5 space-y-1.5">
-                  <span className="font-semibold text-purple-400 uppercase text-[11px] tracking-wider">Phytosanitary & Plant Health</span>
-                  <p className="text-slate-300 text-xs">{inspectedCommodity.quality_standards.phytosanitary}</p>
-                  <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-800">Issued by RAB & RICA inspectors</div>
+                <div className="bg-surface border border-border-main rounded-lg p-3.5 space-y-1.5">
+                  <span className="font-semibold text-purple-700 uppercase text-[11px] tracking-wider">Phytosanitary & Plant Health</span>
+                  <p className="text-text-main text-xs">{inspectedCommodity.quality_standards.phytosanitary}</p>
+                  <div className="text-[10px] text-muted pt-1 border-t border-border-main">Issued by RAB & RICA inspectors</div>
                 </div>
               </div>
 
               {/* Market Access Barriers & Readiness Pillars */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="p-3 rounded-lg bg-rose-950/30 border border-rose-800/40 space-y-1 text-xs">
-                  <div className="font-bold text-rose-300 flex items-center">
-                    <AlertTriangle className="w-3.5 h-3.5 mr-1 text-rose-400" />
+                <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 space-y-1 text-xs">
+                  <div className="font-bold text-rose-800 flex items-center">
+                    <AlertTriangle className="w-3.5 h-3.5 mr-1 text-rose-600" />
                     Documented Barriers to Market Access:
                   </div>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                  <p className="text-rose-950 leading-relaxed text-[11px]">
                     {inspectedCommodity.quality_standards.marketBarriers}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-2 text-xs">
-                  <span className="font-bold text-slate-200">Export Readiness 5-Pillar Scorecard:</span>
+                <div className="p-3 rounded-lg bg-surface border border-border-main space-y-2 text-xs">
+                  <span className="font-bold text-text-main">Export Readiness 5-Pillar Scorecard:</span>
                   <div className="grid grid-cols-5 gap-1.5 text-center font-mono">
-                    <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
-                      <div className="text-[9px] text-slate-400 uppercase">Supply</div>
-                      <div className="font-bold text-emerald-400">{inspectedCommodity.quality_standards.readinessPillars.supply}</div>
+                    <div className="p-1.5 rounded bg-background border border-border-main">
+                      <div className="text-[9px] text-muted uppercase">Supply</div>
+                      <div className="font-bold text-agriculture">{inspectedCommodity.quality_standards.readinessPillars.supply}</div>
                     </div>
-                    <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
-                      <div className="text-[9px] text-slate-400 uppercase">Quality</div>
-                      <div className="font-bold text-emerald-400">{inspectedCommodity.quality_standards.readinessPillars.quality}</div>
+                    <div className="p-1.5 rounded bg-background border border-border-main">
+                      <div className="text-[9px] text-muted uppercase">Quality</div>
+                      <div className="font-bold text-agriculture">{inspectedCommodity.quality_standards.readinessPillars.quality}</div>
                     </div>
-                    <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
-                      <div className="text-[9px] text-slate-400 uppercase">Process</div>
-                      <div className="font-bold text-cyan-400">{inspectedCommodity.quality_standards.readinessPillars.processing}</div>
+                    <div className="p-1.5 rounded bg-background border border-border-main">
+                      <div className="text-[9px] text-muted uppercase">Process</div>
+                      <div className="font-bold text-primary">{inspectedCommodity.quality_standards.readinessPillars.processing}</div>
                     </div>
-                    <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
-                      <div className="text-[9px] text-slate-400 uppercase">Logistics</div>
-                      <div className="font-bold text-amber-400">{inspectedCommodity.quality_standards.readinessPillars.logistics}</div>
+                    <div className="p-1.5 rounded bg-background border border-border-main">
+                      <div className="text-[9px] text-muted uppercase">Logistics</div>
+                      <div className="font-bold text-amber-700">{inspectedCommodity.quality_standards.readinessPillars.logistics}</div>
                     </div>
-                    <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
-                      <div className="text-[9px] text-slate-400 uppercase">Market</div>
-                      <div className="font-bold text-purple-400">{inspectedCommodity.quality_standards.readinessPillars.market}</div>
+                    <div className="p-1.5 rounded bg-background border border-border-main">
+                      <div className="text-[9px] text-muted uppercase">Market</div>
+                      <div className="font-bold text-purple-700">{inspectedCommodity.quality_standards.readinessPillars.market}</div>
                     </div>
                   </div>
                 </div>
@@ -1393,28 +1424,28 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 3: INTERNATIONAL EXPORT MARKETS */}
-        <section id="markets" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <section id="markets" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Globe className="w-5 h-5 text-purple-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Globe className="w-5 h-5 text-purple-600" />
                 <span>3. International Export Markets & Destination Concentration</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Where are Rwanda's agricultural products going, which commodities are sold there, and how is performance changing?
               </p>
             </div>
-            <div className="text-xs text-slate-400 font-mono">
-              Top 3 Concentration: <strong className="text-purple-400">{marketConcentration?.top3SharePct || 0}% of earnings</strong>
+            <div className="text-xs text-muted font-mono">
+              Top 3 Concentration: <strong className="text-purple-700">{marketConcentration?.top3SharePct || 0}% of earnings</strong>
             </div>
           </div>
 
           {/* Market Concentration Alert Banner */}
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+          <div className="p-3 rounded-lg bg-background border border-border-main flex items-center justify-between text-xs">
             <div className="flex items-center space-x-2.5">
-              <Compass className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span className="text-slate-300">
-                <strong className="text-white">Market Resiliency Signal:</strong> {marketConcentration?.diversificationRecommendation}
+              <Compass className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-muted">
+                <strong className="text-text-main">Market Resiliency Signal:</strong> {marketConcentration?.diversificationRecommendation}
               </span>
             </div>
           </div>
@@ -1422,34 +1453,34 @@ export default function ExportImportIntelligence() {
           {/* Destination Market Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {internationalMarkets.slice(0, 9).map((m, idx) => (
-              <div key={idx} className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-2 hover:border-slate-700 transition">
+              <div key={idx} className="bg-background border border-border-main rounded-lg p-4 space-y-2 hover:border-slate-300 transition">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{m.country_name}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-900 text-purple-300 border border-slate-800">
+                  <span className="font-bold text-text-main text-sm">{m.country_name}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface text-purple-700 border border-border-main">
                     {m.region}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-baseline pt-1">
-                  <span className="text-xl font-bold font-mono text-emerald-400">
+                  <span className="text-xl font-bold font-mono text-agriculture">
                     ${(m.total_export_value_usd / 1000000).toFixed(1)}M
                   </span>
-                  <span className="text-xs font-mono text-slate-400">{m.market_share_pct}% of total</span>
+                  <span className="text-xs font-mono text-muted">{m.market_share_pct}% of total</span>
                 </div>
 
-                <div className="text-xs text-slate-400 flex justify-between">
+                <div className="text-xs text-muted flex justify-between">
                   <span>Exported Volume:</span>
-                  <span className="font-mono text-slate-200">{m.total_export_quantity_mt.toLocaleString()} MT</span>
+                  <span className="font-mono text-text-main">{m.total_export_quantity_mt.toLocaleString()} MT</span>
                 </div>
 
-                <div className="text-xs text-slate-400 flex justify-between">
+                <div className="text-xs text-muted flex justify-between">
                   <span>Avg Unit Value:</span>
-                  <span className="font-mono text-amber-300 font-bold">${m.unit_value_usd_per_mt}/MT</span>
+                  <span className="font-mono text-amber-700 font-bold">${m.unit_value_usd_per_mt}/MT</span>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 space-y-1">
-                  <div>Commodities: <span className="text-slate-200 font-medium">{m.commodities.slice(0, 3).join(', ')}</span></div>
-                  <div className="text-[10px] text-slate-500 truncate" title={m.tariff_protocol}>{m.tariff_protocol}</div>
+                <div className="pt-2 border-t border-border-main text-[11px] text-muted space-y-1">
+                  <div>Commodities: <span className="text-text-main font-medium">{m.commodities.slice(0, 3).join(', ')}</span></div>
+                  <div className="text-[10px] text-muted truncate" title={m.tariff_protocol}>{m.tariff_protocol}</div>
                 </div>
               </div>
             ))}
@@ -1457,62 +1488,62 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 4: SEASONAL EXPORT TRENDS */}
-        <section id="trends" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <section id="trends" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5 text-agriculture" />
                 <span>4. Post-Harvest & Export Trends Across Seasons (2014A – 2026C)</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Track historical export earnings (USD), exported quantities (MT), and traditional vs. horticulture diversification over 38 recorded seasons.
               </p>
             </div>
-            <div className="text-xs text-slate-400 font-mono">
-              Records: <strong className="text-emerald-400">{seasonalComparison.length} Historical Seasons</strong>
+            <div className="text-xs text-muted font-mono">
+              Records: <strong className="text-agriculture">{seasonalComparison.length} Historical Seasons</strong>
             </div>
           </div>
 
-          <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-300">
+          <div className="bg-background border border-border-main rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between text-xs text-text-main">
               <span className="font-bold uppercase tracking-wider">Export Value Composition: Traditional vs. Non-Traditional (USD)</span>
               <div className="flex items-center space-x-4">
-                <span className="flex items-center"><span className="w-3 h-3 bg-emerald-500 rounded-sm mr-1.5"></span>Total Export Value</span>
+                <span className="flex items-center"><span className="w-3 h-3 bg-agriculture rounded-sm mr-1.5"></span>Total Export Value</span>
                 <span className="flex items-center"><span className="w-3 h-3 bg-amber-500 rounded-sm mr-1.5"></span>Traditional (Tea/Coffee)</span>
-                <span className="flex items-center"><span className="w-3 h-3 bg-cyan-500 rounded-sm mr-1.5"></span>Horticulture & Specialty</span>
+                <span className="flex items-center"><span className="w-3 h-3 bg-primary rounded-sm mr-1.5"></span>Horticulture & Specialty</span>
               </div>
             </div>
 
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={seasonalComparison} margin={{ top: 10, right: 30, left: 20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="season_code" stroke="#94a3b8" tick={{ fontSize: 10 }} />
-                  <YAxis stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }} />
-                  <Area type="monotone" dataKey="total_export_value_usd" name="Total Export USD" stroke="#10b981" fill="#10b981" fillOpacity={0.15} />
-                  <Area type="monotone" dataKey="traditional_export_value_usd" name="Traditional (Tea/Coffee) USD" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.25} />
-                  <Area type="monotone" dataKey="horticulture_export_value_usd" name="Horticulture USD" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" />
+                  <XAxis dataKey="season_code" stroke="#64748B" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="#64748B" tick={{ fontSize: 11 }} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', color: '#1F2937' }} />
+                  <Area type="monotone" dataKey="total_export_value_usd" name="Total Export USD" stroke="#15803D" fill="#15803D" fillOpacity={0.15} />
+                  <Area type="monotone" dataKey="traditional_export_value_usd" name="Traditional (Tea/Coffee) USD" stroke="#D97706" fill="#D97706" fillOpacity={0.25} />
+                  <Area type="monotone" dataKey="horticulture_export_value_usd" name="Horticulture USD" stroke="#0284C7" fill="#0284C7" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <div className="pt-2 border-t border-border-main text-[11px] text-muted flex items-center justify-between">
               <span>Data Source: NAEB Export Registries & MINICOM Trade Directorate.</span>
-              <span className="text-amber-400 font-medium">Historical trends use dated shipment records. Trade periods are matched to official customs reporting dates.</span>
+              <span className="text-amber-700 font-medium">Historical trends use dated shipment records. Trade periods are matched to official customs reporting dates.</span>
             </div>
           </div>
         </section>
 
         {/* SECTION 5: EXPORT EXIT HUBS & INFRASTRUCTURE */}
-        <section id="hubs" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <section id="hubs" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Plane className="w-5 h-5 text-amber-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Plane className="w-5 h-5 text-amber-600" />
                 <span>5. Documented National Export Exit Hubs</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Verified border posts, air cargo terminals, and lake ports with documented customs, quarantine, and consolidation facilities.
               </p>
             </div>
@@ -1520,19 +1551,19 @@ export default function ExportImportIntelligence() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {exportHubs.map((hub, idx) => (
-              <div key={idx} className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-2 hover:border-slate-700 transition">
+              <div key={idx} className="bg-background border border-border-main rounded-lg p-4 space-y-2 hover:border-slate-300 transition">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">{hub.hub_name}</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-900 text-amber-400 border border-slate-800">
+                  <span className="font-bold text-text-main text-xs">{hub.hub_name}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                     {hub.hub_type.replace(/_/g, ' ')}
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-300">{hub.location_desc}</div>
-                <div className="text-[11px] text-emerald-400 font-medium">
+                <div className="text-[11px] text-text-main">{hub.location_desc}</div>
+                <div className="text-[11px] text-agriculture font-medium">
                   Primary Cargo: {hub.primary_commodities.join(', ')}
                 </div>
-                <p className="text-[10px] text-slate-400 leading-relaxed">{hub.infrastructure}</p>
-                <div className="pt-2 border-t border-slate-800 text-[10px] flex justify-between items-center text-slate-500">
+                <p className="text-[10px] text-muted leading-relaxed">{hub.infrastructure}</p>
+                <div className="pt-2 border-t border-border-main text-[10px] flex justify-between items-center text-muted">
                   <span>Serving {hub.serviced_districts_count} districts</span>
                   <button
                     onClick={() => {
@@ -1541,7 +1572,7 @@ export default function ExportImportIntelligence() {
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                       focusOnCoordinates(hub.coordinates[0], hub.coordinates[1], 12);
                     }}
-                    className="text-cyan-400 hover:underline flex items-center"
+                    className="text-primary hover:underline flex items-center font-medium"
                   >
                     <MapPin className="w-3 h-3 mr-0.5" /> View on Map
                   </button>
@@ -1552,35 +1583,35 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 6: DISTRICT EXPORT CONTRIBUTIONS LEAGUE TABLE */}
-        <section id="districts" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <section id="districts" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Award className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Award className="w-5 h-5 text-agriculture" />
                 <span>6. District Export Contributions & Readiness League Table</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 All 30 districts ranked by estimated exportable volume, readiness index, and quality certification for Season {selectedSeason}.
               </p>
             </div>
 
             <div className="flex items-center space-x-3 text-xs">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-muted" />
                 <input
                   type="text"
                   placeholder="Search district..."
                   value={searchDistrict}
                   onChange={(e) => setSearchDistrict(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="bg-background border border-border-main rounded-lg pl-8 pr-3 py-1.5 text-text-main placeholder-muted focus:outline-none focus:ring-1 focus:ring-agriculture"
                 />
               </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-border-main">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3 w-12 text-center">Rank</th>
                   <th className="py-3 px-3">District</th>
@@ -1596,45 +1627,45 @@ export default function ExportImportIntelligence() {
                   <th className="py-3 px-3 text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-border-main">
                 {filteredDistricts.map((d, index) => {
                   const isSelected = d.district_name.toLowerCase() === selectedDistrictName.toLowerCase();
                   return (
                     <tr
                       key={d.district_name}
                       onClick={() => setSelectedDistrictName(d.district_name)}
-                      className={`hover:bg-slate-800/60 cursor-pointer transition ${
-                        isSelected ? 'bg-slate-800/90 font-medium' : index % 2 === 0 ? 'bg-slate-900/40' : 'bg-slate-900/10'
+                      className={`hover:bg-slate-50 cursor-pointer transition ${
+                        isSelected ? 'bg-emerald-50/70 font-medium' : index % 2 === 0 ? 'bg-surface' : 'bg-background/40'
                       }`}
                     >
-                      <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-400">{index + 1}</td>
-                      <td className="py-2.5 px-3 font-bold text-white flex items-center space-x-1.5">
+                      <td className="py-2.5 px-3 text-center font-mono font-bold text-muted">{index + 1}</td>
+                      <td className="py-2.5 px-3 font-bold text-text-main flex items-center space-x-1.5">
                         <span>{d.district_name}</span>
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>}
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-agriculture"></span>}
                       </td>
-                      <td className="py-2.5 px-3 text-slate-400">{d.province_name}</td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-2.5 px-3 text-muted">{d.province_name}</td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-agriculture">
                         {d.estimated_exportable_volume_mt.toLocaleString()}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-amber-400">
+                      <td className="py-2.5 px-3 text-right font-mono text-amber-700">
                         {d.market_surplus_volume_mt.toLocaleString()}
                       </td>
-                      <td className="py-2.5 px-3 text-center font-mono font-bold text-cyan-400">
+                      <td className="py-2.5 px-3 text-center font-mono font-bold text-primary">
                         {d.export_readiness_score}/100
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                           d.export_tier === 'TIER_1_GLOBAL_EXPORT_HUB'
-                            ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                            : 'bg-slate-800 text-slate-300 border-slate-700'
+                            ? 'bg-emerald-50 text-agriculture border-emerald-200'
+                            : 'bg-background text-muted border-border-main'
                         }`}>
                           {d.export_tier?.replace(/_/g, ' ') || 'PRODUCER'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-slate-300 truncate max-w-[140px]">{d.nearest_exit_hub}</td>
-                      <td className="py-2.5 px-3 text-right font-mono text-slate-400">{d.distance_to_exit_km} km</td>
-                      <td className="py-2.5 px-3 text-center font-mono text-purple-400 font-semibold">{d.cooperatives_export_ready_count}</td>
-                      <td className="py-2.5 px-3 text-center font-mono text-emerald-300 font-semibold">{d.quality_certification_pct}%</td>
+                      <td className="py-2.5 px-3 text-text-main truncate max-w-[140px]">{d.nearest_exit_hub}</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-muted">{d.distance_to_exit_km} km</td>
+                      <td className="py-2.5 px-3 text-center font-mono text-purple-700 font-semibold">{d.cooperatives_export_ready_count}</td>
+                      <td className="py-2.5 px-3 text-center font-mono text-agriculture font-semibold">{d.quality_certification_pct}%</td>
                       <td className="py-2.5 px-3 text-center">
                         <button
                           onClick={(e) => {
@@ -1644,7 +1675,7 @@ export default function ExportImportIntelligence() {
                             const el = document.getElementById('overview');
                             if (el) el.scrollIntoView({ behavior: 'smooth' });
                           }}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white text-[10px] font-medium transition"
+                          className="px-2 py-1 rounded bg-surface hover:bg-agriculture text-text-main hover:text-white border border-border-main text-[10px] font-medium transition shadow-sm"
                         >
                           Inspect
                         </button>
@@ -1658,22 +1689,22 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 7: COMMODITY EARNINGS RANKINGS */}
-        <section id="rankings" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <section id="rankings" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-amber-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <DollarSign className="w-5 h-5 text-amber-600" />
                 <span>7. Crop Rankings Based on Export Income</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Ranked contribution of agricultural commodities to Rwanda's national export earnings in Season {selectedSeason}.
               </p>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-border-main">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3 w-12 text-center">Rank</th>
                   <th className="py-3 px-3">Commodity</th>
@@ -1686,29 +1717,29 @@ export default function ExportImportIntelligence() {
                   <th className="py-3 px-3 text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-border-main">
                 {commoditiesCatalogue.map((c, idx) => (
-                  <tr key={c.product_name} className="hover:bg-slate-800/50 transition">
-                    <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-400">{idx + 1}</td>
-                    <td className="py-2.5 px-3 font-bold text-white">{c.product_name}</td>
-                    <td className="py-2.5 px-3 text-slate-400">{c.product_category.replace(/_/g, ' ')}</td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">
+                  <tr key={c.product_name} className="hover:bg-slate-50 transition">
+                    <td className="py-2.5 px-3 text-center font-mono font-bold text-muted">{idx + 1}</td>
+                    <td className="py-2.5 px-3 font-bold text-text-main">{c.product_name}</td>
+                    <td className="py-2.5 px-3 text-muted">{c.product_category.replace(/_/g, ' ')}</td>
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-agriculture">
                       ${c.export_value_usd.toLocaleString()}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-amber-400">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-amber-700">
                       {c.income_share_pct}%
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-slate-200">
+                    <td className="py-2.5 px-3 text-right font-mono text-text-main">
                       {c.export_quantity_mt.toLocaleString()}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-cyan-300 font-semibold">
+                    <td className="py-2.5 px-3 text-right font-mono text-primary font-semibold">
                       ${c.unit_value_usd_per_mt.toLocaleString()}
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         c.net_trade_status === 'NET_EXPORTER'
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40'
-                          : 'bg-amber-950 text-amber-400 border border-amber-800/40'
+                          ? 'bg-emerald-50 text-agriculture border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}>
                         {c.net_trade_status}
                       </span>
@@ -1721,7 +1752,7 @@ export default function ExportImportIntelligence() {
                           const el = document.getElementById('catalogue');
                           if (el) el.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="px-2 py-1 rounded bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white text-[10px] font-medium transition"
+                        className="px-2 py-1 rounded bg-surface hover:bg-agriculture text-text-main hover:text-white border border-border-main text-[10px] font-medium transition shadow-sm"
                       >
                         Catalogue →
                       </button>
@@ -1734,14 +1765,14 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 8: EXPORT SUPPORTING FACILITIES REGISTER */}
-        <section id="facilities" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <section id="facilities" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Building2 className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Building2 className="w-5 h-5 text-primary" />
                 <span>8. Facilities That Support Agricultural Exports</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Searchable register of verified tea processing factories, coffee washing stations, cold stores, and export packhouses.
               </p>
             </div>
@@ -1752,13 +1783,13 @@ export default function ExportImportIntelligence() {
                 placeholder="Search facility, district..."
                 value={facilitySearch}
                 onChange={(e) => setFacilitySearch(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="bg-background border border-border-main rounded-lg px-3 py-1.5 text-text-main placeholder-muted focus:outline-none focus:ring-1 focus:ring-agriculture"
               />
 
               <select
                 value={facilityTypeFilter}
                 onChange={(e) => setFacilityTypeFilter(e.target.value)}
-                className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none"
+                className="bg-background border border-border-main rounded-lg px-2.5 py-1.5 text-text-main focus:outline-none"
               >
                 <option value="ALL">All Facility Types</option>
                 <option value="PROCESSING_PLANT">Processing Plants (Tea/Mills)</option>
@@ -1769,9 +1800,9 @@ export default function ExportImportIntelligence() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-800">
+          <div className="overflow-x-auto rounded-lg border border-border-main">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3">Facility Name</th>
                   <th className="py-3 px-3">Type</th>
@@ -1782,27 +1813,27 @@ export default function ExportImportIntelligence() {
                   <th className="py-3 px-3 text-center">Map Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-border-main">
                 {filteredFacilities.slice(0, 30).map((f) => (
-                  <tr key={f.id} className="hover:bg-slate-800/50 transition">
-                    <td className="py-2.5 px-3 font-bold text-white">{f.facility_name}</td>
+                  <tr key={f.id} className="hover:bg-slate-50 transition">
+                    <td className="py-2.5 px-3 font-bold text-text-main">{f.facility_name}</td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-cyan-300 border border-slate-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface text-primary border border-border-main">
                         {f.facility_type.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-300">{f.district_name}</td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">
+                    <td className="py-2.5 px-3 text-text-main">{f.district_name}</td>
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-agriculture">
                       {f.storage_capacity_tonnes > 0
                         ? `${f.storage_capacity_tonnes.toLocaleString()} MT`
                         : `${f.processing_capacity_tonnes_day} MT/day`}
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200">
                         {f.status}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-400">{f.operator_name}</td>
+                    <td className="py-2.5 px-3 text-muted">{f.operator_name}</td>
                     <td className="py-2.5 px-3 text-center">
                       {f.longitude && f.latitude ? (
                         <button
@@ -1813,12 +1844,12 @@ export default function ExportImportIntelligence() {
                             if (el) el.scrollIntoView({ behavior: 'smooth' });
                             focusOnCoordinates(f.longitude!, f.latitude!, 12);
                           }}
-                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-[10px] font-medium transition inline-flex items-center"
+                          className="px-2.5 py-1 rounded bg-surface hover:bg-agriculture text-text-main hover:text-white border border-border-main text-[10px] font-medium transition inline-flex items-center shadow-sm"
                         >
                           <MapPin className="w-3 h-3 mr-1" /> Focus on Map
                         </button>
                       ) : (
-                        <span className="text-slate-600 text-[10px]">No GPS</span>
+                        <span className="text-muted text-[10px]">No GPS</span>
                       )}
                     </td>
                   </tr>
@@ -1829,17 +1860,17 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 9: STRATEGIC OPPORTUNITIES & PRE-FEASIBILITY SCREENING */}
-        <section id="opportunities" className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <section id="opportunities" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
-              <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40 mb-1">
+              <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
                 Strategic Trade Planning Framework
               </div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <Target className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                <Target className="w-5 h-5 text-agriculture" />
                 <span>9. Strategic Planning & Export Investment Opportunities</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 Evidence-based screening signals identifying high-potential product-market pairings requiring feasibility audits.
               </p>
             </div>
@@ -1847,57 +1878,57 @@ export default function ExportImportIntelligence() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {strategicOpportunities.map((opp, idx) => (
-              <div key={idx} className="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-3">
+              <div key={idx} className="bg-background border border-border-main rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-base font-bold text-white">{opp.product_name}</span>
-                    <span className="ml-2 text-xs text-cyan-400 font-semibold">→ {opp.destination_country} ({opp.destination_region})</span>
+                    <span className="text-base font-bold text-text-main">{opp.product_name}</span>
+                    <span className="ml-2 text-xs text-primary font-semibold">→ {opp.destination_country} ({opp.destination_region})</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-950 text-amber-300 border border-amber-800/40">
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
                     MCDA Score: {opp.opportunity_score}/100
                   </span>
                 </div>
 
                 <div className="flex items-center space-x-2 text-xs">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200">
                     {opp.classification.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-slate-400">Level: <strong className="text-slate-200">{opp.opportunity_level}</strong></span>
+                  <span className="text-muted">Level: <strong className="text-text-main">{opp.opportunity_level}</strong></span>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-2.5 rounded border border-slate-800/80">
+                <p className="text-xs text-text-main leading-relaxed bg-surface p-2.5 rounded border border-border-main">
                   {opp.evidence_summary}
                 </p>
 
                 {/* Pre-feasibility Checklist */}
                 <div className="space-y-1.5 text-[11px]">
-                  <div className="font-semibold text-slate-300">Mandatory Pre-Investment Verifications:</div>
+                  <div className="font-semibold text-text-main">Mandatory Pre-Investment Verifications:</div>
                   <div className="space-y-1">
                     {opp.pre_feasibility_checklist.map((step, sIdx) => (
-                      <div key={sIdx} className="flex items-start space-x-2 text-slate-400">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                        <span><strong className="text-slate-300">{step.step}:</strong> {step.note}</span>
+                      <div key={sIdx} className="flex items-start space-x-2 text-muted">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-agriculture shrink-0 mt-0.5" />
+                        <span><strong className="text-text-main">{step.step}:</strong> {step.note}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Safeguard Disclaimer */}
-                <div className="p-2 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-400 space-y-0.5">
-                  <div className="text-amber-400 font-semibold flex items-center">
+                <div className="p-2 rounded bg-surface border border-border-main text-[10px] text-muted space-y-0.5">
+                  <div className="text-amber-800 font-semibold flex items-center">
                     <ShieldAlert className="w-3.5 h-3.5 mr-1" />
                     {opp.institutional_safeguard}
                   </div>
-                  <p className="text-slate-500 italic">Constraints: {opp.constraints_and_limitations}</p>
+                  <p className="text-muted italic">Constraints: {opp.constraints_and_limitations}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
-      </main>
+      </div>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 px-6 py-4 mt-auto text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-3">
+      <footer className="border-t border-border-main bg-surface px-6 py-4 mt-auto text-xs text-muted flex flex-col md:flex-row items-center justify-between gap-3 shadow-xs">
         <div>
           AgriLens Rwanda · National Agricultural Export Planning & Intelligence Centre · NAEB & MINICOM Compliant
         </div>

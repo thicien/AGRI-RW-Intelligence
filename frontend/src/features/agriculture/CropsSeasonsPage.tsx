@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { 
+  RWANDA_DISTRICTS_GEOJSON, 
+  DISTRICT_CENTROIDS, 
+  enrichRwandaGeoJSON, 
+  type DistrictChoroplethData,
+  type PerformanceTier 
+} from '../../data/rwandaMapData';
 import { apiUrl } from '../../config/api';
 import { 
   Sprout, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ShieldAlert, 
@@ -58,10 +65,14 @@ export default function CropsSeasonsPage() {
   const [selectedDistrictName, setSelectedDistrictName] = useState<string>('Nyagatare');
   const [districtTab, setDistrictTab] = useState<'OVERVIEW' | 'CROPS' | 'TRENDS' | 'QUALITY'>('OVERVIEW');
 
+  // Facilities state & toggle
+  const [facilities, setFacilities] = useState<any[]>([]);
+  const [showFacilities, setShowFacilities] = useState<boolean>(true);
+  const facilityMarkersRef = useRef<maplibregl.Marker[]>([]);
+
   // Refs for map callbacks to prevent stale closures
   const districtsRef = useRef<DistrictStat[]>([]);
   const selectedDistrictNameRef = useRef<string>('Nyagatare');
-  const geojsonLoadedRef = useRef<boolean>(false);
   const activeIndicatorRef = useRef<MapIndicatorType>('production_tonnes');
 
   // Backend Data States
@@ -99,6 +110,7 @@ export default function CropsSeasonsPage() {
       const districtList: DistrictStat[] = data.districts || [];
       setDistricts(districtList);
       districtsRef.current = districtList;
+      setFacilities(data.facilities || []);
       setSeasonalTrends(data.seasonalTrends || []);
       setCropComparisonTable(data.cropComparisonTable || []);
       setAlerts(data.alerts || { large_increases: [], large_decreases: [], stable_crops: [] });
@@ -187,23 +199,64 @@ export default function CropsSeasonsPage() {
     return { min, p25, p50, p75, max };
   }, [districts, indicatorConfig]);
 
-  // Color Ramp: 5 sequential green shades + neutral gray for missing data
-  const greenRamp = ['#E8F5E9', '#A5D6A7', '#4CAF50', '#2E7D32', '#1B5E20'];
-  const missingColor = '#94A3B8'; // Neutral slate gray for missing/unreported data
-
-  const getDistrictColor = (d: DistrictStat): string => {
-    const val = indicatorConfig.getValue(d);
-    if (val === null || val === undefined || !d.has_data) {
-      return missingColor;
-    }
-    const { min, max, p25, p50, p75 } = extents;
-    if (max === min) return greenRamp[2];
-    if (val <= p25) return greenRamp[0];
-    if (val <= p50) return greenRamp[1];
-    if (val <= p75) return greenRamp[2];
-    if (val < max) return greenRamp[3];
-    return greenRamp[4];
+  // 3-Tier Classification Colors for Crops
+  const tierColors = {
+    HIGH: '#15803D',      // Rich dark emerald green
+    MODERATE: '#4ADE80',  // Vibrant medium leaf green
+    LOW: '#BBF7D0',       // Soft light mint green
+    NO_DATA: '#CBD5E1',   // Slate gray
   };
+
+  // Build Choropleth Data Map (High, Moderate, Low 3-Tier Classification)
+  const choroplethDataMap = useMemo(() => {
+    const mapData: Record<string, DistrictChoroplethData> = {};
+    const validVals = districts
+      .map(d => indicatorConfig.getValue(d))
+      .filter((v): v is number => typeof v === 'number' && !isNaN(v) && v > 0)
+      .sort((a, b) => a - b);
+
+    const min = validVals[0] ?? 0;
+    const max = validVals[validVals.length - 1] ?? 100;
+    const p33 = validVals[Math.floor(validVals.length * 0.33)] ?? (min + (max - min) * 0.33);
+    const p66 = validVals[Math.floor(validVals.length * 0.66)] ?? (min + (max - min) * 0.66);
+
+    for (const d of districts) {
+      const val = indicatorConfig.getValue(d);
+      let tier: PerformanceTier = 'NO_DATA';
+      let tierLabel = 'Unreported';
+      let color = tierColors.NO_DATA;
+
+      if (val !== null && val !== undefined && d.has_data) {
+        if (val >= p66) {
+          tier = 'HIGH';
+          tierLabel = 'High Performing';
+          color = tierColors.HIGH;
+        } else if (val >= p33) {
+          tier = 'MODERATE';
+          tierLabel = 'Moderate';
+          color = tierColors.MODERATE;
+        } else {
+          tier = 'LOW';
+          tierLabel = 'Low Output';
+          color = tierColors.LOW;
+        }
+      }
+
+      mapData[d.district_name] = {
+        districtName: d.district_name,
+        numericValue: val,
+        formattedValue: indicatorConfig.format(val),
+        tier,
+        tierLabel,
+        color,
+        rank: d.rank,
+        hasData: d.has_data,
+        facilitiesCount: facilities.filter(f => f.district_name?.toLowerCase() === d.district_name.toLowerCase()).length,
+      };
+    }
+
+    return { mapData, min, p33, p66, max };
+  }, [districts, indicatorConfig, facilities]);
 
   // 2. Initialize MapLibre GL JS
   useEffect(() => {
@@ -244,31 +297,17 @@ export default function CropsSeasonsPage() {
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', async () => {
+    map.current.on('load', () => {
       if (!map.current) return;
 
       try {
-        const res = await fetch('/rwanda-districts.geojson');
-        const geojson = await res.json();
-        geojsonLoadedRef.current = true;
+        const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, tierColors.NO_DATA);
 
         if (!map.current.getSource('rwanda-districts')) {
           map.current.addSource('rwanda-districts', {
             type: 'geojson',
-            data: geojson,
+            data: initialEnriched,
           });
-
-          // Build match expression from current districts state if available
-          let initialFill: any = '#4CAF50';
-          const currentList = districtsRef.current;
-          if (currentList && currentList.length > 0) {
-            const matchExpr: any[] = ['match', ['get', 'shapeName']];
-            for (const d of currentList) {
-              matchExpr.push(d.district_name, getDistrictColor(d));
-            }
-            matchExpr.push(missingColor);
-            initialFill = matchExpr;
-          }
 
           // District Fill Layer
           map.current.addLayer({
@@ -276,24 +315,24 @@ export default function CropsSeasonsPage() {
             type: 'fill',
             source: 'rwanda-districts',
             paint: {
-              'fill-color': initialFill,
+              'fill-color': ['coalesce', ['get', 'choroplethColor'], '#BBF7D0'],
               'fill-opacity': 0.82,
             },
           });
 
-          // District Boundary Lines
+          // District Boundary Lines - Distinct dark borders for clear visibility
           map.current.addLayer({
             id: 'district-borders',
             type: 'line',
             source: 'rwanda-districts',
             paint: {
               'line-color': '#0F172A',
-              'line-width': 1.3,
-              'line-opacity': 0.75,
+              'line-width': 1.6,
+              'line-opacity': 0.85,
             },
           });
 
-          // Selected District Glowing Highlight Border
+          // Selected District Highlight Border
           map.current.addLayer({
             id: 'district-selected-border',
             type: 'line',
@@ -317,14 +356,11 @@ export default function CropsSeasonsPage() {
             if (!map.current || !e.features || e.features.length === 0) return;
             map.current.getCanvas().style.cursor = 'pointer';
 
-            const shapeName = e.features[0].properties?.shapeName;
-            if (!shapeName) return;
-
-            const district = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
-            if (!district) return;
-
-            const val = indicatorConfig.getValue(district);
-            const formatted = indicatorConfig.format(val);
+            const props = e.features[0].properties;
+            const name = props?.districtName || props?.shapeName;
+            const tier = props?.tierLabel || 'Recorded';
+            const val = props?.formattedValue || '';
+            const rank = props?.rank ? `#${props.rank} of 30` : '';
 
             if (!hoverPopupRef.current) {
               hoverPopupRef.current = new maplibregl.Popup({
@@ -339,19 +375,16 @@ export default function CropsSeasonsPage() {
               .setHTML(`
                 <div style="font-family: inherit; padding: 6px 10px; min-width: 175px;">
                   <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${district.district_name}</span>
-                    <span style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">${district.province_name}</span>
+                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${name}</span>
+                    <span style="font-size: 10px; font-weight: 700; color: #15803D; text-transform: uppercase;">${tier}</span>
                   </div>
                   <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">
                     ${selectedCrop} · ${indicatorConfig.label}:
                   </div>
-                  <div style="font-size: 16px; font-weight: 800; color: #166534; margin-bottom: 6px;">
-                    ${formatted}
+                  <div style="font-size: 16px; font-weight: 800; color: #15803D; margin-bottom: 6px;">
+                    ${val}
                   </div>
-                  <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">
-                    <span>Rank: <b>#${district.rank} of 30</b></span>
-                    <span>Share: <b>${district.national_share_pct}%</b></span>
-                  </div>
+                  ${rank ? `<div style="font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">National Rank: <b>${rank}</b></div>` : ''}
                 </div>
               `)
               .addTo(map.current);
@@ -362,18 +395,22 @@ export default function CropsSeasonsPage() {
             if (hoverPopupRef.current) hoverPopupRef.current.remove();
           });
 
-          // Click on district polygon
+          // Click on district polygon -> Highlights and updates dossier
           map.current.on('click', 'district-fill', (e) => {
             if (!e.features || e.features.length === 0) return;
-            const shapeName = e.features[0].properties?.shapeName;
+            const shapeName = e.features[0].properties?.shapeName || e.features[0].properties?.districtName;
             if (shapeName) {
               setSelectedDistrictName(shapeName);
               selectedDistrictNameRef.current = shapeName;
+              const coords = DISTRICT_CENTROIDS[shapeName];
+              if (coords && map.current) {
+                map.current.flyTo({ center: coords, zoom: 9.8, duration: 1000 });
+              }
             }
           });
         }
       } catch (err) {
-        console.error('Failed to load district boundaries GeoJSON:', err);
+        console.error('Error initializing Rwanda district map layers:', err);
       }
     });
 
@@ -388,36 +425,68 @@ export default function CropsSeasonsPage() {
     return () => {
       window.removeEventListener('resize', handleResize);
       clearTimeout(initialResizeTimer);
+      facilityMarkersRef.current.forEach(m => m.remove());
+      facilityMarkersRef.current = [];
       map.current?.remove();
       map.current = null;
     };
   }, []);
 
-  // 3. Update Choropleth Colors when districts or indicator change
+  // 3. Update Choropleth Colors when data or indicator changes
   useEffect(() => {
     districtsRef.current = districts;
     selectedDistrictNameRef.current = selectedDistrictName;
     activeIndicatorRef.current = activeIndicator;
 
-    if (!map.current || !map.current.isStyleLoaded() || !geojsonLoadedRef.current || districts.length === 0) return;
-    if (!map.current.getLayer('district-fill')) return;
+    if (!map.current || !map.current.isStyleLoaded()) return;
 
-    const matchExpression: any[] = ['match', ['get', 'shapeName']];
-
-    for (const d of districts) {
-      const color = getDistrictColor(d);
-      matchExpression.push(d.district_name, color);
+    const source = map.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
+    if (source) {
+      const enriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, tierColors.NO_DATA);
+      source.setData(enriched);
     }
-    matchExpression.push(missingColor);
-
-    map.current.setPaintProperty('district-fill', 'fill-color', matchExpression as any);
 
     if (map.current.getLayer('district-selected-border')) {
       map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || ''] as any);
     }
+  }, [choroplethDataMap, selectedDistrictName]);
 
-    map.current.resize();
-  }, [districts, activeIndicator, selectedDistrictName, extents]);
+  // 4. Update Agricultural Facility Markers on Map
+  useEffect(() => {
+    if (!map.current) return;
+
+    facilityMarkersRef.current.forEach(m => m.remove());
+    facilityMarkersRef.current = [];
+
+    if (!showFacilities || facilities.length === 0) return;
+
+    facilities.forEach(fac => {
+      if (fac.longitude === null || fac.latitude === null) return;
+
+      const el = document.createElement('div');
+      const isTea = fac.facility_type?.includes('TEA');
+      const isCoffee = fac.facility_type?.includes('COFFEE');
+      el.className = 'w-4 h-4 rounded-full border-2 border-white shadow-md cursor-pointer transition-transform hover:scale-150 flex items-center justify-center';
+      el.style.backgroundColor = isTea ? '#047857' : isCoffee ? '#92400E' : '#0284C7';
+      el.title = `${fac.name} (${fac.facility_type})`;
+
+      const popup = new maplibregl.Popup({ offset: 12 }).setHTML(`
+        <div style="font-family: inherit; padding: 6px 10px; font-size: 11px;">
+          <div style="font-weight: 800; font-size: 12px; color: #0F172A; margin-bottom: 2px;">${fac.name}</div>
+          <div style="color: #475569; margin-bottom: 2px;">Type: <b style="color: #0D47A1;">${fac.facility_type?.replace(/_/g, ' ')}</b></div>
+          <div style="color: #64748B;">District: ${fac.district_name}</div>
+          ${fac.operator_name ? `<div style="color: #64748B; font-size: 10px;">Operator: ${fac.operator_name}</div>` : ''}
+        </div>
+      `);
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([fac.longitude, fac.latitude])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      facilityMarkersRef.current.push(marker);
+    });
+  }, [facilities, showFacilities]);
 
   // Sortable Crop Comparison Table
   const sortedTableData = useMemo(() => {
@@ -728,11 +797,27 @@ export default function CropsSeasonsPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-muted hidden sm:inline">District:</span>
-              <span className="text-xs font-extrabold text-primary bg-primary-soft px-2.5 py-1 rounded-lg">
-                {selectedDistrict?.district_name || 'Select District'}
-              </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowFacilities(!showFacilities)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${
+                  showFacilities 
+                    ? 'bg-agriculture-soft text-agriculture border-agriculture/30 shadow-xs' 
+                    : 'bg-surface text-muted border-border-main hover:bg-background'
+                }`}
+                title="Toggle display of documented processing mills, washing stations, and factories"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Facilities ({facilities.length})</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 pl-2 border-l border-border-main">
+                <span className="text-[11px] text-muted hidden sm:inline">District:</span>
+                <span className="text-xs font-extrabold text-primary bg-primary-soft px-2.5 py-1 rounded-lg">
+                  {selectedDistrict?.district_name || 'Select District'}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -744,31 +829,54 @@ export default function CropsSeasonsPage() {
               style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
             />
 
-            {/* Dynamic Map Legend Overlay */}
+            {/* Dynamic Map Legend Overlay: 3-Tier Classification */}
             <div className="absolute bottom-5 left-4 z-10 bg-white/95 backdrop-blur-md border border-border-main rounded-xl p-3 shadow-xl max-w-xs text-xs">
-              <div className="flex items-center justify-between font-bold text-text-main mb-1.5">
-                <span>{indicatorConfig.label}</span>
-                <span className="text-[10px] text-muted font-normal">({indicatorConfig.unit})</span>
+              <div className="flex items-center justify-between font-bold text-text-main mb-2">
+                <span>{indicatorConfig.label} ({indicatorConfig.unit})</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-agriculture bg-agriculture-soft px-1.5 py-0.5 rounded border border-agriculture/20">
+                  Performance Tiers
+                </span>
               </div>
 
-              {/* Gradient Bar */}
-              <div className="flex h-3 rounded-full overflow-hidden mb-1.5 border border-border-main">
-                {greenRamp.map((color, i) => (
-                  <div key={i} className="flex-1" style={{ backgroundColor: color }} />
-                ))}
+              {/* 3-Tier Performance Scale */}
+              <div className="space-y-1.5 text-[11px]">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#15803D] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">High Performing</b>
+                  </span>
+                  <span className="text-muted font-semibold">≥ {indicatorConfig.format(choroplethDataMap.p66)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#4ADE80] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">Moderate Tier</b>
+                  </span>
+                  <span className="text-muted font-semibold">{indicatorConfig.format(choroplethDataMap.p33)} - {indicatorConfig.format(choroplethDataMap.p66)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#BBF7D0] inline-block border border-black/10 shrink-0"></span>
+                    <b className="text-text-main">Low Output</b>
+                  </span>
+                  <span className="text-muted font-semibold">&lt; {indicatorConfig.format(choroplethDataMap.p33)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-border-main text-[10px] text-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded bg-[#CBD5E1] inline-block border border-black/10 shrink-0"></span>
+                    <span>Unreported / Gap</span>
+                  </span>
+                  <span>Missing survey records</span>
+                </div>
               </div>
 
-              {/* Quantiles / Scale Numbers */}
-              <div className="flex justify-between text-[10px] text-muted font-semibold">
-                <span>{indicatorConfig.format(extents.min)}</span>
-                <span>{indicatorConfig.format(extents.p50)}</span>
-                <span>{indicatorConfig.format(extents.max)}</span>
-              </div>
-
-              {/* Missing data explanation */}
-              <div className="mt-2 pt-2 border-t border-border-main flex items-center gap-2 text-[10px] text-muted">
-                <div className="w-3 h-3 rounded bg-[#94A3B8] shrink-0" />
-                <span>Neutral gray denotes missing/unreported survey records (not zero production).</span>
+              {/* Mapped Facilities Indicator */}
+              <div className="mt-2 pt-2 border-t border-border-main flex items-center justify-between text-[10px] text-muted">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#047857] inline-block"></span>
+                  <span>Agri Facilities (Mills/Washing):</span>
+                </span>
+                <span className="font-bold text-text-main">{facilities.length} active</span>
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@ import {
   AlertTriangle, Lock, RefreshCw, UserCheck, Check, Building2
 } from 'lucide-react';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth, PRESET_PERSONAS } from '../features/auth/AuthContext';
 
 export default function AppShell() {
@@ -16,6 +16,23 @@ export default function AppShell() {
   const location = useLocation();
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
   const [showScopeMenu, setShowScopeMenu] = useState(false);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
+    return localStorage.getItem('agrilens_user_avatar') || null;
+  });
+
+  useEffect(() => {
+    const handleAvatarSync = () => {
+      const avatar = localStorage.getItem('agrilens_user_avatar');
+      setAvatarUrl(avatar || null);
+    };
+    window.addEventListener('agrilens_user_updated', handleAvatarSync);
+    window.addEventListener('storage', handleAvatarSync);
+    return () => {
+      window.removeEventListener('agrilens_user_updated', handleAvatarSync);
+      window.removeEventListener('storage', handleAvatarSync);
+    };
+  }, []);
 
   // Check if current route is authorized for this persona
   const accessCheck = canAccessRoute(location.pathname);
@@ -34,27 +51,22 @@ export default function AppShell() {
       items: [
         { to: '/admin/crops', label: 'Crops & Seasons (2014-2026A)', icon: Leaf, minRoles: [] },
         { to: '/admin/facilities', label: 'Agricultural Facilities Map', icon: Building2, minRoles: [] },
-        { to: '/admin/agricultural-data', label: 'Productivity Statistics', icon: Database, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/farmers', label: 'Farmers Registry', icon: Users, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/farms', label: 'Farms & Holdings', icon: LayoutDashboard, minRoles: ['COOPERATIVE_FARMER'] },
       ]
     },
     {
       title: 'OPPORTUNITY ASSESSMENT',
       items: [
-        { to: '/admin/irrigation', label: 'Module 2: Irrigation Opportunity', icon: Droplets, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/soil-conservation', label: 'Module 3: Soil & Fertility', icon: Layers, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/post-harvest', label: 'Module 4: Post-Harvest & Storage', icon: Package, minRoles: [] },
-        { to: '/admin/imports-exports', label: 'Module 5: Export Opportunities', icon: Globe, minRoles: ['COOPERATIVE_FARMER'] },
+        { to: '/admin/irrigation', label: 'Irrigation Opportunity', icon: Droplets, minRoles: ['COOPERATIVE_FARMER'] },
+        { to: '/admin/soil-conservation', label: 'Soil & Fertility', icon: Layers, minRoles: ['COOPERATIVE_FARMER'] },
+        { to: '/admin/post-harvest', label: 'Post-Harvest & Storage', icon: Package, minRoles: [] },
+        { to: '/admin/imports-exports', label: 'Export Opportunities', icon: Globe, minRoles: ['COOPERATIVE_FARMER'] },
       ]
     },
     {
-      title: 'FIELD OPERATIONS',
+      title: 'REPORTS & ACCOUNT',
       items: [
-        { to: '/admin/interventions', label: 'Priority Interventions', icon: ClipboardList, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/field-validation', label: 'Field Verification & Observations', icon: MessageSquare, minRoles: ['PARTNER_VIEWER'] },
-        { to: '/admin/recommendations', label: 'Policy Briefs & Guidance', icon: FileBarChart, minRoles: [] },
         { to: '/admin/reports', label: 'Evidence Reports & Exports', icon: FileText, minRoles: [] },
+        { to: '/admin/profile', label: 'Planner Profile & Security', icon: User, minRoles: [] },
       ]
     }
   ];
@@ -144,7 +156,10 @@ export default function AppShell() {
             </p>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#86AF96] pt-2 border-t border-white/20">
-            <span className="text-[10px] text-emerald-200/90 font-medium">NISR SAS Intelligence</span>
+            <NavLink to="/admin/profile" className="text-emerald-200/90 hover:text-white transition-colors font-semibold text-[10px] flex items-center gap-1">
+              <User className="w-3 h-3" />
+              <span>Profile Settings</span>
+            </NavLink>
             <NavLink to="/login" className="text-red-300 hover:text-white transition-colors uppercase tracking-wider font-bold text-[10px]">
               Logout
             </NavLink>
@@ -233,15 +248,33 @@ export default function AppShell() {
               )}
             </div>
 
+            {/* Quick Profile Link */}
+            <NavLink
+              to="/admin/profile"
+              className="p-1.5 px-3 rounded-xl text-slate-700 hover:text-emerald-700 hover:bg-slate-100 transition-colors border border-border-main hidden sm:flex items-center gap-1.5 text-xs font-bold"
+              title="View and edit profile / change password"
+            >
+              <User className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Profile</span>
+            </NavLink>
+
             {/* Persona Switcher Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowPersonaMenu(!showPersonaMenu)}
                 className="flex items-center gap-2.5 bg-surface hover:bg-background border border-border-main p-1.5 pr-3 rounded-xl transition-all shadow-sm"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentUser.avatarColor}`}>
-                  {currentUser.avatarInitials}
-                </div>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={currentUser.name}
+                    className="w-8 h-8 rounded-lg object-cover border border-emerald-500/50 shadow-xs flex-shrink-0"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${currentUser.avatarColor}`}>
+                    {currentUser.avatarInitials}
+                  </div>
+                )}
                 <div className="text-left hidden sm:block">
                   <div className="text-xs font-bold text-text-main leading-tight">{currentUser.name}</div>
                   <div className="text-[10px] font-semibold text-primary">{currentUser.roleName}</div>
@@ -292,6 +325,17 @@ export default function AppShell() {
                         </button>
                       );
                     })}
+                  </div>
+
+                  <div className="pt-2 border-t border-border-main flex items-center justify-between">
+                    <NavLink
+                      to="/admin/profile"
+                      onClick={() => setShowPersonaMenu(false)}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-emerald-50 transition"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>Manage Planner Profile & Security</span>
+                    </NavLink>
                   </div>
                 </div>
               )}

@@ -834,7 +834,7 @@ export default function AgriculturalFacilitiesPage() {
                   to="/admin/post-harvest"
                   className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
                 >
-                  <span>Open Module 4 (Post-Harvest Intelligence)</span>
+                  <span>Open Post-Harvest Intelligence</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
 

@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import { 
+  RWANDA_DISTRICTS_GEOJSON, 
+  DISTRICT_CENTROIDS, 
+  enrichRwandaGeoJSON, 
+  type DistrictChoroplethData,
+  type PerformanceTier 
+} from '../../data/rwandaMapData';
 import { apiUrl } from '../../config/api';
 import { 
   Layers, ShieldAlert, Sprout, AlertTriangle, CheckCircle2, 
@@ -137,38 +143,6 @@ export interface SoilConservationProject {
   funding_source: string;
   key_impact: string;
 }
-
-// Centroid coordinates for Rwandan districts for quick pan/zoom
-const DISTRICT_CENTROIDS: Record<string, [number, number]> = {
-  Gicumbi: [30.12, -1.61],
-  Nyaruguru: [29.54, -2.71],
-  Rubavu: [29.33, -1.67],
-  Ngororero: [29.62, -1.86],
-  Nyamagabe: [29.47, -2.39],
-  Karongi: [29.38, -2.14],
-  Gakenke: [29.78, -1.69],
-  Bugesera: [30.25, -2.23],
-  Kayonza: [30.65, -1.85],
-  Rutsiro: [29.35, -1.93],
-  Nyagatare: [30.33, -1.30],
-  Kirehe: [30.73, -2.27],
-  Gatsibo: [30.45, -1.60],
-  Rwamagana: [30.43, -1.95],
-  Musanze: [29.63, -1.50],
-  Burera: [29.83, -1.45],
-  Rulindo: [29.98, -1.73],
-  Huye: [29.70, -2.60],
-  Nyanza: [29.75, -2.35],
-  Ruhango: [29.78, -2.22],
-  Muhanga: [29.75, -2.08],
-  Kamonyi: [29.93, -2.00],
-  Gisagara: [29.84, -2.61],
-  Rusizi: [28.90, -2.58],
-  Nyamasheke: [29.15, -2.35],
-  Gasabo: [30.13, -1.90],
-  Kicukiro: [30.10, -2.00],
-  Nyarugenge: [30.05, -1.96]
-};
 
 export default function SoilConservation() {
   // DOM & Map references
@@ -443,48 +417,79 @@ export default function SoilConservation() {
     }
   }, [activeIndicator]);
 
-  // Quantile Extents for Legend
-  const extents = useMemo(() => {
+  // 3-Tier Classification for Soil & Fertility Indicators
+  const choroplethDataMap = useMemo(() => {
     const validVals = districts
       .map(d => indicatorConfig.getValue(d))
       .filter((v): v is number => typeof v === 'number' && !isNaN(v))
       .sort((a, b) => a - b);
 
     if (validVals.length === 0) {
-      return { min: 0, p25: 1, p50: 2, p75: 3, max: 5 };
+      return { mapData: {}, min: 0, p33: 33, p66: 66, max: 100 };
     }
 
     const min = validVals[0];
     const max = validVals[validVals.length - 1];
-    const p25 = validVals[Math.floor(validVals.length * 0.25)] ?? min;
-    const p50 = validVals[Math.floor(validVals.length * 0.50)] ?? (min + max) / 2;
-    const p75 = validVals[Math.floor(validVals.length * 0.75)] ?? max;
-    return { min, p25, p50, p75, max };
-  }, [districts, indicatorConfig]);
+    const p33 = validVals[Math.floor(validVals.length * 0.33)] ?? min;
+    const p66 = validVals[Math.floor(validVals.length * 0.66)] ?? (min + max) / 2;
 
-  // Color Ramps
-  // Favorable: Pale emerald -> Rich Forest Green
-  const favorableRamp = ['#ECFDF5', '#A7F3D0', '#34D399', '#059669', '#064E3B'];
-  // Warning/Hazard: Pale Amber -> Crimson Red
-  const warningRamp = ['#FEF3C7', '#FDE68A', '#F59E0B', '#EF4444', '#991B1B'];
-  const missingColor = '#94A3B8'; // Slate gray for missing records
+    const mapData: Record<string, DistrictChoroplethData> = {};
 
-  const activeRamp = indicatorConfig.isWarning ? warningRamp : favorableRamp;
+    for (const d of districts) {
+      const val = indicatorConfig.getValue(d);
+      let tier: PerformanceTier = 'LOW';
+      let tierLabel = 'Low';
+      let color = '#CBD5E1';
 
-  const getDistrictColor = (d: DistrictSoilStat): string => {
-    const val = indicatorConfig.getValue(d);
-    if (val === null || val === undefined || !d.has_data) {
-      return missingColor;
+      if (val !== null && !isNaN(val) && d.has_data) {
+        if (indicatorConfig.isWarning) {
+          // Warning indicator (e.g. soil acidity hazard, erosion severity)
+          if (val >= p66) {
+            tier = 'HIGH';
+            tierLabel = 'High Hazard';
+            color = '#EF4444'; // Red
+          } else if (val >= p33) {
+            tier = 'MODERATE';
+            tierLabel = 'Moderate Concern';
+            color = '#F59E0B'; // Amber
+          } else {
+            tier = 'LOW';
+            tierLabel = 'Low Risk';
+            color = '#10B981'; // Green
+          }
+        } else {
+          // Favorable adoption indicator (e.g. fertilizer adoption, erosion control)
+          if (val >= p66) {
+            tier = 'HIGH';
+            tierLabel = 'High Adoption';
+            color = '#15803D'; // Dark forest green
+          } else if (val >= p33) {
+            tier = 'MODERATE';
+            tierLabel = 'Moderate Adoption';
+            color = '#4ADE80'; // Medium green
+          } else {
+            tier = 'LOW';
+            tierLabel = 'Low Adoption';
+            color = '#BBF7D0'; // Light mint green
+          }
+        }
+      }
+
+      mapData[d.district_name] = {
+        districtName: d.district_name,
+        numericValue: val,
+        formattedValue: indicatorConfig.format(val),
+        tier,
+        tierLabel,
+        color,
+        rank: d.priority_score ? Math.round(d.priority_score) : undefined,
+        hasData: d.has_data,
+        facilitiesCount: projectsList.filter(p => p.district_name?.toLowerCase() === d.district_name.toLowerCase()).length
+      };
     }
-    const { min, max, p25, p50, p75 } = extents;
-    if (max === min) return activeRamp[2];
 
-    if (val <= p25) return activeRamp[0];
-    if (val <= p50) return activeRamp[1];
-    if (val <= p75) return activeRamp[2];
-    if (val < max) return activeRamp[3];
-    return activeRamp[4];
-  };
+    return { mapData, min, p33, p66, max };
+  }, [districts, indicatorConfig, projectsList]);
 
   // 2. Initialize MapLibre GL Map
   useEffect(() => {
@@ -523,52 +528,39 @@ export default function SoilConservation() {
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', async () => {
+    map.current.on('load', () => {
       if (!map.current) return;
 
       try {
-        const res = await fetch('/rwanda-districts.geojson');
-        const geojson = await res.json();
+        const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#BBF7D0');
         geojsonLoadedRef.current = true;
 
         if (!map.current.getSource('rwanda-districts')) {
           map.current.addSource('rwanda-districts', {
             type: 'geojson',
-            data: geojson,
+            data: initialEnriched,
           });
 
-          // Build match expression
-          let initialFill: any = '#34D399';
-          const currentList = districtsRef.current;
-          if (currentList && currentList.length > 0) {
-            const matchExpr: any[] = ['match', ['get', 'shapeName']];
-            for (const d of currentList) {
-              matchExpr.push(d.district_name, getDistrictColor(d));
-            }
-            matchExpr.push(missingColor);
-            initialFill = matchExpr;
-          }
-
-          // District Fill Layer
+          // District Fill Layer with synchronous choropleth coloring
           map.current.addLayer({
             id: 'district-fill',
             type: 'fill',
             source: 'rwanda-districts',
             paint: {
-              'fill-color': initialFill,
+              'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
               'fill-opacity': 0.82,
             },
           });
 
-          // District Boundary Lines
+          // District Boundary Lines - high contrast dark borders
           map.current.addLayer({
             id: 'district-borders',
             type: 'line',
             source: 'rwanda-districts',
             paint: {
               'line-color': '#0F172A',
-              'line-width': 1.3,
-              'line-opacity': 0.75,
+              'line-width': 1.6,
+              'line-opacity': 0.85,
             },
           });
 
@@ -596,7 +588,8 @@ export default function SoilConservation() {
             if (!map.current || !e.features || e.features.length === 0) return;
             map.current.getCanvas().style.cursor = 'pointer';
 
-            const shapeName = e.features[0].properties?.shapeName;
+            const props = e.features[0].properties;
+            const shapeName = props?.shapeName || props?.districtName;
             const currentListInner = districtsRef.current;
             const districtData = currentListInner.find(
               (d) => d.district_name.toLowerCase() === (shapeName || '').toLowerCase()
@@ -612,19 +605,24 @@ export default function SoilConservation() {
 
             const activeInd = activeIndicatorRef.current;
             const val = districtData ? (districtData as any)[activeInd] : null;
+            const tierLabel = props?.tierLabel || 'Recorded';
+            const tierColor = props?.choroplethColor || '#059669';
 
             const popupHtml = `
-              <div style="font-family: inherit; font-size: 11px; padding: 4px; min-width: 170px;">
-                <div style="font-weight: 700; color: #064E3B; font-size: 13px;">${shapeName || 'District'}</div>
+              <div style="font-family: inherit; font-size: 11px; padding: 6px; min-width: 180px;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
+                  <span style="font-weight: 800; color: #0F172A; font-size: 13px;">${shapeName || 'District'}</span>
+                  <span style="font-size: 10px; font-weight: 700; color: ${tierColor}; text-transform: uppercase;">${tierLabel}</span>
+                </div>
                 <div style="color: #64748B; font-size: 10px; margin-bottom: 4px;">${districtData?.province_name || 'Rwanda'} · Season ${selectedSeason}</div>
                 <div style="border-top: 1px solid #E2E8F0; padding-top: 4px;">
                   <span style="color: #475569;">${activeInd.replace(/_/g, ' ').toUpperCase()}:</span>
-                  <span style="font-weight: 700; color: #0F172A; float: right;">
+                  <span style="font-weight: 800; color: #0F172A; float: right;">
                     ${typeof val === 'number' ? val.toLocaleString() : (val || 'No Record')}
                   </span>
                 </div>
-                <div style="margin-top: 3px; font-size: 9px; color: #059669; font-weight: 600;">
-                  Data Source: NISR SAS & RAB Soil Testing
+                <div style="margin-top: 4px; font-size: 9px; color: #059669; font-weight: 600;">
+                  Click to inspect detailed District Soil Dossier
                 </div>
               </div>
             `;
@@ -643,15 +641,16 @@ export default function SoilConservation() {
             }
           });
 
-          // Click on district
+          // Click on district -> Updates dossier and highlights
           map.current.on('click', 'district-fill', (e: any) => {
             if (!e.features || e.features.length === 0) return;
-            const shapeName = e.features[0].properties?.shapeName;
+            const shapeName = e.features[0].properties?.shapeName || e.features[0].properties?.districtName;
             if (shapeName) {
               setSelectedDistrictName(shapeName);
               selectedDistrictNameRef.current = shapeName;
-              if (map.current && map.current.getLayer('district-selected-border')) {
-                map.current.setFilter('district-selected-border', ['==', 'shapeName', shapeName]);
+              const coords = DISTRICT_CENTROIDS[shapeName];
+              if (coords && map.current) {
+                map.current.flyTo({ center: coords, zoom: 9.8, duration: 1000 });
               }
             }
           });
@@ -675,25 +674,24 @@ export default function SoilConservation() {
     };
   }, []);
 
-  // Update choropleth colors when districts or indicator changes
+  // Update choropleth colors when data or indicator changes
   useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded() || !map.current.getLayer('district-fill')) return;
+    districtsRef.current = districts;
+    selectedDistrictNameRef.current = selectedDistrictName;
+    activeIndicatorRef.current = activeIndicator;
 
-    if (districts.length > 0) {
-      const matchExpr: any[] = ['match', ['get', 'shapeName']];
-      for (const d of districts) {
-        matchExpr.push(d.district_name, getDistrictColor(d));
-      }
-      matchExpr.push(missingColor);
-      map.current.setPaintProperty('district-fill', 'fill-color', matchExpr as any);
+    if (!map.current || !map.current.isStyleLoaded()) return;
+
+    const source = map.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
+    if (source) {
+      const enriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#CBD5E1');
+      source.setData(enriched);
     }
-  }, [districts, activeIndicator, extents]);
 
-  // Update selected district border
-  useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded() || !map.current.getLayer('district-selected-border')) return;
-    map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || '']);
-  }, [selectedDistrictName]);
+    if (map.current.getLayer('district-selected-border')) {
+      map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || '']);
+    }
+  }, [choroplethDataMap, selectedDistrictName]);
 
   // Update Documented Project Markers on Map
   useEffect(() => {
@@ -848,77 +846,75 @@ export default function SoilConservation() {
   const ns = nationalSummary;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-950 text-slate-100 font-sans">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300">
       
-      {/* 1. Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              National Agricultural Planner · Soil & Fertility
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-              NISR Seasonal Agricultural Survey (SAS) & RAB RwandaSIS Verified
-            </span>
+      {/* 1. Top Header Banner */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              National Agricultural Planner · Soil & Fertility Intelligence
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <Layers className="w-8 h-8 text-emerald-400" />
+              National Soil Health, Fertility & Conservation Intelligence
+            </h1>
+            <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
+              Monitor fertility-management adoption, compare modern and traditional practices, evaluate erosion prevention, and explore district-level changes across agricultural seasons.
+            </p>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1.5 flex items-center gap-3">
-            <Layers className="w-8 h-8 text-emerald-400" />
-            National Soil Health, Fertility & Conservation Intelligence
-          </h1>
-          <p className="text-xs md:text-sm text-slate-400 mt-1 max-w-4xl">
-            Monitor fertility-management adoption, compare modern and traditional practices, evaluate erosion prevention, and explore district-level changes across agricultural seasons.
-          </p>
-        </div>
 
-        {/* Top Actions */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 transition-colors shadow-xs"
-            title="Export filtered intelligence dataset as CSV"
-          >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Export CSV</span>
-          </button>
-          <button
-            onClick={fetchWorkspaceData}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-xs disabled:opacity-50"
-            title="Refresh Intelligence Data"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
+          {/* Top Actions */}
+          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+            <button
+              onClick={handleExportCSV}
+              className="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-emerald-300 text-xs font-bold transition-all flex items-center gap-2 border border-slate-700 shadow-md"
+              title="Export filtered intelligence dataset as CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Export CSV</span>
+            </button>
+            <button
+              onClick={fetchWorkspaceData}
+              disabled={loading}
+              className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-md disabled:opacity-50"
+              title="Refresh Intelligence Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 2. Unified Master Filter Bar */}
-      <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur shadow-sm space-y-3">
-        <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-2">
-          <div className="flex items-center gap-2 font-semibold text-slate-300">
-            <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
-            <span>NATIONAL SOIL & FERTILITY FILTER CONTROLS</span>
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm text-text-main">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-main text-xs text-muted font-bold">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-emerald-600" />
+            <span className="uppercase tracking-wider">NATIONAL SOIL & FERTILITY FILTER CONTROLS</span>
           </div>
-          <span className="text-[11px] text-slate-500 italic">
+          <span className="text-[11px] font-normal text-muted italic">
             Filters synchronize across map, KPI cards, charts, and ranked league tables.
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Filter 1: Agricultural Season */}
           <div className="space-y-1">
-            <label className="text-slate-400 font-medium flex items-center justify-between">
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center justify-between">
               <span>Agricultural Season</span>
-              <span className="text-[10px] text-emerald-400 font-bold">NISR SAS</span>
+              <span className="text-[10px] text-emerald-600 font-bold">NISR SAS</span>
             </label>
             <select
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-emerald-400 font-semibold focus:outline-none focus:border-emerald-500"
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               {availableSeasons.map((s) => (
-                <option key={s.code} value={s.code} className="bg-slate-900 text-white">
-                  {s.label}
+                <option key={s.code} value={s.code}>
+                  {s.label} ({s.code})
                 </option>
               ))}
             </select>
@@ -926,11 +922,13 @@ export default function SoilConservation() {
 
           {/* Filter 2: Intelligence Layer */}
           <div className="space-y-1">
-            <label className="text-slate-400 font-medium">Intelligence Layer</label>
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <Layers className="w-3 h-3 text-emerald-600" /> Intelligence Layer
+            </label>
             <select
               value={activeLayer}
               onChange={(e) => setActiveLayer(e.target.value as IntelligenceLayerType)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-emerald-500"
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="fertility">Fertility-Management Adoption</option>
               <option value="erosion">Soil Erosion Prevention</option>
@@ -941,11 +939,13 @@ export default function SoilConservation() {
 
           {/* Filter 3: Specific Indicator Selector */}
           <div className="space-y-1">
-            <label className="text-slate-400 font-medium">Map Indicator & Metric</label>
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <SlidersHorizontal className="w-3 h-3 text-teal-600" /> Map Indicator & Metric
+            </label>
             <select
               value={activeIndicator}
               onChange={(e) => setActiveIndicator(e.target.value as SoilIndicatorType)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-emerald-500"
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               {activeLayer === 'fertility' && (
                 <>
@@ -985,11 +985,13 @@ export default function SoilConservation() {
 
           {/* Filter 4: Geographic Scope */}
           <div className="space-y-1">
-            <label className="text-slate-400 font-medium">Geographic Scope</label>
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-cyan-600" /> Geographic Scope
+            </label>
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-emerald-500"
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="ALL">All Districts — National View</option>
               <option value="Eastern">Eastern Province</option>
@@ -1002,16 +1004,18 @@ export default function SoilConservation() {
 
           {/* Filter 5: Comparison Season */}
           <div className="space-y-1">
-            <label className="text-slate-400 font-medium">Comparison Season</label>
+            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+              <TrendingUp className="w-3 h-3 text-amber-600" /> Comparison Season
+            </label>
             <select
               value={compareSeason}
               onChange={(e) => setCompareSeason(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 font-medium focus:outline-none focus:border-emerald-500"
+              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="">Auto (Previous Comparable)</option>
               {availableSeasons.filter(s => s.code !== selectedSeason).map((s) => (
-                <option key={s.code} value={s.code} className="bg-slate-900 text-white">
-                  {s.label}
+                <option key={s.code} value={s.code}>
+                  {s.label} ({s.code})
                 </option>
               ))}
             </select>
@@ -1020,24 +1024,24 @@ export default function SoilConservation() {
       </div>
 
       {/* 3. Mandatory Pre-Feasibility & Agronomic Safeguard Banner */}
-      <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-950/20 backdrop-blur-sm flex items-start gap-3.5 shadow-xs">
-        <ShieldAlert className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+      <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/80 flex items-start gap-3.5 shadow-xs text-amber-900">
+        <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div className="space-y-1 text-xs">
-          <div className="font-bold text-amber-300 uppercase tracking-wide flex items-center gap-2">
+          <div className="font-bold text-amber-950 uppercase tracking-wide flex items-center gap-2">
             METHODOLOGICAL SAFEGUARD: INDICATOR SEPARATION & EVIDENCE REQUIREMENT
           </div>
-          <p className="text-amber-200/90 leading-relaxed">
+          <p className="text-amber-900/90 leading-relaxed">
             <strong>Distinguish between reported practice adoption, laboratory-measured soil properties, and modelled terrain hazard:</strong> A district with high fertilizer adoption does not automatically possess healthy soil; likewise, low adoption of terraces is not identical to measured severe erosion.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2 text-[11px] text-amber-100">
-            <div className="p-2 rounded bg-amber-900/30 border border-amber-500/20">
-              <span className="font-bold text-amber-300">1. Reported Practices:</span> Survey-declared farm practices (NISR SAS: terraces, agroforestry, organic manure, mineral fertilizer).
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2 text-[11px]">
+            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
+              <span className="font-bold text-amber-950">1. Reported Practices:</span> Survey-declared farm practices (NISR SAS: terraces, agroforestry, organic manure, mineral fertilizer).
             </div>
-            <div className="p-2 rounded bg-amber-900/30 border border-amber-500/20">
-              <span className="font-bold text-amber-300">2. Measured Soil Condition:</span> Laboratory tested parameters (RAB archives: pH, organic carbon %, CEC, lime requirement).
+            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
+              <span className="font-bold text-amber-950">2. Measured Soil Condition:</span> Laboratory tested parameters (RAB archives: pH, organic carbon %, CEC, lime requirement).
             </div>
-            <div className="p-2 rounded bg-amber-900/30 border border-amber-500/20">
-              <span className="font-bold text-amber-300">3. Modelled Hazard:</span> Simulation index based on terrain slope gradient (DEM), rainfall erosivity, and soil erodibility.
+            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
+              <span className="font-bold text-amber-950">3. Modelled Hazard:</span> Simulation index based on terrain slope gradient (DEM), rainfall erosivity, and soil erodibility.
             </div>
           </div>
         </div>
@@ -1046,23 +1050,23 @@ export default function SoilConservation() {
       {/* 4. National Soil & Fertility Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Fertility Practice Adoption */}
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Fertility Practice Adoption</span>
-            <Activity className="w-4 h-4 text-emerald-400" />
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+          <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
+            <span>Fertility Practice Adoption</span>
+            <Activity className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-white tracking-tight">
+            <span className="text-2xl font-extrabold text-text-main tracking-tight">
               {ns ? `${ns.national_avg_inorganic_farmer_pct}%` : '—'}
             </span>
-            <span className="text-xs text-emerald-400 font-semibold">of farmers</span>
+            <span className="text-xs text-emerald-700 font-semibold">of farmers</span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2">
+          <div className="mt-2 flex items-center justify-between text-[11px] text-muted border-t border-border-main pt-2">
             <span>Mineral Treated Farmland:</span>
-            <span className="font-semibold text-emerald-300">
+            <span className="font-bold text-text-main">
               {ns ? `${ns.total_inorganic_fertilizer_ha.toLocaleString()} ha` : '—'}
               {ns?.inorganic_change_pct !== null && ns?.inorganic_change_pct !== undefined && (
-                <span className={`ml-1 font-bold ${ns.inorganic_change_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`ml-1 font-bold ${ns.inorganic_change_pct >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                   ({ns.inorganic_change_pct >= 0 ? '+' : ''}{ns.inorganic_change_pct}%)
                 </span>
               )}
@@ -1071,23 +1075,23 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 2: Organic Fertility Inputs */}
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Organic Fertility Inputs</span>
-            <Shovel className="w-4 h-4 text-amber-400" />
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+          <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
+            <span>Organic Fertility Inputs</span>
+            <Shovel className="w-4 h-4 text-amber-600" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-white tracking-tight">
+            <span className="text-2xl font-extrabold text-text-main tracking-tight">
               {ns ? `${ns.national_avg_organic_farmer_pct}%` : '—'}
             </span>
-            <span className="text-xs text-amber-400 font-semibold">of farmers</span>
+            <span className="text-xs text-amber-700 font-semibold">of farmers</span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2">
+          <div className="mt-2 flex items-center justify-between text-[11px] text-muted border-t border-border-main pt-2">
             <span>Manure & Compost Area:</span>
-            <span className="font-semibold text-amber-300">
+            <span className="font-bold text-text-main">
               {ns ? `${ns.total_organic_fertilizer_ha.toLocaleString()} ha` : '—'}
               {ns?.organic_change_pct !== null && ns?.organic_change_pct !== undefined && (
-                <span className={`ml-1 font-bold ${ns.organic_change_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`ml-1 font-bold ${ns.organic_change_pct >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                   ({ns.organic_change_pct >= 0 ? '+' : ''}{ns.organic_change_pct}%)
                 </span>
               )}
@@ -1096,23 +1100,23 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 3: Erosion-Control Adoption */}
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">Erosion-Control Adoption</span>
-            <Mountain className="w-4 h-4 text-teal-400" />
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+          <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
+            <span>Erosion-Control Adoption</span>
+            <Mountain className="w-4 h-4 text-teal-600" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-white tracking-tight">
+            <span className="text-2xl font-extrabold text-text-main tracking-tight">
               {ns ? `${ns.national_erosion_control_pct}%` : '—'}
             </span>
-            <span className="text-xs text-teal-400 font-semibold">of cultivated area</span>
+            <span className="text-xs text-teal-700 font-semibold">of cultivated area</span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2">
+          <div className="mt-2 flex items-center justify-between text-[11px] text-muted border-t border-border-main pt-2">
             <span>Protected Land:</span>
-            <span className="font-semibold text-teal-300">
+            <span className="font-bold text-text-main">
               {ns ? `${ns.total_erosion_control_ha.toLocaleString()} ha` : '—'}
               {ns?.erosion_control_change_pct !== null && ns?.erosion_control_change_pct !== undefined && (
-                <span className={`ml-1 font-bold ${ns.erosion_control_change_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`ml-1 font-bold ${ns.erosion_control_change_pct >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                   ({ns.erosion_control_change_pct >= 0 ? '+' : ''}{ns.erosion_control_change_pct}%)
                 </span>
               )}
@@ -1121,22 +1125,22 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 4: District Data Coverage */}
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span className="font-semibold uppercase tracking-wider">District Data Coverage</span>
-            <Database className="w-4 h-4 text-cyan-400" />
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+          <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
+            <span>District Data Coverage</span>
+            <Database className="w-4 h-4 text-cyan-600" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-white tracking-tight">
+            <span className="text-2xl font-extrabold text-text-main tracking-tight">
               {ns ? `${ns.districts_reporting} / ${ns.districts_expected}` : '—'}
             </span>
-            <span className="text-xs text-cyan-400 font-semibold">
+            <span className="text-xs text-cyan-700 font-semibold">
               ({ns ? ns.data_coverage_pct : 100}%)
             </span>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2">
+          <div className="mt-2 flex items-center justify-between text-[11px] text-muted border-t border-border-main pt-2">
             <span>Documented Projects:</span>
-            <span className="font-semibold text-cyan-300">
+            <span className="font-bold text-text-main">
               {ns ? `${ns.documented_projects_count} schemes (${ns.total_project_command_area_ha.toLocaleString()} ha)` : '—'}
             </span>
           </div>
@@ -1148,27 +1152,27 @@ export default function SoilConservation() {
         
         {/* Left Column (65%): MapLibre Map */}
         <div className="lg:col-span-8 flex flex-col space-y-3">
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+          <div className="p-4 rounded-2xl bg-surface border border-border-main flex flex-wrap items-center justify-between gap-3 shadow-sm text-text-main">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                <h3 className="text-sm font-bold text-text-main uppercase tracking-wider">
                   Rwanda Soil & Fertility Performance Map
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Active Indicator: <strong className="text-emerald-400">{indicatorConfig.label}</strong> ({indicatorConfig.unit}) · Season {selectedSeason}
+              <p className="text-xs text-muted mt-0.5">
+                Active Indicator: <strong className="text-emerald-700">{indicatorConfig.label}</strong> ({indicatorConfig.unit}) · Season {selectedSeason}
               </p>
             </div>
 
             {/* Toggle Project Markers */}
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-text-main select-none">
                 <input
                   type="checkbox"
                   checked={showProjectMarkers}
                   onChange={(e) => setShowProjectMarkers(e.target.checked)}
-                  className="rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-800"
+                  className="rounded border-border-main text-emerald-600 focus:ring-emerald-500"
                 />
                 <span>Documented Conservation Schemes ({projectsList.length})</span>
               </label>
@@ -1179,7 +1183,7 @@ export default function SoilConservation() {
                     [30.90, -1.05]
                   ], { padding: 25 });
                 }}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-background border border-border-main hover:bg-slate-100 text-text-main text-xs font-bold transition-all shadow-xs"
                 title="Reset Map Extent"
               >
                 Reset Zoom
@@ -1188,94 +1192,97 @@ export default function SoilConservation() {
           </div>
 
           {/* Map Container */}
-          <div className="min-h-[580px] h-[580px] relative w-full overflow-hidden rounded-xl border border-slate-800 shadow-md bg-slate-950">
+          <div className="min-h-[580px] h-[580px] relative w-full overflow-hidden rounded-2xl border border-border-main shadow-md bg-slate-50">
             <div 
               ref={mapContainer} 
               style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }} 
             />
 
-            {/* Floating Map Legend */}
-            <div className="absolute bottom-4 right-4 z-10 p-3 rounded-lg bg-slate-950/92 border border-slate-800/90 backdrop-blur-md text-[11px] text-slate-300 shadow-lg max-w-xs space-y-1.5 pointer-events-auto">
-              <div className="font-semibold text-white border-b border-slate-800 pb-1 flex items-center justify-between">
-                <span>Map Classification Ramp</span>
-                <span className="text-[10px] text-slate-400 font-normal">{indicatorConfig.unit}</span>
+            {/* Floating Map Legend with 3-Tier Classification */}
+            <div className="absolute bottom-4 right-4 z-10 p-3.5 rounded-2xl bg-surface/95 border border-border-main backdrop-blur-md text-[11px] text-text-main shadow-xl max-w-xs space-y-2 pointer-events-auto">
+              <div className="font-bold text-text-main border-b border-border-main pb-1.5 flex items-center justify-between">
+                <span>District Performance Tiers</span>
+                <span className="text-[10px] text-muted font-normal">{indicatorConfig.unit}</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: activeRamp[4] }}></span>
-                  <span>{extents.p75.toFixed(1)} – {extents.max.toFixed(1)} (Upper Quantile)</span>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: indicatorConfig.isWarning ? '#EF4444' : '#15803D' }} />
+                    <span className="font-semibold">{indicatorConfig.isWarning ? 'High Hazard / Need' : 'High Performance'}</span>
+                  </div>
+                  <span className="text-muted font-mono">&ge; {choroplethDataMap.p66.toFixed(1)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: activeRamp[3] }}></span>
-                  <span>{extents.p50.toFixed(1)} – {extents.p75.toFixed(1)} (Moderate-High)</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: indicatorConfig.isWarning ? '#F59E0B' : '#4ADE80' }} />
+                    <span className="font-semibold">{indicatorConfig.isWarning ? 'Moderate Concern' : 'Moderate Performance'}</span>
+                  </div>
+                  <span className="text-muted font-mono">{choroplethDataMap.p33.toFixed(1)} – {choroplethDataMap.p66.toFixed(1)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: activeRamp[2] }}></span>
-                  <span>{extents.p25.toFixed(1)} – {extents.p50.toFixed(1)} (Median Range)</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: indicatorConfig.isWarning ? '#10B981' : '#BBF7D0' }} />
+                    <span className="font-semibold">{indicatorConfig.isWarning ? 'Low Risk / Stable' : 'Low Adoption / Output'}</span>
+                  </div>
+                  <span className="text-muted font-mono">&lt; {choroplethDataMap.p33.toFixed(1)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: activeRamp[1] }}></span>
-                  <span>{extents.min.toFixed(1)} – {extents.p25.toFixed(1)} (Low Range)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-xs" style={{ backgroundColor: missingColor }}></span>
-                  <span className="text-slate-400">Missing / Unreported District Record</span>
+                <div className="flex items-center justify-between border-t border-border-main pt-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-sm bg-slate-300" />
+                    <span className="text-muted">Unreported / Missing</span>
+                  </div>
                 </div>
               </div>
-              <div className="text-[10px] text-slate-400 border-t border-slate-800 pt-1">
-                {indicatorConfig.isWarning ? (
-                  <span className="text-rose-400 font-medium">⚠️ Warning: Higher values indicate elevated risk / deficit</span>
-                ) : (
-                  <span className="text-emerald-400 font-medium">✓ Favorable: Higher values indicate higher adoption / favorable status</span>
-                )}
+              <div className="text-[10px] text-muted border-t border-border-main pt-1.5 flex items-center gap-1">
+                <span>💡 Click any district polygon to inspect dossier</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Right Column (35%): District Soil & Fertility Profile */}
-        <div className="lg:col-span-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm flex flex-col h-[650px] overflow-hidden">
+        <div className="lg:col-span-4 rounded-2xl bg-surface border border-border-main shadow-sm flex flex-col h-[650px] overflow-hidden text-text-main">
           {selectedDistrictData ? (
             <>
               {/* Profile Header */}
-              <div className="p-4 bg-slate-950/70 border-b border-slate-800 flex-shrink-0">
+              <div className="p-4 bg-background border-b border-border-main flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-emerald-400" />
+                    <h3 className="text-lg font-extrabold text-text-main flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-emerald-600" />
                       {selectedDistrictData.district_name}
                     </h3>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-muted">
                       {selectedDistrictData.province_name} · Season {selectedSeason}
                     </div>
                   </div>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                     selectedDistrictData.priority_tier === 'TIER_1_URGENT_INTERVENTION'
-                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                   }`}>
                     {selectedDistrictData.priority_tier.replace(/_/g, ' ')}
                   </span>
                 </div>
 
                 {/* Quick Indicators Bar */}
-                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
-                  <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                    <div className="text-[10px] text-slate-400">Erosion Control</div>
-                    <div className="text-xs font-bold text-teal-400">{selectedDistrictData.erosion_control_pct}%</div>
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border-main text-center">
+                  <div className="p-2 rounded-xl bg-surface border border-border-main shadow-xs">
+                    <div className="text-[10px] text-muted font-bold">Erosion Control</div>
+                    <div className="text-xs font-extrabold text-teal-700">{selectedDistrictData.erosion_control_pct}%</div>
                   </div>
-                  <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                    <div className="text-[10px] text-slate-400">Mineral Fert.</div>
-                    <div className="text-xs font-bold text-emerald-400">{selectedDistrictData.inorganic_farmer_pct}%</div>
+                  <div className="p-2 rounded-xl bg-surface border border-border-main shadow-xs">
+                    <div className="text-[10px] text-muted font-bold">Mineral Fert.</div>
+                    <div className="text-xs font-extrabold text-emerald-700">{selectedDistrictData.inorganic_farmer_pct}%</div>
                   </div>
-                  <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                    <div className="text-[10px] text-slate-400">Measured pH</div>
-                    <div className="text-xs font-bold text-cyan-400">{selectedDistrictData.soil_ph.toFixed(1)}</div>
+                  <div className="p-2 rounded-xl bg-surface border border-border-main shadow-xs">
+                    <div className="text-[10px] text-muted font-bold">Measured pH</div>
+                    <div className="text-xs font-extrabold text-cyan-700">{selectedDistrictData.soil_ph.toFixed(1)}</div>
                   </div>
                 </div>
 
                 {/* Dossier Tabs */}
-                <div className="flex border-b border-slate-800 space-x-1 mt-3 overflow-x-auto custom-scrollbar">
+                <div className="flex border-b border-border-main space-x-1 mt-3 overflow-x-auto custom-scrollbar">
                   {[
                     { id: 'OVERVIEW', label: 'Overview' },
                     { id: 'FERTILITY', label: 'Fertility' },
@@ -1286,10 +1293,10 @@ export default function SoilConservation() {
                     <button
                       key={tab.id}
                       onClick={() => setDistrictTab(tab.id as any)}
-                      className={`px-2.5 py-1 text-[11px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                      className={`px-2.5 py-1 text-[11px] font-bold border-b-2 transition-all whitespace-nowrap ${
                         districtTab === tab.id
-                          ? 'border-emerald-400 text-emerald-400 bg-slate-900'
-                          : 'border-transparent text-slate-400 hover:text-slate-200'
+                          ? 'border-emerald-600 text-emerald-700 bg-surface'
+                          : 'border-transparent text-muted hover:text-text-main'
                       }`}
                     >
                       {tab.label}
@@ -1299,37 +1306,37 @@ export default function SoilConservation() {
               </div>
 
               {/* Profile Body (Scrollable) */}
-              <div className="p-4 overflow-y-auto space-y-4 flex-1 text-xs text-slate-300">
+              <div className="p-4 overflow-y-auto space-y-4 flex-1 text-xs text-text-main">
                 {/* TAB 1: OVERVIEW */}
                 {districtTab === 'OVERVIEW' && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                      <div className="font-semibold text-white flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2">
+                      <div className="font-bold text-text-main flex items-center justify-between">
                         <span>Farmland & Adoption Footprint</span>
-                        <span className="text-emerald-400">{selectedDistrictData.total_cultivated_ha.toLocaleString()} ha</span>
+                        <span className="text-emerald-700 font-extrabold">{selectedDistrictData.total_cultivated_ha.toLocaleString()} ha</span>
                       </div>
                       <div className="space-y-1.5 text-[11px]">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Erosion Control Land:</span>
-                          <span className="font-medium text-slate-200">
+                          <span className="text-muted">Erosion Control Land:</span>
+                          <span className="font-semibold text-text-main">
                             {selectedDistrictData.erosion_control_ha.toLocaleString()} ha ({selectedDistrictData.erosion_control_pct}%)
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Agroforestry Tree Area:</span>
-                          <span className="font-medium text-slate-200">
+                          <span className="text-muted">Agroforestry Tree Area:</span>
+                          <span className="font-semibold text-text-main">
                             {selectedDistrictData.agroforestry_ha.toLocaleString()} ha ({selectedDistrictData.agroforestry_pct}%)
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Organic Manure Farmers:</span>
-                          <span className="font-medium text-slate-200">
+                          <span className="text-muted">Organic Manure Farmers:</span>
+                          <span className="font-semibold text-text-main">
                             {selectedDistrictData.organic_fertilizer_ha.toLocaleString()} ha ({selectedDistrictData.organic_farmer_pct}%)
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Mineral Fertilizer Farmers:</span>
-                          <span className="font-medium text-slate-200">
+                          <span className="text-muted">Mineral Fertilizer Farmers:</span>
+                          <span className="font-semibold text-text-main">
                             {selectedDistrictData.inorganic_fertilizer_ha.toLocaleString()} ha ({selectedDistrictData.inorganic_farmer_pct}%)
                           </span>
                         </div>
@@ -1337,43 +1344,43 @@ export default function SoilConservation() {
                     </div>
 
                     {/* National Comparison */}
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="font-semibold text-white">National Benchmark Comparison</div>
-                      <div className="space-y-1.5">
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2 text-[11px]">
+                      <div className="font-bold text-text-main">National Benchmark Comparison</div>
+                      <div className="space-y-2">
                         <div>
-                          <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                          <div className="flex justify-between text-[10px] text-muted mb-0.5 font-medium">
                             <span>Erosion Control Adoption</span>
                             <span>{selectedDistrictData.erosion_control_pct}% vs {ns?.national_erosion_control_pct || 76.8}% National</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.erosion_control_pct)}%` }}></div>
+                          <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-teal-600 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.erosion_control_pct)}%` }}></div>
                           </div>
                         </div>
 
                         <div>
-                          <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                          <div className="flex justify-between text-[10px] text-muted mb-0.5 font-medium">
                             <span>Mineral Fertilizer Adoption</span>
                             <span>{selectedDistrictData.inorganic_farmer_pct}% vs {ns?.national_avg_inorganic_farmer_pct || 56.9}% National</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.inorganic_farmer_pct)}%` }}></div>
+                          <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.inorganic_farmer_pct)}%` }}></div>
                           </div>
                         </div>
 
                         <div>
-                          <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                          <div className="flex justify-between text-[10px] text-muted mb-0.5 font-medium">
                             <span>Organic Input Adoption</span>
                             <span>{selectedDistrictData.organic_farmer_pct}% vs {ns?.national_avg_organic_farmer_pct || 81.6}% National</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-amber-500 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.organic_farmer_pct)}%` }}></div>
+                          <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-600 rounded-full" style={{ width: `${Math.min(100, selectedDistrictData.organic_farmer_pct)}%` }}></div>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Data Provenance & Citation */}
-                    <div className="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-[10px] text-emerald-300">
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[10px] text-emerald-800">
                       <strong>Audit Traceability:</strong> Derived from NISR Seasonal Agricultural Survey (SAS Table 8 & Table 22/23) and RAB laboratory soil testing database.
                     </div>
                   </div>
@@ -1382,38 +1389,38 @@ export default function SoilConservation() {
                 {/* TAB 2: FERTILITY PRACTICES */}
                 {districtTab === 'FERTILITY' && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                      <div className="font-semibold text-white">Fertilizer Type Formulations</div>
-                      <p className="text-[11px] text-slate-400">
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2">
+                      <div className="font-bold text-text-main">Fertilizer Type Formulations</div>
+                      <p className="text-[11px] text-muted">
                         Breakdown of mineral fertilizer and lime applied in {selectedDistrictData.district_name}:
                       </p>
                       <div className="space-y-1.5 text-[11px] pt-1">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Urea (46% Nitrogen):</span>
-                          <span className="font-bold text-cyan-400">{selectedDistrictData.fert_urea_pct}%</span>
+                          <span className="text-muted">Urea (46% Nitrogen):</span>
+                          <span className="font-bold text-cyan-700">{selectedDistrictData.fert_urea_pct}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">DAP (18-46-0 Basal):</span>
-                          <span className="font-bold text-emerald-400">{selectedDistrictData.fert_dap_pct}%</span>
+                          <span className="text-muted">DAP (18-46-0 Basal):</span>
+                          <span className="font-bold text-emerald-700">{selectedDistrictData.fert_dap_pct}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">NPK (17-17-17 Compound):</span>
-                          <span className="font-bold text-teal-400">{selectedDistrictData.fert_npk_pct}%</span>
+                          <span className="text-muted">NPK (17-17-17 Compound):</span>
+                          <span className="font-bold text-teal-700">{selectedDistrictData.fert_npk_pct}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Agricultural Calcic Lime:</span>
-                          <span className="font-bold text-amber-400">{selectedDistrictData.fert_lime_pct}%</span>
+                          <span className="text-muted">Agricultural Calcic Lime:</span>
+                          <span className="font-bold text-amber-700">{selectedDistrictData.fert_lime_pct}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Other Micronutrients:</span>
-                          <span className="font-bold text-slate-300">{selectedDistrictData.fert_other_pct}%</span>
+                          <span className="text-muted">Other Micronutrients:</span>
+                          <span className="font-bold text-text-main">{selectedDistrictData.fert_other_pct}%</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
-                      <div className="font-semibold text-white">Integrated Soil Fertility Management (ISFM)</div>
-                      <p className="text-slate-300 leading-relaxed">
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-1.5 text-[11px]">
+                      <div className="font-bold text-text-main">Integrated Soil Fertility Management (ISFM)</div>
+                      <p className="text-muted leading-relaxed">
                         Smallholder plots combining organic manure ({selectedDistrictData.organic_plot_pct}% of plots) with mineral basal dressing ({selectedDistrictData.inorganic_plot_pct}% of plots) achieve higher crop resilience and nitrogen use efficiency.
                       </p>
                     </div>
@@ -1423,33 +1430,33 @@ export default function SoilConservation() {
                 {/* TAB 3: CONSERVATION & EROSION */}
                 {districtTab === 'CONSERVATION' && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="font-semibold text-white">Terrain Slope & Erosion Hazard</div>
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2 text-[11px]">
+                      <div className="font-bold text-text-main">Terrain Slope & Erosion Hazard</div>
                       <div className="grid grid-cols-2 gap-2 text-center pt-1">
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Steep Slopes (&gt;25%)</div>
-                          <div className="text-sm font-bold text-rose-400">{selectedDistrictData.slope_steep_pct}%</div>
+                        <div className="p-2 rounded-xl bg-surface border border-border-main">
+                          <div className="text-[10px] text-muted font-bold">Steep Slopes (&gt;25%)</div>
+                          <div className="text-sm font-extrabold text-rose-600">{selectedDistrictData.slope_steep_pct}%</div>
                         </div>
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Severe Erosion Plots</div>
-                          <div className="text-sm font-bold text-amber-400">{selectedDistrictData.degree_severe_pct}%</div>
+                        <div className="p-2 rounded-xl bg-surface border border-border-main">
+                          <div className="text-[10px] text-muted font-bold">Severe Erosion Plots</div>
+                          <div className="text-sm font-extrabold text-amber-600">{selectedDistrictData.degree_severe_pct}%</div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="font-semibold text-white">Physical Terracing Need Gap</div>
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2 text-[11px]">
+                      <div className="font-bold text-text-main">Physical Terracing Need Gap</div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Radical Bench Terraces Needed:</span>
-                        <span className="font-bold text-rose-400">{selectedDistrictData.radical_terracing_gap_ha.toLocaleString()} ha</span>
+                        <span className="text-muted">Radical Bench Terraces Needed:</span>
+                        <span className="font-bold text-rose-600">{selectedDistrictData.radical_terracing_gap_ha.toLocaleString()} ha</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">General Conservation Gap:</span>
-                        <span className="font-bold text-amber-400">{selectedDistrictData.conservation_gap_ha.toLocaleString()} ha</span>
+                        <span className="text-muted">General Conservation Gap:</span>
+                        <span className="font-bold text-amber-600">{selectedDistrictData.conservation_gap_ha.toLocaleString()} ha</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Modelled Susceptibility Index:</span>
-                        <span className="font-bold text-slate-200">{selectedDistrictData.modelled_erosion_susceptibility_index} / 100</span>
+                        <span className="text-muted">Modelled Susceptibility Index:</span>
+                        <span className="font-bold text-text-main">{selectedDistrictData.modelled_erosion_susceptibility_index} / 100</span>
                       </div>
                     </div>
                   </div>
@@ -1458,53 +1465,53 @@ export default function SoilConservation() {
                 {/* TAB 4: MEASURED SOIL TEST */}
                 {districtTab === 'MEASURED_SOIL' && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="font-semibold text-white flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2 text-[11px]">
+                      <div className="font-bold text-text-main flex items-center justify-between">
                         <span>Laboratory Soil Reactions</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          selectedDistrictData.soil_ph < 5.5 ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
+                          selectedDistrictData.soil_ph < 5.5 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
                         }`}>
                           {selectedDistrictData.acidity_status.replace(/_/g, ' ')}
                         </span>
                       </div>
                       <div className="space-y-1.5 pt-1">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Measured Soil pH (H2O):</span>
-                          <span className="font-bold text-white">{selectedDistrictData.soil_ph.toFixed(2)}</span>
+                          <span className="text-muted">Measured Soil pH (H2O):</span>
+                          <span className="font-extrabold text-text-main">{selectedDistrictData.soil_ph.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Lime Requirement (Calcic):</span>
-                          <span className="font-bold text-cyan-400">{selectedDistrictData.lime_requirement_tons_per_ha} tons / ha</span>
+                          <span className="text-muted">Lime Requirement (Calcic):</span>
+                          <span className="font-bold text-cyan-700">{selectedDistrictData.lime_requirement_tons_per_ha} tons / ha</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Soil Organic Carbon (SOC):</span>
-                          <span className="font-bold text-amber-400">{selectedDistrictData.organic_carbon_pct}%</span>
+                          <span className="text-muted">Soil Organic Carbon (SOC):</span>
+                          <span className="font-bold text-amber-700">{selectedDistrictData.organic_carbon_pct}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Cation Exchange Capacity:</span>
-                          <span className="font-bold text-teal-400">{selectedDistrictData.cation_exchange_capacity_meq} meq/100g</span>
+                          <span className="text-muted">Cation Exchange Capacity:</span>
+                          <span className="font-bold text-teal-700">{selectedDistrictData.cation_exchange_capacity_meq} meq/100g</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Dominant Soil Texture:</span>
-                          <span className="font-bold text-slate-300">{selectedDistrictData.soil_texture}</span>
+                          <span className="text-muted">Dominant Soil Texture:</span>
+                          <span className="font-bold text-text-main">{selectedDistrictData.soil_texture}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
-                      <div className="font-semibold text-white">Macronutrient Ratings (RAB Baseline)</div>
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-1.5 text-[11px]">
+                      <div className="font-bold text-text-main">Macronutrient Ratings (RAB Baseline)</div>
                       <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                        <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Nitrogen (N)</div>
-                          <div className="text-xs font-semibold text-slate-200">{selectedDistrictData.nitrogen_rating}</div>
+                        <div className="p-2 rounded-xl bg-surface border border-border-main">
+                          <div className="text-[10px] text-muted font-bold">Nitrogen (N)</div>
+                          <div className="text-xs font-bold text-text-main">{selectedDistrictData.nitrogen_rating}</div>
                         </div>
-                        <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Phosphorus (P)</div>
-                          <div className="text-xs font-semibold text-rose-400">{selectedDistrictData.phosphorus_rating}</div>
+                        <div className="p-2 rounded-xl bg-surface border border-border-main">
+                          <div className="text-[10px] text-muted font-bold">Phosphorus (P)</div>
+                          <div className="text-xs font-bold text-rose-600">{selectedDistrictData.phosphorus_rating}</div>
                         </div>
-                        <div className="p-1.5 rounded bg-slate-900 border border-slate-800">
-                          <div className="text-[10px] text-slate-400">Potassium (K)</div>
-                          <div className="text-xs font-semibold text-emerald-400">{selectedDistrictData.potassium_rating}</div>
+                        <div className="p-2 rounded-xl bg-surface border border-border-main">
+                          <div className="text-[10px] text-muted font-bold">Potassium (K)</div>
+                          <div className="text-xs font-bold text-emerald-700">{selectedDistrictData.potassium_rating}</div>
                         </div>
                       </div>
                     </div>
@@ -1516,58 +1523,58 @@ export default function SoilConservation() {
                   <div className="space-y-3.5">
                     {/* Matching Documented Project */}
                     {selectedDistrictData.matching_projects && selectedDistrictData.matching_projects.length > 0 ? (
-                      <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-2 text-[11px]">
-                        <div className="font-semibold text-emerald-300 flex items-center justify-between">
+                      <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2 text-[11px]">
+                        <div className="font-bold text-emerald-900 flex items-center justify-between">
                           <span>Documented Conservation Scheme</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 font-bold">
                             {selectedDistrictData.matching_projects[0].status}
                           </span>
                         </div>
-                        <div className="font-bold text-white text-xs">{selectedDistrictData.matching_projects[0].name}</div>
-                        <div className="text-slate-300 text-[10px]">
+                        <div className="font-extrabold text-emerald-950 text-xs">{selectedDistrictData.matching_projects[0].name}</div>
+                        <div className="text-emerald-800 text-[10px]">
                           Command Area: <strong>{Number(selectedDistrictData.matching_projects[0].command_area_ha).toLocaleString()} ha</strong> · Beneficiaries: <strong>{Number(selectedDistrictData.matching_projects[0].beneficiary_farmers).toLocaleString()} farmers</strong>
                         </div>
-                        <div className="text-slate-400 text-[10px]">
+                        <div className="text-emerald-700 text-[10px]">
                           Funding: {selectedDistrictData.matching_projects[0].funding_source}
                         </div>
                       </div>
                     ) : (
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+                      <div className="p-3 rounded-xl bg-background border border-border-main text-[11px] text-muted">
                         No major external funded watershed scheme currently documented in this district.
                       </div>
                     )}
 
                     {/* Pre-Feasibility Checklist */}
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
-                      <div className="font-semibold text-white">Pre-Feasibility Action Checklist</div>
+                    <div className="p-3.5 rounded-xl bg-background border border-border-main space-y-2 text-[11px]">
+                      <div className="font-bold text-text-main">Pre-Feasibility Action Checklist</div>
                       <div className="space-y-1.5">
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800/80 flex items-start gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <div className="p-2 rounded-xl bg-surface border border-border-main flex items-start gap-2 shadow-xs">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                           <div>
-                            <div className="font-semibold text-slate-200">Soil Core Acidity Validation</div>
-                            <div className="text-[10px] text-slate-400">Confirm buffer pH and aluminum saturation across target sectors before liming.</div>
+                            <div className="font-bold text-text-main">Soil Core Acidity Validation</div>
+                            <div className="text-[10px] text-muted">Confirm buffer pH and aluminum saturation across target sectors before liming.</div>
                           </div>
                         </div>
 
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800/80 flex items-start gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <div className="p-2 rounded-xl bg-surface border border-border-main flex items-start gap-2 shadow-xs">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                           <div>
-                            <div className="font-semibold text-slate-200">Micro-Catchment Contour Survey</div>
-                            <div className="text-[10px] text-slate-400">Survey slope gradient and waterways for radical bench terrace stone risers.</div>
+                            <div className="font-bold text-text-main">Micro-Catchment Contour Survey</div>
+                            <div className="text-[10px] text-muted">Survey slope gradient and waterways for radical bench terrace stone risers.</div>
                           </div>
                         </div>
 
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800/80 flex items-start gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <div className="p-2 rounded-xl bg-surface border border-border-main flex items-start gap-2 shadow-xs">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                           <div>
-                            <div className="font-semibold text-slate-200">Smart Nkunganire Subsidy Link</div>
-                            <div className="text-[10px] text-slate-400">Facilitate subsidized travertine delivery to registered farming cooperatives.</div>
+                            <div className="font-bold text-text-main">Smart Nkunganire Subsidy Link</div>
+                            <div className="text-[10px] text-muted">Facilitate subsidized travertine delivery to registered farming cooperatives.</div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-amber-950/20 border border-amber-500/20 text-[10px] text-amber-300 italic">
+                    <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[10px] text-amber-800 italic">
                       Institutional Disclaimer: Flagged strictly as a Potential Area for Assessment. Does not constitute an automatic engineering prescription.
                     </div>
                   </div>
@@ -1575,7 +1582,7 @@ export default function SoilConservation() {
               </div>
             </>
           ) : (
-            <div className="p-6 text-center text-slate-400 text-xs my-auto">
+            <div className="p-6 text-center text-muted text-xs my-auto">
               Select a district on the map or ranking table to view its detailed soil intelligence profile.
             </div>
           )}
@@ -1583,18 +1590,18 @@ export default function SoilConservation() {
       </div>
 
       {/* 6. Analytical Section A: Fertility-Management Adoption: Modern, Traditional & Integrated Practices */}
-      <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Sprout className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
+              <Sprout className="w-5 h-5 text-emerald-600" />
               Fertility-Management Adoption: Modern, Traditional & Integrated Practices
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Compare reported mineral fertilizer, organic manure, and soil amendment adoption across seasons and districts.
             </p>
           </div>
-          <div className="text-[11px] text-slate-400 italic">
+          <div className="text-[11px] text-muted italic">
             *Categories overlap: farmers commonly integrate both mineral inputs and organic manure on the same plots.
           </div>
         </div>
@@ -1602,9 +1609,9 @@ export default function SoilConservation() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Chart 1: Practice Type Adoption Comparison */}
           <div className="lg:col-span-7 h-72">
-            <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
+            <div className="text-xs font-bold text-text-main mb-2 flex items-center justify-between">
               <span>National Practice Adoption Comparison (% of Farmers)</span>
-              <span className="text-[10px] text-emerald-400">Season {selectedSeason}</span>
+              <span className="text-[10px] text-emerald-700 font-bold">Season {selectedSeason}</span>
             </div>
             <ResponsiveContainer width="100%" height="90%">
               <BarChart
@@ -1616,14 +1623,14 @@ export default function SoilConservation() {
                 ]}
                 margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-                <XAxis dataKey="practice" stroke="#94A3B8" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#94A3B8" tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.8} />
+                <XAxis dataKey="practice" stroke="#64748B" tick={{ fontSize: 11 }} />
+                <YAxis stroke="#64748B" tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
                 <RechartsTooltip
-                  contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', fontSize: '11px' }}
+                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '12px', fontSize: '11px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                   formatter={(val: any) => [`${val}%`, 'Adoption Rate']}
                 />
-                <Bar dataKey="adoptionPct" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="adoptionPct" radius={[6, 6, 0, 0]}>
                   {
                     [
                       { fill: '#F59E0B' },
@@ -1640,60 +1647,60 @@ export default function SoilConservation() {
           </div>
 
           {/* Chart 2: Fertilizer Formulation Breakdown */}
-          <div className="lg:col-span-5 h-72 flex flex-col justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <div className="lg:col-span-5 h-72 flex flex-col justify-between p-4 rounded-xl bg-background border border-border-main">
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1 flex items-center justify-between">
+              <h4 className="text-xs font-bold text-text-main uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span>Mineral Fertilizer Formulation Shares</span>
-                <span className="text-[10px] text-cyan-400">MINAGRI SAS</span>
+                <span className="text-[10px] text-cyan-700 font-bold">MINAGRI SAS</span>
               </h4>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-muted">
                 National distribution share of chemical fertilizers and agricultural lime:
               </p>
             </div>
 
             <div className="space-y-2.5 my-auto text-xs">
               <div>
-                <div className="flex justify-between text-slate-300 font-medium mb-1">
+                <div className="flex justify-between text-text-main font-semibold mb-1">
                   <span>Urea 46% N (Top Dressing)</span>
-                  <span className="text-cyan-400 font-bold">{ns?.fert_breakdown?.urea || 39.1}%</span>
+                  <span className="text-cyan-700 font-extrabold">{ns?.fert_breakdown?.urea || 39.1}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${ns?.fert_breakdown?.urea || 39.1}%` }}></div>
+                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyan-600 rounded-full" style={{ width: `${ns?.fert_breakdown?.urea || 39.1}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-slate-300 font-medium mb-1">
+                <div className="flex justify-between text-text-main font-semibold mb-1">
                   <span>DAP 18-46-0 (Basal Rooting)</span>
-                  <span className="text-emerald-400 font-bold">{ns?.fert_breakdown?.dap || 36.5}%</span>
+                  <span className="text-emerald-700 font-extrabold">{ns?.fert_breakdown?.dap || 36.5}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${ns?.fert_breakdown?.dap || 36.5}%` }}></div>
+                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${ns?.fert_breakdown?.dap || 36.5}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-slate-300 font-medium mb-1">
+                <div className="flex justify-between text-text-main font-semibold mb-1">
                   <span>NPK 17-17-17 (Balanced Compound)</span>
-                  <span className="text-teal-400 font-bold">{ns?.fert_breakdown?.npk || 21.1}%</span>
+                  <span className="text-teal-700 font-extrabold">{ns?.fert_breakdown?.npk || 21.1}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-teal-500 rounded-full" style={{ width: `${ns?.fert_breakdown?.npk || 21.1}%` }}></div>
+                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-teal-600 rounded-full" style={{ width: `${ns?.fert_breakdown?.npk || 21.1}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-slate-300 font-medium mb-1">
+                <div className="flex justify-between text-text-main font-semibold mb-1">
                   <span>Agricultural Calcic Lime</span>
-                  <span className="text-amber-400 font-bold">{ns?.fert_breakdown?.lime || 2.0}%</span>
+                  <span className="text-amber-700 font-extrabold">{ns?.fert_breakdown?.lime || 2.0}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(ns?.fert_breakdown?.lime || 2.0) * 10}%` }}></div>
+                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-600 rounded-full" style={{ width: `${(ns?.fert_breakdown?.lime || 2.0) * 10}%` }}></div>
                 </div>
               </div>
             </div>
 
-            <div className="text-[10px] text-slate-500 border-t border-slate-800/80 pt-2">
+            <div className="text-[10px] text-muted border-t border-border-main pt-2">
               Note: Lime application is expanding under the National Acid Soil Neutralization Subsidy.
             </div>
           </div>
@@ -1701,28 +1708,28 @@ export default function SoilConservation() {
       </div>
 
       {/* 7. Analytical Section B: Seasonal Soil Management Trends */}
-      <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
               Seasonal Soil Health & Conservation Trends (2014A – 2026C)
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Long-term national trajectory across 38 chronological agricultural seasons.
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <span className="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+            <span className="flex items-center gap-1.5 text-text-main font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
               <span>Erosion Control %</span>
             </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span className="flex items-center gap-1.5 text-text-main font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
               <span>Organic Manure %</span>
             </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span className="flex items-center gap-1.5 text-text-main font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-600"></span>
               <span>Mineral Fert %</span>
             </span>
           </div>
@@ -1733,23 +1740,23 @@ export default function SoilConservation() {
             <AreaChart data={seasonalTrends} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
               <defs>
                 <linearGradient id="erosionGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.4} />
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="organicGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3} />
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.25} />
                   <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="inorganicGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0284C7" stopOpacity={0.3} />
+                  <stop offset="5%" stopColor="#0284C7" stopOpacity={0.25} />
                   <stop offset="95%" stopColor="#0284C7" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.4} />
-              <XAxis dataKey="season_code" stroke="#94A3B8" tick={{ fontSize: 10 }} interval={3} />
-              <YAxis stroke="#94A3B8" tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.8} />
+              <XAxis dataKey="season_code" stroke="#64748B" tick={{ fontSize: 10 }} interval={3} />
+              <YAxis stroke="#64748B" tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
               <RechartsTooltip
-                contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', fontSize: '11px' }}
+                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#CBD5E1', borderRadius: '12px', fontSize: '11px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                 formatter={(val: any, name: any) => [`${val}%`, name]}
               />
               <Area type="monotone" dataKey="erosion_control_pct" name="Erosion Control" stroke="#14B8A6" strokeWidth={2} fillOpacity={1} fill="url(#erosionGrad)" />
@@ -1761,32 +1768,32 @@ export default function SoilConservation() {
 
         {/* Dynamic Shift Alert Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-2">
-          <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30">
-            <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-              <ArrowUpRight className="w-4 h-4" />
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+            <div className="font-bold text-emerald-800 flex items-center gap-1.5">
+              <ArrowUpRight className="w-4 h-4 text-emerald-600" />
               <span>High Adoption Expansion Zone</span>
             </div>
-            <p className="text-[11px] text-slate-300 mt-1">
+            <p className="text-[11px] text-emerald-900 mt-1">
               Districts with &gt;10% increase in erosion control adoption: Bugesera, Kayonza, Nyagatare (scale up of contour bunds & agroforestry).
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-rose-950/20 border border-rose-500/30">
-            <div className="font-bold text-rose-400 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4" />
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
+            <div className="font-bold text-rose-800 flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
               <span>Critical Soil Acidity Hotspots</span>
             </div>
-            <p className="text-[11px] text-slate-300 mt-1">
+            <p className="text-[11px] text-rose-900 mt-1">
               High altitude volcanic/laterite zones with pH &lt; 5.2 requiring urgent lime distribution: Nyaruguru, Nyamagabe, Rutsiro.
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-cyan-950/20 border border-cyan-500/30">
-            <div className="font-bold text-cyan-400 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" />
+          <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200">
+            <div className="font-bold text-cyan-800 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-cyan-600" />
               <span>Stabilized Conservation Corridors</span>
             </div>
-            <p className="text-[11px] text-slate-300 mt-1">
+            <p className="text-[11px] text-cyan-900 mt-1">
               Consolidated radical bench terracing perimeters maintaining &gt;85% soil coverage: Gicumbi, Gakenke, Rulindo.
             </p>
           </div>
@@ -1794,14 +1801,14 @@ export default function SoilConservation() {
       </div>
 
       {/* 8. District Soil & Fertility Performance Ranking Table */}
-      <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
+              <Award className="w-5 h-5 text-emerald-600" />
               District Soil & Fertility League Table ({filteredRankingDistricts.length} Districts)
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Search, sort, filter, and inspect verified district-level soil indicators for Season {selectedSeason}.
             </p>
           </div>
@@ -1809,13 +1816,13 @@ export default function SoilConservation() {
           {/* Table Search */}
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="text"
                 value={searchDistrict}
                 onChange={(e) => setSearchDistrict(e.target.value)}
                 placeholder="Search district or province..."
-                className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-56"
+                className="bg-background border border-border-main rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-main placeholder-slate-400 focus:outline-none focus:border-emerald-600 w-56 font-medium"
               />
             </div>
           </div>
@@ -1835,10 +1842,10 @@ export default function SoilConservation() {
             <button
               key={pill.id}
               onClick={() => setRankingFilter(pill.id as any)}
-              className={`px-3 py-1 rounded-full font-semibold transition-colors ${
+              className={`px-3 py-1 rounded-full font-bold transition-all text-xs ${
                 rankingFilter === pill.id
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
+                  : 'bg-background border border-border-main text-muted hover:text-text-main hover:bg-slate-100'
               }`}
             >
               {pill.label}
@@ -1847,64 +1854,64 @@ export default function SoilConservation() {
         </div>
 
         {/* Interactive League Table */}
-        <div className="overflow-x-auto rounded-lg border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-border-main">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+            <thead className="bg-background text-muted uppercase tracking-wider text-[11px] border-b border-border-main font-bold">
               <tr>
-                <th className="py-2.5 px-3 font-semibold">Rank</th>
-                <th className="py-2.5 px-3 font-semibold">District</th>
-                <th className="py-2.5 px-3 font-semibold">Province</th>
-                <th className="py-2.5 px-3 font-semibold">Erosion Control (%)</th>
-                <th className="py-2.5 px-3 font-semibold">Organic (%)</th>
-                <th className="py-2.5 px-3 font-semibold">Mineral Fert (%)</th>
-                <th className="py-2.5 px-3 font-semibold">Measured pH</th>
-                <th className="py-2.5 px-3 font-semibold">Lime Need (t/ha)</th>
-                <th className="py-2.5 px-3 font-semibold">Priority Score</th>
-                <th className="py-2.5 px-3 font-semibold text-right">Actions</th>
+                <th className="py-2.5 px-3 font-bold">Rank</th>
+                <th className="py-2.5 px-3 font-bold">District</th>
+                <th className="py-2.5 px-3 font-bold">Province</th>
+                <th className="py-2.5 px-3 font-bold">Erosion Control (%)</th>
+                <th className="py-2.5 px-3 font-bold">Organic (%)</th>
+                <th className="py-2.5 px-3 font-bold">Mineral Fert (%)</th>
+                <th className="py-2.5 px-3 font-bold">Measured pH</th>
+                <th className="py-2.5 px-3 font-bold">Lime Need (t/ha)</th>
+                <th className="py-2.5 px-3 font-bold">Priority Score</th>
+                <th className="py-2.5 px-3 font-bold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-300">
+            <tbody className="divide-y divide-border-main text-text-main">
               {filteredRankingDistricts.map((d, idx) => (
                 <tr 
                   key={d.id} 
-                  className={`hover:bg-slate-800/50 transition-colors cursor-pointer ${
-                    selectedDistrictName.toLowerCase() === d.district_name.toLowerCase() ? 'bg-emerald-950/30 border-l-4 border-emerald-500' : ''
+                  className={`hover:bg-slate-50 transition-colors cursor-pointer ${
+                    selectedDistrictName.toLowerCase() === d.district_name.toLowerCase() ? 'bg-emerald-50/70 border-l-4 border-emerald-600' : ''
                   }`}
                   onClick={() => focusDistrictOnMap(d.district_name)}
                 >
-                  <td className="py-2 px-3 font-mono text-slate-400">#{idx + 1}</td>
-                  <td className="py-2 px-3 font-bold text-white flex items-center gap-1.5">
+                  <td className="py-2.5 px-3 font-mono text-muted">#{idx + 1}</td>
+                  <td className="py-2.5 px-3 font-bold text-text-main flex items-center gap-1.5">
                     <span>{d.district_name}</span>
                     {d.priority_tier === 'TIER_1_URGENT_INTERVENTION' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" title="Tier 1 Priority"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500" title="Tier 1 Priority"></span>
                     )}
                   </td>
-                  <td className="py-2 px-3 text-slate-400">{d.province_name}</td>
-                  <td className="py-2 px-3 font-semibold text-teal-400">{d.erosion_control_pct}%</td>
-                  <td className="py-2 px-3 font-semibold text-amber-400">{d.organic_farmer_pct}%</td>
-                  <td className="py-2 px-3 font-semibold text-cyan-400">{d.inorganic_farmer_pct}%</td>
-                  <td className="py-2 px-3">
+                  <td className="py-2.5 px-3 text-muted">{d.province_name}</td>
+                  <td className="py-2.5 px-3 font-bold text-teal-700">{d.erosion_control_pct}%</td>
+                  <td className="py-2.5 px-3 font-bold text-amber-700">{d.organic_farmer_pct}%</td>
+                  <td className="py-2.5 px-3 font-bold text-cyan-700">{d.inorganic_farmer_pct}%</td>
+                  <td className="py-2.5 px-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      d.soil_ph < 5.2 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
-                      d.soil_ph < 5.6 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                      'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      d.soil_ph < 5.2 ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                      d.soil_ph < 5.6 ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                      'bg-emerald-100 text-emerald-800 border border-emerald-300'
                     }`}>
                       {d.soil_ph.toFixed(2)} pH
                     </span>
                   </td>
-                  <td className="py-2 px-3 text-slate-300 font-mono">
+                  <td className="py-2.5 px-3 text-text-main font-mono">
                     {d.lime_requirement_tons_per_ha > 0 ? `${d.lime_requirement_tons_per_ha} t/ha` : '0 t/ha'}
                   </td>
-                  <td className="py-2 px-3">
-                    <span className="font-bold text-white">{d.priority_score.toFixed(1)}</span>
+                  <td className="py-2.5 px-3">
+                    <span className="font-extrabold text-text-main">{d.priority_score.toFixed(1)}</span>
                   </td>
-                  <td className="py-2 px-3 text-right">
+                  <td className="py-2.5 px-3 text-right">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         focusDistrictOnMap(d.district_name);
                       }}
-                      className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-background border border-border-main hover:bg-slate-100 text-emerald-700 text-[11px] font-bold transition-all shadow-xs"
                     >
                       Inspect Profile
                     </button>
@@ -1917,69 +1924,69 @@ export default function SoilConservation() {
       </div>
 
       {/* 9. National Documented Soil Conservation Projects Directory */}
-      <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Mountain className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
+              <Mountain className="w-5 h-5 text-emerald-600" />
               National Soil Conservation & Catchment Projects Directory ({projectsList.length} Verified Schemes)
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Official watershed rehabilitation, radical terracing, and lime programs documented by MINAGRI, RAB, FONERWA, and climate funds.
             </p>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
             {ns ? `${ns.total_project_command_area_ha.toLocaleString()} ha Command Area` : '47,500 ha'}
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-border-main">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+            <thead className="bg-background text-muted uppercase tracking-wider text-[11px] border-b border-border-main font-bold">
               <tr>
-                <th className="py-2.5 px-3 font-semibold">Project Name & Code</th>
-                <th className="py-2.5 px-3 font-semibold">District</th>
-                <th className="py-2.5 px-3 font-semibold">Technology Type</th>
-                <th className="py-2.5 px-3 font-semibold">Command (Ha)</th>
-                <th className="py-2.5 px-3 font-semibold">Beneficiary Smallholders</th>
-                <th className="py-2.5 px-3 font-semibold">Funding Source</th>
-                <th className="py-2.5 px-3 font-semibold">Operational Status</th>
-                <th className="py-2.5 px-3 font-semibold text-right">Map Location</th>
+                <th className="py-2.5 px-3 font-bold">Project Name & Code</th>
+                <th className="py-2.5 px-3 font-bold">District</th>
+                <th className="py-2.5 px-3 font-bold">Technology Type</th>
+                <th className="py-2.5 px-3 font-bold">Command (Ha)</th>
+                <th className="py-2.5 px-3 font-bold">Beneficiary Smallholders</th>
+                <th className="py-2.5 px-3 font-bold">Funding Source</th>
+                <th className="py-2.5 px-3 font-bold">Operational Status</th>
+                <th className="py-2.5 px-3 font-bold text-right">Map Location</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-300">
+            <tbody className="divide-y divide-border-main text-text-main">
               {projectsList.map((p) => (
-                <tr key={p.code} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-2 px-3 font-medium text-white">
+                <tr key={p.code} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-2.5 px-3 font-semibold text-text-main">
                     <div>{p.name}</div>
-                    <div className="text-[10px] text-slate-400 font-mono">{p.code}</div>
+                    <div className="text-[10px] text-muted font-mono">{p.code}</div>
                   </td>
-                  <td className="py-2 px-3 font-bold text-slate-200">{p.district_name}</td>
-                  <td className="py-2 px-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                      p.project_type === 'RADICAL_TERRACING' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                      p.project_type === 'LIME_APPLICATION' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' :
-                      'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  <td className="py-2.5 px-3 font-bold text-text-main">{p.district_name}</td>
+                  <td className="py-2.5 px-3">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      p.project_type === 'RADICAL_TERRACING' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                      p.project_type === 'LIME_APPLICATION' ? 'bg-cyan-100 text-cyan-800 border border-cyan-300' :
+                      'bg-emerald-100 text-emerald-800 border border-emerald-300'
                     }`}>
                       {p.project_type.replace(/_/g, ' ')}
                     </span>
                   </td>
-                  <td className="py-2 px-3 font-mono font-semibold text-slate-200">
+                  <td className="py-2.5 px-3 font-mono font-bold text-text-main">
                     {Number(p.command_area_ha).toLocaleString()} ha
                   </td>
-                  <td className="py-2 px-3 text-slate-300">
+                  <td className="py-2.5 px-3 text-text-main">
                     {Number(p.beneficiary_farmers).toLocaleString()}
                   </td>
-                  <td className="py-2 px-3 text-slate-400">{p.funding_source}</td>
-                  <td className="py-2 px-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">
+                  <td className="py-2.5 px-3 text-muted">{p.funding_source}</td>
+                  <td className="py-2.5 px-3">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                       {p.status}
                     </span>
                   </td>
-                  <td className="py-2 px-3 text-right">
+                  <td className="py-2.5 px-3 text-right">
                     <button
                       onClick={() => focusDistrictOnMap(p.district_name)}
-                      className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-background border border-border-main hover:bg-slate-100 text-emerald-700 text-[11px] font-bold transition-all shadow-xs"
                     >
                       Focus on Map
                     </button>
@@ -1992,18 +1999,18 @@ export default function SoilConservation() {
       </div>
 
       {/* 10. Soil Management Intervention Priorities (Evidence-Based Pre-Screening) */}
-      <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 shadow-sm">
-        <div className="border-b border-slate-800 pb-3">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+        <div className="border-b border-border-main pb-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Target className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
+              <Target className="w-5 h-5 text-emerald-600" />
               Soil Management Intervention Priorities (Pre-Feasibility Decision Support)
             </h3>
-            <span className="text-[11px] text-amber-300 font-semibold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30">
+            <span className="text-[11px] text-amber-900 font-bold px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300">
               Screening Framework — Not an Automatic Prescription
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Evidence-based pre-screening to prioritize micro-catchment field assessment, soil sampling, and lime distribution.
           </p>
         </div>
@@ -2011,12 +2018,12 @@ export default function SoilConservation() {
         {/* Screening Criteria Breakdown */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           {interventionScreening?.criteriaWeights?.map((c: any) => (
-            <div key={c.criterion} className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-              <div className="flex justify-between font-bold text-slate-200">
+            <div key={c.criterion} className="p-3.5 rounded-xl bg-background border border-border-main space-y-1">
+              <div className="flex justify-between font-bold text-text-main">
                 <span>{c.criterion}</span>
-                <span className="text-emerald-400">{c.weightPercent}%</span>
+                <span className="text-emerald-700 font-extrabold">{c.weightPercent}%</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-tight">
+              <p className="text-[11px] text-muted leading-tight">
                 {c.description}
               </p>
             </div>
@@ -2026,34 +2033,34 @@ export default function SoilConservation() {
         {/* Candidate Districts Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
           {interventionScreening?.candidateDistricts?.map((cd: any) => (
-            <div key={cd.district_name} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 flex flex-col justify-between">
+            <div key={cd.district_name} className="p-4 rounded-2xl bg-background border border-border-main space-y-3 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-white text-sm">{cd.district_name}</h4>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                  <h4 className="font-extrabold text-text-main text-sm">{cd.district_name}</h4>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                     Score: {cd.priority_score.toFixed(1)}
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-400">{cd.province_name}</div>
+                <div className="text-[11px] text-muted">{cd.province_name}</div>
 
                 <div className="mt-2.5 space-y-1.5">
-                  <div className="text-[11px] font-semibold text-slate-300">Screening Flags:</div>
+                  <div className="text-[11px] font-bold text-text-main">Screening Flags:</div>
                   {cd.screening_flags.map((f: string, i: number) => (
-                    <div key={i} className="p-1.5 rounded bg-rose-950/20 border border-rose-500/20 text-[10px] text-rose-300 flex items-start gap-1">
-                      <span className="text-rose-400 font-bold">•</span>
+                    <div key={i} className="p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-[10px] text-rose-800 flex items-start gap-1">
+                      <span className="text-rose-600 font-bold">•</span>
                       <span>{f}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                <div className="text-[10px] text-slate-400 leading-tight">
-                  <strong>Missing Evidence:</strong> {cd.missing_evidence_note}
+              <div className="pt-2 border-t border-border-main space-y-2">
+                <div className="text-[10px] text-muted leading-tight">
+                  <strong className="text-text-main">Missing Evidence:</strong> {cd.missing_evidence_note}
                 </div>
                 <button
                   onClick={() => focusDistrictOnMap(cd.district_name)}
-                  className="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <span>Open Pre-Feasibility Dossier</span>
                   <ChevronRight className="w-3.5 h-3.5" />
