@@ -996,6 +996,24 @@ export class CropStatisticsService {
       .filter((c: any) => c.change_pct !== null && Math.abs(c.change_pct) <= 4.0 && c.current_production_tonnes > 5000)
       .slice(0, 5);
 
+    // 11. Documented Agricultural Facilities with Coordinates
+    let facilities: any[] = [];
+    try {
+      facilities = await this.dataSource.query(`
+        SELECT 
+          f.id, f.name, f.facility_type,
+          ROUND(ST_Y(f.location::geometry)::numeric, 4) AS latitude,
+          ROUND(ST_X(f.location::geometry)::numeric, 4) AS longitude,
+          f.storage_capacity_tonnes, f.processing_capacity_tonnes_day,
+          f.operator_name, COALESCE(u.name, 'Rwanda') AS district_name
+        FROM agrilens.agri_facilities f
+        LEFT JOIN agrilens.administrative_units u ON f.admin_unit_id = u.id
+        WHERE f.location IS NOT NULL;
+      `);
+    } catch (e: any) {
+      console.warn(`[CropStatisticsService] Failed to fetch facilities: ${e?.message}`);
+    }
+
     return {
       meta: {
         season: validSeason,
@@ -1012,6 +1030,7 @@ export class CropStatisticsService {
       },
       nationalSummary,
       districts: processedDistricts,
+      facilities,
       seasonalTrends: trendsRes.map((t: any) => ({
         season_code: t.season_code,
         year: t.year,
