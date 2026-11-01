@@ -1,15 +1,27 @@
-import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private jwtService: JwtService,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.dataSource.query(`
+        ALTER TABLE agrilens.users 
+        ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+      `);
+      console.log('[AuthService] agrilens.users avatar_url column verified/created.');
+    } catch (e: any) {
+      console.warn('[AuthService] Auto-migration for avatar_url deferred:', e.message);
+    }
+  }
 
   /**
    * 1. Retrieve all 8 Official Logical Roles with Geographic Scope and Capability Metadata
@@ -552,17 +564,39 @@ export class AuthService {
    * 11. User Authentication (Login)
    */
   async login(email: string, pass: string) {
-    const userRes = await this.dataSource.query(`
-      SELECT 
-        u.id, u.full_name, u.email, u.password_hash, u.status, u.avatar_url,
-        r.code AS role_code, r.name AS role_name, r.scope_type,
-        ul.scope_level, ul.district_name, ul.sector_name
-      FROM agrilens.users u
-      LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
-      LEFT JOIN agrilens.roles r ON ur.role_id = r.id
-      LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
-      WHERE u.email = $1 LIMIT 1;
-    `, [email]);
+    let userRes: any[] = [];
+    try {
+      userRes = await this.dataSource.query(`
+        SELECT 
+          u.id, u.full_name, u.email, u.password_hash, u.status, u.avatar_url,
+          r.code AS role_code, r.name AS role_name, r.scope_type,
+          ul.scope_level, ul.district_name, ul.sector_name
+        FROM agrilens.users u
+        LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
+        LEFT JOIN agrilens.roles r ON ur.role_id = r.id
+        LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
+        WHERE u.email = $1 LIMIT 1;
+      `, [email]);
+    } catch (queryErr: any) {
+      if (queryErr.message?.includes('avatar_url') || queryErr.code === '42703') {
+        try {
+          await this.dataSource.query(`ALTER TABLE agrilens.users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`);
+        } catch (e) {}
+        userRes = await this.dataSource.query(`
+          SELECT 
+            u.id, u.full_name, u.email, u.password_hash, u.status, NULL AS avatar_url,
+            r.code AS role_code, r.name AS role_name, r.scope_type,
+            ul.scope_level, ul.district_name, ul.sector_name
+          FROM agrilens.users u
+          LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
+          LEFT JOIN agrilens.roles r ON ur.role_id = r.id
+          LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
+          WHERE u.email = $1 LIMIT 1;
+        `, [email]);
+      } else {
+        throw queryErr;
+      }
+    }
 
     if (userRes.length === 0) {
       throw new UnauthorizedException('Invalid credentials.');
@@ -635,8 +669,13 @@ export class AuthService {
       updates.push(`phone = $${params.length}`);
     }
     if (body.avatarUrl !== undefined) {
-      params.push(body.avatarUrl);
-      updates.push(`avatar_url = $${params.length}`);
+      try {
+        await this.dataSource.query(`ALTER TABLE agrilens.users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`);
+        params.push(body.avatarUrl);
+        updates.push(`avatar_url = $${params.length}`);
+      } catch (colErr) {
+        console.warn('Could not update avatar_url column:', colErr);
+      }
     }
     if (body.password) {
       const hash = await argon2.hash(body.password);
@@ -661,17 +700,32 @@ export class AuthService {
       details: { updatedFields: Object.keys(body).filter(k => (body as any)[k] !== undefined) }
     });
 
-    const updatedUserRes = await this.dataSource.query(`
-      SELECT 
-        u.id, u.full_name, u.email, u.phone, u.status, u.avatar_url,
-        r.code AS role_code, r.name AS role_name,
-        ul.scope_level, ul.district_name, ul.sector_name
-      FROM agrilens.users u
-      LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
-      LEFT JOIN agrilens.roles r ON ur.role_id = r.id
-      LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
-      WHERE u.id = $1 LIMIT 1;
-    `, [user.id]);
+    let updatedUserRes: any[] = [];
+    try {
+      updatedUserRes = await this.dataSource.query(`
+        SELECT 
+          u.id, u.full_name, u.email, u.phone, u.status, u.avatar_url,
+          r.code AS role_code, r.name AS role_name,
+          ul.scope_level, ul.district_name, ul.sector_name
+        FROM agrilens.users u
+        LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
+        LEFT JOIN agrilens.roles r ON ur.role_id = r.id
+        LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
+        WHERE u.id = $1 LIMIT 1;
+      `, [user.id]);
+    } catch (e: any) {
+      updatedUserRes = await this.dataSource.query(`
+        SELECT 
+          u.id, u.full_name, u.email, u.phone, u.status, NULL AS avatar_url,
+          r.code AS role_code, r.name AS role_name,
+          ul.scope_level, ul.district_name, ul.sector_name
+        FROM agrilens.users u
+        LEFT JOIN agrilens.user_roles ur ON u.id = ur.user_id
+        LEFT JOIN agrilens.roles r ON ur.role_id = r.id
+        LEFT JOIN agrilens.user_locations ul ON u.id = ul.user_id
+        WHERE u.id = $1 LIMIT 1;
+      `, [user.id]);
+    }
 
     const u = updatedUserRes[0] || {};
     return {
