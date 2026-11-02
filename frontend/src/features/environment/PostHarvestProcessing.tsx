@@ -985,7 +985,7 @@ export default function PostHarvestProcessing() {
           </div>
 
           {/* F. Comparison Season with Compare Season Button */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-semibold text-muted flex items-center">
                 <Activity className="w-3 h-3 mr-1 text-primary" />
@@ -1001,33 +1001,33 @@ export default function PostHarvestProcessing() {
                 </span>
               )}
             </div>
+            <select
+              value={pendingCompareSeason}
+              onChange={(e) => setPendingCompareSeason(e.target.value)}
+              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-agriculture focus:outline-none"
+            >
+              <option value="">-- Select season to compare --</option>
+              {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
+                <option key={s.code} value={s.code}>
+                  {s.code} ({s.year} {s.name})
+                </option>
+              ))}
+            </select>
             <div className="flex items-center gap-1.5">
-              <select
-                value={pendingCompareSeason}
-                onChange={(e) => setPendingCompareSeason(e.target.value)}
-                className="flex-1 bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-agriculture focus:outline-none"
-              >
-                <option value="">-- Select season to compare --</option>
-                {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
-                  <option key={s.code} value={s.code}>
-                    {s.code} ({s.year} {s.name})
-                  </option>
-                ))}
-              </select>
               <button
                 type="button"
                 disabled={!pendingCompareSeason || pendingCompareSeason === appliedCompareSeason}
                 onClick={() => setAppliedCompareSeason(pendingCompareSeason)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs ${
                   pendingCompareSeason && pendingCompareSeason !== appliedCompareSeason
-                    ? 'bg-primary text-white hover:bg-primary-hover shadow-sm cursor-pointer'
+                    ? 'bg-primary text-white hover:bg-primary-hover cursor-pointer'
                     : isComparing
-                    ? 'bg-surface border border-border-main text-muted cursor-default'
-                    : 'bg-muted/20 text-muted cursor-not-allowed'
+                    ? 'bg-primary/10 text-primary border border-primary/20 cursor-default'
+                    : 'bg-muted/10 text-muted border border-border-main cursor-not-allowed opacity-60'
                 }`}
               >
                 <TrendingUp className="w-3.5 h-3.5" />
-                Compare Season
+                <span>{isComparing ? `Comparing ${appliedCompareSeason}` : 'Compare Season'}</span>
               </button>
               {isComparing && (
                 <button
@@ -1037,7 +1037,7 @@ export default function PostHarvestProcessing() {
                     setPendingCompareSeason('');
                   }}
                   title="Clear comparison and return to single season view"
-                  className="px-2 py-1.5 rounded-lg text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
+                  className="py-1.5 px-2.5 rounded-lg text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
                 >
                   Clear
                 </button>

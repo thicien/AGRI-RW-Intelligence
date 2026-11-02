@@ -777,7 +777,7 @@ export default function Irrigation() {
           </div>
 
           {/* Season Comparison Selector with Compare Season Button */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
                 <TrendingUp className="w-3 h-3 text-cyan-600" /> Comparison Season
@@ -792,33 +792,33 @@ export default function Irrigation() {
                 </span>
               )}
             </div>
+            <select
+              value={pendingCompareSeason}
+              onChange={(e) => setPendingCompareSeason(e.target.value)}
+              className="w-full bg-background border border-border-main rounded-xl px-2.5 py-1.5 text-xs font-bold text-text-main focus:outline-none focus:border-cyan-600 cursor-pointer"
+            >
+              <option value="">-- Select season to compare --</option>
+              {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
+                <option key={s.code} value={s.code}>
+                  {s.code} ({s.label || s.code})
+                </option>
+              ))}
+            </select>
             <div className="flex items-center gap-1.5">
-              <select
-                value={pendingCompareSeason}
-                onChange={(e) => setPendingCompareSeason(e.target.value)}
-                className="flex-1 bg-background border border-border-main rounded-xl px-2.5 py-1.5 text-xs font-bold text-text-main focus:outline-none focus:border-cyan-600 cursor-pointer"
-              >
-                <option value="">-- Select season to compare --</option>
-                {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
-                  <option key={s.code} value={s.code}>
-                    {s.code} ({s.label || s.code})
-                  </option>
-                ))}
-              </select>
               <button
                 type="button"
                 disabled={!pendingCompareSeason || pendingCompareSeason === appliedCompareSeason}
                 onClick={() => setAppliedCompareSeason(pendingCompareSeason)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs ${
                   pendingCompareSeason && pendingCompareSeason !== appliedCompareSeason
-                    ? 'bg-cyan-700 text-white hover:bg-cyan-800 shadow-sm cursor-pointer'
+                    ? 'bg-cyan-700 text-white hover:bg-cyan-800 cursor-pointer'
                     : isComparing
-                    ? 'bg-surface border border-border-main text-muted cursor-default'
-                    : 'bg-muted/20 text-muted cursor-not-allowed'
+                    ? 'bg-cyan-500/10 text-cyan-700 border border-cyan-500/20 cursor-default'
+                    : 'bg-muted/10 text-muted border border-border-main cursor-not-allowed opacity-60'
                 }`}
               >
                 <TrendingUp className="w-3.5 h-3.5" />
-                Compare Season
+                <span>{isComparing ? `Comparing ${appliedCompareSeason}` : 'Compare Season'}</span>
               </button>
               {isComparing && (
                 <button
@@ -828,7 +828,7 @@ export default function Irrigation() {
                     setPendingCompareSeason('');
                   }}
                   title="Clear comparison and return to single season view"
-                  className="px-2 py-1.5 rounded-xl text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
+                  className="py-1.5 px-2.5 rounded-xl text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
                 >
                   Clear
                 </button>
