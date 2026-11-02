@@ -1,4 +1,13 @@
 import rawGeoJSON from './rwandaDistricts.json';
+import { setWorkerUrl } from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+
+// Ensure worker URL is set whenever map utilities are loaded
+try {
+  setWorkerUrl(maplibreWorkerUrl);
+} catch {
+  // worker URL already initialized
+}
 
 export interface DistrictCentroid {
   lng: number;
