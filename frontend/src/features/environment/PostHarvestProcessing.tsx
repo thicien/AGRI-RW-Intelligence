@@ -175,7 +175,9 @@ export function renderRecommendedInvestment(rec: any) {
 export default function PostHarvestProcessing() {
   // Navigation & Filter States
   const [selectedSeason, setSelectedSeason] = useState<string>('2025A');
-  const [compareSeason, setCompareSeason] = useState<string>('2024A');
+  const [pendingCompareSeason, setPendingCompareSeason] = useState<string>('');
+  const [appliedCompareSeason, setAppliedCompareSeason] = useState<string>('');
+  const isComparing = Boolean(appliedCompareSeason);
   const [selectedLayer, setSelectedLayer] = useState<IntelligenceLayerType>('storage');
   const [selectedFacilityType, setSelectedFacilityType] = useState<FacilityTypeFilter>('ALL');
   const [selectedCrop, setSelectedCrop] = useState<CropFilterType>('ALL');
@@ -230,7 +232,8 @@ export default function PostHarvestProcessing() {
   const fetchWorkspaceData = async () => {
     setLoading(true);
     try {
-      const url = `${apiUrl('post-harvest')}/decision-workspace?season=${selectedSeason}&compareSeason=${compareSeason}&province=${selectedProvince}&layer=${selectedLayer}&facilityType=${selectedFacilityType}&crop=${selectedCrop}`;
+      const compareParam = appliedCompareSeason ? `&compareSeason=${appliedCompareSeason}` : '';
+      const url = `${apiUrl('post-harvest')}/decision-workspace?season=${selectedSeason}${compareParam}&province=${selectedProvince}&layer=${selectedLayer}&facilityType=${selectedFacilityType}&crop=${selectedCrop}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -256,7 +259,7 @@ export default function PostHarvestProcessing() {
 
   useEffect(() => {
     fetchWorkspaceData();
-  }, [selectedSeason, compareSeason, selectedProvince, selectedLayer, selectedFacilityType, selectedCrop]);
+  }, [selectedSeason, appliedCompareSeason, selectedProvince, selectedLayer, selectedFacilityType, selectedCrop]);
 
   // Selected District Dossier Object
   const selectedDistrictData = useMemo(() => {
@@ -981,23 +984,65 @@ export default function PostHarvestProcessing() {
             </select>
           </div>
 
-          {/* F. Comparison Season */}
+          {/* F. Comparison Season with Compare Season Button */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted flex items-center">
-              <Activity className="w-3 h-3 mr-1 text-primary" />
-              Comparison Season
-            </label>
-            <select
-              value={compareSeason}
-              onChange={(e) => setCompareSeason(e.target.value)}
-              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-agriculture focus:outline-none"
-            >
-              {availableSeasons.map(s => (
-                <option key={s.code} value={s.code}>
-                  {s.code} ({s.year} {s.name})
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-muted flex items-center">
+                <Activity className="w-3 h-3 mr-1 text-primary" />
+                Comparison Season
+              </label>
+              {isComparing ? (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                  Active vs {appliedCompareSeason}
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-muted/10 text-muted border border-border-main">
+                  Comparison Disabled
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={pendingCompareSeason}
+                onChange={(e) => setPendingCompareSeason(e.target.value)}
+                className="flex-1 bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-agriculture focus:outline-none"
+              >
+                <option value="">-- Select season to compare --</option>
+                {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
+                  <option key={s.code} value={s.code}>
+                    {s.code} ({s.year} {s.name})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                disabled={!pendingCompareSeason || pendingCompareSeason === appliedCompareSeason}
+                onClick={() => setAppliedCompareSeason(pendingCompareSeason)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                  pendingCompareSeason && pendingCompareSeason !== appliedCompareSeason
+                    ? 'bg-primary text-white hover:bg-primary-hover shadow-sm cursor-pointer'
+                    : isComparing
+                    ? 'bg-surface border border-border-main text-muted cursor-default'
+                    : 'bg-muted/20 text-muted cursor-not-allowed'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Compare Season
+              </button>
+              {isComparing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppliedCompareSeason('');
+                    setPendingCompareSeason('');
+                  }}
+                  title="Clear comparison and return to single season view"
+                  className="px-2 py-1.5 rounded-lg text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1037,11 +1082,13 @@ export default function PostHarvestProcessing() {
               </div>
               <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main pt-2">
                 <span>Total recorded capacity</span>
-                {nationalSummary?.storage_change_pct !== undefined && (
+                {isComparing && nationalSummary?.storage_change_pct !== undefined ? (
                   <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.storage_change_pct >= 0 ? 'text-agriculture' : 'text-rose-600'}`}>
                     {nationalSummary.storage_change_pct >= 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                    {Math.abs(nationalSummary.storage_change_pct)}% vs {compareSeason}
+                    {Math.abs(nationalSummary.storage_change_pct)}% vs {appliedCompareSeason}
                   </span>
+                ) : (
+                  <span className="text-[11px] text-muted">Single Season Baseline</span>
                 )}
               </div>
             </div>
@@ -1076,11 +1123,13 @@ export default function PostHarvestProcessing() {
               </div>
               <div className="mt-2 text-xs text-muted flex items-center justify-between border-t border-border-main pt-2">
                 <span>Market surplus: <strong className="text-text-main font-mono">{nationalSummary?.total_market_surplus_volume_mt?.toLocaleString() || '—'} MT</strong></span>
-                {nationalSummary?.production_change_pct !== undefined && (
+                {isComparing && nationalSummary?.production_change_pct !== undefined ? (
                   <span className={`inline-flex items-center font-semibold font-mono ${nationalSummary.production_change_pct >= 0 ? 'text-agriculture' : 'text-rose-600'}`}>
                     {nationalSummary.production_change_pct >= 0 ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                    {Math.abs(nationalSummary.production_change_pct)}% vs {compareSeason}
+                    {Math.abs(nationalSummary.production_change_pct)}% vs {appliedCompareSeason}
                   </span>
+                ) : (
+                  <span className="text-[11px] text-muted">Single Season</span>
                 )}
               </div>
             </div>

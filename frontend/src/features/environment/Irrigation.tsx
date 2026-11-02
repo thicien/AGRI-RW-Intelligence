@@ -85,7 +85,9 @@ export default function Irrigation() {
 
   // Filter States
   const [selectedSeason, setSelectedSeason] = useState<string>('2025A');
-  const [compareSeason, setCompareSeason] = useState<string>('');
+  const [pendingCompareSeason, setPendingCompareSeason] = useState<string>('');
+  const [appliedCompareSeason, setAppliedCompareSeason] = useState<string>('');
+  const isComparing = Boolean(appliedCompareSeason);
   const [activeIndicator, setActiveIndicator] = useState<IrrigationIndicatorType>('coverage_pct');
   const [selectedProvince, setSelectedProvince] = useState<string>('ALL');
   const [selectedFacilityType, setSelectedFacilityType] = useState<string>('ALL');
@@ -124,7 +126,7 @@ export default function Irrigation() {
 
       const params = new URLSearchParams();
       params.append('season', selectedSeason);
-      if (compareSeason) params.append('compareSeason', compareSeason);
+      if (appliedCompareSeason) params.append('compareSeason', appliedCompareSeason);
       if (selectedProvince) params.append('province', selectedProvince);
       if (selectedFacilityType) params.append('facilityType', selectedFacilityType);
 
@@ -150,9 +152,6 @@ export default function Irrigation() {
       if (data.meta?.availableFacilityTypes) {
         setAvailableFacilityTypes(data.meta.availableFacilityTypes);
       }
-      if (data.meta?.compareSeason && !compareSeason) {
-        setCompareSeason(data.meta.compareSeason);
-      }
 
       // Default selected district if not set
       if (districtList.length > 0) {
@@ -172,7 +171,7 @@ export default function Irrigation() {
 
   useEffect(() => {
     fetchWorkspaceData();
-  }, [selectedSeason, compareSeason]);
+  }, [selectedSeason, appliedCompareSeason, selectedProvince, selectedFacilityType]);
 
   // Selected district object
   const selectedDistrict = useMemo(() => {
@@ -623,14 +622,15 @@ export default function Irrigation() {
 
   // Export Filtered Table to CSV
   const handleExportCSV = () => {
-    const headers = ['District', 'Province', `Irrigated Area (${selectedSeason}) ha`, `Coverage %`, `Previous Irrigated (${compareSeason}) ha`, 'Change %', 'Documented Schemes Count', 'Documented Command ha', 'Water Deficit mm', 'Feasibility Tier'];
+    const compareLabel = isComparing ? appliedCompareSeason : 'Baseline';
+    const headers = ['District', 'Province', `Irrigated Area (${selectedSeason}) ha`, `Coverage %`, `Previous Irrigated (${compareLabel}) ha`, 'Change %', 'Documented Schemes Count', 'Documented Command ha', 'Water Deficit mm', 'Feasibility Tier'];
     const rows = filteredRankings.map(d => [
       d.district_name,
       d.province_name,
       d.area_irrigated_ha !== null ? d.area_irrigated_ha : 'N/A',
       d.coverage_pct !== null ? `${d.coverage_pct}%` : 'N/A',
-      d.prev_irrigated_ha !== null ? d.prev_irrigated_ha : 'N/A',
-      d.irrigated_change_pct !== null ? `${d.irrigated_change_pct}%` : 'N/A',
+      isComparing && d.prev_irrigated_ha !== null ? d.prev_irrigated_ha : 'N/A',
+      isComparing && d.irrigated_change_pct !== null ? `${d.irrigated_change_pct}%` : 'N/A',
       d.facility_count,
       d.documented_command_ha,
       d.water_deficit_mm,
@@ -776,22 +776,64 @@ export default function Irrigation() {
             </select>
           </div>
 
-          {/* Season Comparison Selector */}
+          {/* Season Comparison Selector with Compare Season Button */}
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-emerald-600" /> Reference Season
-            </label>
-            <select
-              value={compareSeason}
-              onChange={(e) => setCompareSeason(e.target.value)}
-              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-cyan-600 cursor-pointer"
-            >
-              {availableSeasons.map(s => (
-                <option key={s.code} value={s.code}>
-                  Compare with {s.code}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-cyan-600" /> Comparison Season
+              </label>
+              {isComparing ? (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-700 border border-cyan-500/20">
+                  Active vs {appliedCompareSeason}
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-muted/10 text-muted border border-border-main">
+                  Comparison Disabled
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={pendingCompareSeason}
+                onChange={(e) => setPendingCompareSeason(e.target.value)}
+                className="flex-1 bg-background border border-border-main rounded-xl px-2.5 py-1.5 text-xs font-bold text-text-main focus:outline-none focus:border-cyan-600 cursor-pointer"
+              >
+                <option value="">-- Select season to compare --</option>
+                {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
+                  <option key={s.code} value={s.code}>
+                    {s.code} ({s.label || s.code})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                disabled={!pendingCompareSeason || pendingCompareSeason === appliedCompareSeason}
+                onClick={() => setAppliedCompareSeason(pendingCompareSeason)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                  pendingCompareSeason && pendingCompareSeason !== appliedCompareSeason
+                    ? 'bg-cyan-700 text-white hover:bg-cyan-800 shadow-sm cursor-pointer'
+                    : isComparing
+                    ? 'bg-surface border border-border-main text-muted cursor-default'
+                    : 'bg-muted/20 text-muted cursor-not-allowed'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Compare Season
+              </button>
+              {isComparing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppliedCompareSeason('');
+                    setPendingCompareSeason('');
+                  }}
+                  title="Clear comparison and return to single season view"
+                  className="px-2 py-1.5 rounded-xl text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
         </div>
@@ -811,16 +853,22 @@ export default function Irrigation() {
               {Math.round(nationalSummary.total_irrigated_ha).toLocaleString()} <span className="text-sm font-bold text-muted">ha</span>
             </div>
             <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
-              <span className="text-muted">vs {nationalSummary.compareSeason}:</span>
-              {nationalSummary.irrigated_change_pct !== null ? (
-                <span className={`font-bold flex items-center gap-0.5 ${
-                  nationalSummary.irrigated_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
-                }`}>
-                  {nationalSummary.irrigated_change_pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  {nationalSummary.irrigated_change_pct > 0 ? '+' : ''}{nationalSummary.irrigated_change_pct}%
-                </span>
+              {isComparing ? (
+                <>
+                  <span className="text-muted">vs {appliedCompareSeason}:</span>
+                  {nationalSummary.irrigated_change_pct !== null ? (
+                    <span className={`font-bold flex items-center gap-0.5 ${
+                      nationalSummary.irrigated_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
+                    }`}>
+                      {nationalSummary.irrigated_change_pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nationalSummary.irrigated_change_pct > 0 ? '+' : ''}{nationalSummary.irrigated_change_pct}%
+                    </span>
+                  ) : (
+                    <span className="text-muted">No comparison data</span>
+                  )}
+                </>
               ) : (
-                <span className="text-muted">No comparison</span>
+                <span className="text-muted text-[11px]">Comparison disabled · Single season view</span>
               )}
             </div>
           </div>
@@ -1066,13 +1114,17 @@ export default function Irrigation() {
                     {/* Season-over-Season Delta */}
                     <div className="bg-background rounded-xl p-3 border border-border-main">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-text-main">Seasonal Trajectory ({compareSeason} → {selectedSeason})</span>
-                        {selectedDistrict.irrigated_change_pct !== null ? (
+                        <span className="font-bold text-text-main">
+                          {isComparing ? `Seasonal Trajectory (${appliedCompareSeason} → ${selectedSeason})` : `Seasonal Performance (${selectedSeason})`}
+                        </span>
+                        {isComparing && selectedDistrict.irrigated_change_pct !== null ? (
                           <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold flex items-center gap-1 ${
                             selectedDistrict.irrigated_change_pct >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                           }`}>
                             {selectedDistrict.irrigated_change_pct >= 0 ? '+' : ''}{selectedDistrict.irrigated_change_pct}%
                           </span>
+                        ) : !isComparing ? (
+                          <span className="text-[10px] text-muted">Single Season</span>
                         ) : (
                           <span className="text-[10px] text-muted">No comparison</span>
                         )}
@@ -1154,15 +1206,15 @@ export default function Irrigation() {
                         <span className="font-bold">{selectedDistrict.area_irrigated_ha ? `${Math.round(selectedDistrict.area_irrigated_ha).toLocaleString()} ha` : 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted">Previous ({compareSeason}):</span>
-                        <span className="font-bold">{selectedDistrict.prev_irrigated_ha ? `${Math.round(selectedDistrict.prev_irrigated_ha).toLocaleString()} ha` : 'N/A'}</span>
+                        <span className="text-muted">Previous ({isComparing ? appliedCompareSeason : 'Baseline'}):</span>
+                        <span className="font-bold">{isComparing && selectedDistrict.prev_irrigated_ha ? `${Math.round(selectedDistrict.prev_irrigated_ha).toLocaleString()} ha` : '—'}</span>
                       </div>
                       <div className="flex justify-between pt-1 border-t border-border-main">
                         <span className="text-muted">Net Change:</span>
                         <span className={`font-bold ${
                           (selectedDistrict.irrigated_change_pct ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
                         }`}>
-                          {selectedDistrict.irrigated_change_pct !== null ? `${selectedDistrict.irrigated_change_pct > 0 ? '+' : ''}${selectedDistrict.irrigated_change_pct}%` : 'N/A'}
+                          {isComparing && selectedDistrict.irrigated_change_pct !== null ? `${selectedDistrict.irrigated_change_pct > 0 ? '+' : ''}${selectedDistrict.irrigated_change_pct}%` : '—'}
                         </span>
                       </div>
                     </div>
@@ -1401,7 +1453,9 @@ export default function Irrigation() {
               </h2>
             </div>
             <p className="text-xs text-muted mt-0.5">
-              Ranked district statistics for {selectedSeason} with seasonal deltas vs {compareSeason}. Click a row to inspect district intelligence.
+              {isComparing 
+                ? `Ranked district statistics for ${selectedSeason} with seasonal deltas vs ${appliedCompareSeason}. Click a row to inspect district intelligence.`
+                : `Ranked district statistics for ${selectedSeason}. Click a row to inspect district intelligence.`}
             </p>
           </div>
 
@@ -1452,7 +1506,7 @@ export default function Irrigation() {
                 <th className="p-3">Province</th>
                 <th className="p-3 text-right">Irrigated Area</th>
                 <th className="p-3 text-right">Coverage %</th>
-                <th className="p-3 text-right">vs {compareSeason}</th>
+                <th className="p-3 text-right">{isComparing ? `vs ${appliedCompareSeason}` : 'vs Baseline'}</th>
                 <th className="p-3 text-center">Documented Assets</th>
                 <th className="p-3">Feasibility Tier</th>
               </tr>
@@ -1484,7 +1538,7 @@ export default function Irrigation() {
                       {d.coverage_pct !== null ? `${d.coverage_pct}%` : '—'}
                     </td>
                     <td className="p-3 text-right">
-                      {d.irrigated_change_pct !== null ? (
+                      {isComparing && d.irrigated_change_pct !== null ? (
                         <span className={`font-bold flex items-center justify-end gap-0.5 ${
                           d.irrigated_change_pct >= 0 ? 'text-emerald-600' : 'text-rose-600'
                         }`}>
@@ -1492,7 +1546,7 @@ export default function Irrigation() {
                           {d.irrigated_change_pct > 0 ? '+' : ''}{d.irrigated_change_pct}%
                         </span>
                       ) : (
-                        <span className="text-muted">N/A</span>
+                        <span className="text-muted">—</span>
                       )}
                     </td>
                     <td className="p-3 text-center">

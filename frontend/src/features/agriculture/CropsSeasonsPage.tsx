@@ -58,13 +58,16 @@ export default function CropsSeasonsPage() {
   const [selectedCrop, setSelectedCrop] = useState<string>('All crops');
   const [activeIndicator, setActiveIndicator] = useState<MapIndicatorType>('production_tonnes');
   const [selectedProvince, setSelectedProvince] = useState<string>('ALL');
-  const [compareSeason, setCompareSeason] = useState<string>('');
+  const [pendingCompareSeason, setPendingCompareSeason] = useState<string>('');
+  const [appliedCompareSeason, setAppliedCompareSeason] = useState<string>('');
+  const isComparing = Boolean(appliedCompareSeason);
   const [searchDistrict, setSearchDistrict] = useState<string>('');
   const [tableSearch, setTableSearch] = useState<string>('');
+  const [totalCropsSearch, setTotalCropsSearch] = useState<string>('');
 
   // Selected District for Side Panel
   const [selectedDistrictName, setSelectedDistrictName] = useState<string>('Nyagatare');
-  const [districtTab, setDistrictTab] = useState<'OVERVIEW' | 'CROPS' | 'TRENDS' | 'QUALITY'>('OVERVIEW');
+  const [districtTab, setDistrictTab] = useState<'OVERVIEW' | 'CROPS' | 'TRENDS' | 'TOTAL_CROPS'>('OVERVIEW');
 
   // Facilities state & toggle
   const [facilities, setFacilities] = useState<any[]>([]);
@@ -98,7 +101,7 @@ export default function CropsSeasonsPage() {
       const params = new URLSearchParams();
       params.append('season', selectedSeason);
       if (selectedCrop) params.append('crop', selectedCrop);
-      if (compareSeason) params.append('compareSeason', compareSeason);
+      if (appliedCompareSeason) params.append('compareSeason', appliedCompareSeason);
       if (selectedProvince) params.append('province', selectedProvince);
 
       const url = apiUrl(`crop-statistics/decision-workspace?${params.toString()}`);
@@ -122,9 +125,6 @@ export default function CropsSeasonsPage() {
       if (data.meta?.availableCrops) {
         setAvailableCrops(data.meta.availableCrops);
       }
-      if (data.meta?.compareSeason && !compareSeason) {
-        setCompareSeason(data.meta.compareSeason);
-      }
 
       // If current selected district is not set or not in list, pick the highest producing
       if (districtList.length > 0) {
@@ -144,7 +144,7 @@ export default function CropsSeasonsPage() {
 
   useEffect(() => {
     fetchDecisionWorkspace();
-  }, [selectedSeason, selectedCrop, compareSeason]);
+  }, [selectedSeason, selectedCrop, appliedCompareSeason]);
 
   // Selected district object
   const selectedDistrict = useMemo(() => {
@@ -546,14 +546,15 @@ export default function CropsSeasonsPage() {
 
   // Export Filtered Table to CSV
   const handleExportCSV = () => {
-    const headers = ['Crop Name', 'Category', `Selected Season (${selectedSeason}) Production MT`, `Compare Season (${compareSeason}) Production MT`, 'Change MT', 'Change %', 'Yield t/ha', 'Cultivated ha', 'National Share %', 'Leading District'];
+    const compareLabel = isComparing ? appliedCompareSeason : 'Baseline';
+    const headers = ['Crop Name', 'Category', `Selected Season (${selectedSeason}) Production MT`, `Compare Season (${compareLabel}) Production MT`, 'Change MT', 'Change %', 'Yield t/ha', 'Cultivated ha', 'National Share %', 'Leading District'];
     const rows = sortedTableData.map(c => [
       c.crop_name,
       c.category,
       c.current_production_tonnes,
-      c.prev_production_tonnes !== null ? c.prev_production_tonnes : 'N/A',
-      c.change_tonnes !== null ? c.change_tonnes : 'N/A',
-      c.change_pct !== null ? `${c.change_pct}%` : 'N/A',
+      isComparing && c.prev_production_tonnes !== null ? c.prev_production_tonnes : 'N/A',
+      isComparing && c.change_tonnes !== null ? c.change_tonnes : 'N/A',
+      isComparing && c.change_pct !== null ? `${c.change_pct}%` : 'N/A',
       c.current_yield_t_ha,
       c.current_area_ha,
       `${c.national_share_pct}%`,
@@ -566,7 +567,7 @@ export default function CropsSeasonsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Rwanda_Crops_${selectedCrop}_${selectedSeason}_Comparison.csv`);
+    link.setAttribute('download', isComparing ? `Rwanda_Crops_${selectedCrop}_${selectedSeason}_vs_${appliedCompareSeason}.csv` : `Rwanda_Crops_${selectedCrop}_${selectedSeason}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -698,22 +699,64 @@ export default function CropsSeasonsPage() {
             </select>
           </div>
 
-          {/* Season Comparison Selector */}
+          {/* Season Comparison Selector with Compare Season Button */}
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-amber-600" /> Comparison Season
-            </label>
-            <select
-              value={compareSeason}
-              onChange={(e) => setCompareSeason(e.target.value)}
-              className="w-full bg-background border border-border-main rounded-xl px-3 py-2 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
-            >
-              {availableSeasons.map(s => (
-                <option key={s.code} value={s.code}>
-                  Compare with {s.code}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-amber-600" /> Comparison Season
+              </label>
+              {isComparing ? (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                  Active vs {appliedCompareSeason}
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-muted/10 text-muted border border-border-main">
+                  Comparison Disabled
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={pendingCompareSeason}
+                onChange={(e) => setPendingCompareSeason(e.target.value)}
+                className="flex-1 bg-background border border-border-main rounded-xl px-2.5 py-1.5 text-xs font-bold text-text-main focus:outline-none focus:border-primary cursor-pointer"
+              >
+                <option value="">-- Select season to compare --</option>
+                {availableSeasons.filter(s => s.code !== selectedSeason).map(s => (
+                  <option key={s.code} value={s.code}>
+                    {s.code} ({s.label || s.code})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                disabled={!pendingCompareSeason || pendingCompareSeason === appliedCompareSeason}
+                onClick={() => setAppliedCompareSeason(pendingCompareSeason)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                  pendingCompareSeason && pendingCompareSeason !== appliedCompareSeason
+                    ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm cursor-pointer'
+                    : isComparing
+                    ? 'bg-surface border border-border-main text-muted cursor-default'
+                    : 'bg-muted/20 text-muted cursor-not-allowed'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Compare Season
+              </button>
+              {isComparing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppliedCompareSeason('');
+                    setPendingCompareSeason('');
+                  }}
+                  title="Clear comparison and return to single season view"
+                  className="px-2 py-1.5 rounded-xl text-xs font-bold bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shrink-0 cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
         </div>
@@ -733,16 +776,22 @@ export default function CropsSeasonsPage() {
               {(nationalSummary.total_production_tonnes).toLocaleString()} <span className="text-sm font-bold text-muted">MT</span>
             </div>
             <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border-main">
-              <span className="text-muted">vs {nationalSummary.compareSeason}:</span>
-              {nationalSummary.production_change_pct !== null ? (
-                <span className={`font-bold flex items-center gap-0.5 ${
-                  nationalSummary.production_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
-                }`}>
-                  {nationalSummary.production_change_pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  {nationalSummary.production_change_pct > 0 ? '+' : ''}{nationalSummary.production_change_pct}%
-                </span>
+              {isComparing ? (
+                <>
+                  <span className="text-muted">vs {appliedCompareSeason}:</span>
+                  {nationalSummary.production_change_pct !== null ? (
+                    <span className={`font-bold flex items-center gap-0.5 ${
+                      nationalSummary.production_change_pct >= 0 ? 'text-agriculture' : 'text-danger'
+                    }`}>
+                      {nationalSummary.production_change_pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nationalSummary.production_change_pct > 0 ? '+' : ''}{nationalSummary.production_change_pct}%
+                    </span>
+                  ) : (
+                    <span className="text-muted">No comparison data</span>
+                  )}
+                </>
               ) : (
-                <span className="text-muted">No comparison</span>
+                <span className="text-muted text-[11px]">Comparison disabled · Single season view</span>
               )}
             </div>
           </div>
@@ -1022,14 +1071,18 @@ export default function CropsSeasonsPage() {
                 </button>
 
                 <button
-                  onClick={() => setDistrictTab('QUALITY')}
-                  className={`py-2 px-3 border-b-2 transition-colors ${
-                    districtTab === 'QUALITY'
+                  onClick={() => setDistrictTab('TOTAL_CROPS')}
+                  className={`py-2 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                    districtTab === 'TOTAL_CROPS'
                       ? 'border-primary text-primary'
                       : 'border-transparent text-muted hover:text-text-main'
                   }`}
                 >
-                  Data Quality
+                  <Sprout className="w-3.5 h-3.5" />
+                  <span>Total Crops</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-primary/10 text-primary font-bold">
+                    {cropComparisonTable.length}
+                  </span>
                 </button>
               </div>
 
@@ -1042,7 +1095,7 @@ export default function CropsSeasonsPage() {
                     <div className="bg-background/50 p-3 rounded-xl border border-border-main space-y-2">
                       <div className="font-bold text-text-main flex items-center justify-between">
                         <span>Seasonal Production Trajectory</span>
-                        {selectedDistrict.production_change_pct !== null && (
+                        {isComparing && selectedDistrict.production_change_pct !== null && (
                           <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                             selectedDistrict.production_change_pct >= 0 ? 'bg-agriculture-soft text-agriculture' : 'bg-red-50 text-danger'
                           }`}>
@@ -1053,8 +1106,15 @@ export default function CropsSeasonsPage() {
                       <p className="text-muted leading-relaxed text-[11px]">
                         In {selectedSeason}, {selectedDistrict.district_name} produced{' '}
                         <b>{selectedDistrict.production_tonnes?.toLocaleString() || 0} tonnes</b> of {selectedCrop}, accounting for{' '}
-                        <b className="text-primary">{selectedDistrict.national_share_pct}%</b> of national output. Compared to {compareSeason}, production changed by{' '}
-                        <b>{selectedDistrict.production_change_pct !== null ? `${selectedDistrict.production_change_pct}%` : 'N/A'}</b>.
+                        <b className="text-primary">{selectedDistrict.national_share_pct}%</b> of national output.
+                        {isComparing ? (
+                          <>
+                            {' '}Compared to {appliedCompareSeason}, production changed by{' '}
+                            <b>{selectedDistrict.production_change_pct !== null ? `${selectedDistrict.production_change_pct}%` : 'N/A'}</b>.
+                          </>
+                        ) : (
+                          <> (Single season view · Select a season above to compare)</>
+                        )}
                       </p>
                     </div>
 
@@ -1125,32 +1185,103 @@ export default function CropsSeasonsPage() {
                   </div>
                 )}
 
-                {/* TAB 4: DATA QUALITY */}
-                {districtTab === 'QUALITY' && (
+                {/* TAB 4: TOTAL CROPS IN MONITORED SEASON */}
+                {districtTab === 'TOTAL_CROPS' && (
                   <div className="space-y-3">
-                    <div className="p-3 bg-primary-soft/50 rounded-xl border border-primary/20 space-y-1.5 text-[11px] text-text-main">
-                      <div className="font-bold text-primary flex items-center gap-1">
-                        <Database className="w-3.5 h-3.5" />
-                        NISR Data Provenance & Lineage
+                    {/* Header Summary */}
+                    <div className="p-3 bg-agriculture-soft/40 rounded-xl border border-agriculture/30 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="font-bold text-agriculture flex items-center gap-1.5">
+                          <Sprout className="w-4 h-4" />
+                          <span>All Crops Cultivated in {selectedSeason}</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-agriculture text-white">
+                          {cropComparisonTable.length} Crops
+                        </span>
                       </div>
-                      <p className="text-muted leading-relaxed">
-                        Data is ingested from the National Institute of Statistics of Rwanda (NISR) Seasonal Agricultural Surveys (SAS). All biological yields are validated using planted-to-harvested ratio rules.
+                      <div className="flex items-center justify-between text-[11px] text-muted">
+                        <span>Total Verified Harvest:</span>
+                        <b className="text-text-main font-mono">
+                          {nationalSummary?.total_production_tonnes ? `${Math.round(nationalSummary.total_production_tonnes).toLocaleString()} MT` : '—'}
+                        </b>
+                      </div>
+                      <p className="text-[10px] text-muted">
+                        All crops cultivated nationally during the {selectedSeason} agricultural cycle. Click any crop to filter map view.
                       </p>
                     </div>
 
-                    <div className="space-y-1.5 text-[11px]">
-                      <div className="flex justify-between py-1 border-b border-border-main">
-                        <span className="text-muted">Reporting Period:</span>
-                        <span className="font-bold">{selectedSeason} Agricultural Cycle</span>
-                      </div>
-                      <div className="flex justify-between py-1 border-b border-border-main">
-                        <span className="text-muted">Geographic Resolution:</span>
-                        <span className="font-bold">District Level (30 Administrative Units)</span>
-                      </div>
-                      <div className="flex justify-between py-1 border-b border-border-main">
-                        <span className="text-muted">Survey Design:</span>
-                        <span className="font-bold">Two-stage cluster probability sampling</span>
-                      </div>
+                    {/* Quick Search */}
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 text-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={totalCropsSearch}
+                        onChange={(e) => setTotalCropsSearch(e.target.value)}
+                        placeholder="Search cultivated crops..."
+                        className="w-full pl-8 pr-7 py-1.5 bg-background border border-border-main rounded-lg text-xs text-text-main focus:outline-none focus:border-agriculture"
+                      />
+                      {totalCropsSearch && (
+                        <button
+                          onClick={() => setTotalCropsSearch('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-text-main"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Crops List with Production */}
+                    <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+                      {cropComparisonTable
+                        .filter((c: any) => {
+                          if (!totalCropsSearch.trim()) return true;
+                          const q = totalCropsSearch.toLowerCase();
+                          return c.crop_name.toLowerCase().includes(q) || (c.category && c.category.toLowerCase().includes(q));
+                        })
+                        .map((c: any, idx: number) => {
+                          const isCurrentCrop = selectedCrop.toLowerCase() === c.crop_name.toLowerCase();
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedCrop(c.crop_name)}
+                              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                isCurrentCrop
+                                  ? 'bg-agriculture-soft/30 border-agriculture shadow-xs'
+                                  : 'bg-surface hover:bg-background/80 border-border-main'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="w-2 h-2 rounded-full bg-agriculture shrink-0"></span>
+                                  <span className="font-bold text-text-main truncate text-xs">{c.crop_name}</span>
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-muted/10 text-muted border border-border-main shrink-0">
+                                    {c.category}
+                                  </span>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="font-black text-agriculture text-xs">
+                                    {c.current_production_tonnes ? `${Number(c.current_production_tonnes).toLocaleString()} MT` : '0 MT'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="mt-1.5 grid grid-cols-2 gap-1 text-[10px] text-muted border-t border-border-main/50 pt-1.5">
+                                <div>
+                                  Yield: <strong className="text-text-main">{c.current_yield_t_ha} t/ha</strong>
+                                </div>
+                                <div>
+                                  Area: <strong className="text-text-main">{c.current_area_ha ? Number(c.current_area_ha).toLocaleString() : 0} ha</strong>
+                                </div>
+                                <div>
+                                  Share: <strong className="text-primary">{c.national_share_pct}%</strong>
+                                </div>
+                                <div className="truncate" title={c.leading_district ? `Top: ${c.leading_district.name}` : undefined}>
+                                  Top: <strong className="text-text-main">{c.leading_district?.name || '—'}</strong>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
@@ -1252,7 +1383,11 @@ export default function CropsSeasonsPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted">No crops experienced an increase greater than 15% between {compareSeason} and {selectedSeason}.</p>
+              <p className="text-xs text-muted">
+                {isComparing 
+                  ? `No crops experienced an increase greater than 15% between ${appliedCompareSeason} and ${selectedSeason}.` 
+                  : `Comparison disabled. Click "Compare Season" above to analyze expanding crops.`}
+              </p>
             )}
           </div>
 
@@ -1271,7 +1406,11 @@ export default function CropsSeasonsPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted">No crops experienced a decline greater than 15% between {compareSeason} and {selectedSeason}.</p>
+              <p className="text-xs text-muted">
+                {isComparing 
+                  ? `No crops experienced a decline greater than 15% between ${appliedCompareSeason} and ${selectedSeason}.` 
+                  : `Comparison disabled. Click "Compare Season" above to analyze declining crops.`}
+              </p>
             )}
           </div>
 
@@ -1290,7 +1429,11 @@ export default function CropsSeasonsPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted">No high-volume crops maintained a stable delta between {compareSeason} and {selectedSeason}.</p>
+              <p className="text-xs text-muted">
+                {isComparing 
+                  ? `No high-volume crops maintained a stable delta between ${appliedCompareSeason} and ${selectedSeason}.` 
+                  : `Comparison disabled. Click "Compare Season" above to view stability benchmarks.`}
+              </p>
             )}
           </div>
 
@@ -1303,10 +1446,14 @@ export default function CropsSeasonsPage() {
             <div>
               <h4 className="text-sm font-extrabold text-text-main uppercase tracking-wider flex items-center gap-2">
                 <FileSpreadsheet className="w-4 h-4 text-primary" />
-                Seasonal Crop Comparison Table ({selectedSeason} vs {compareSeason})
+                {isComparing 
+                  ? `Seasonal Crop Comparison Table (${selectedSeason} vs ${appliedCompareSeason})`
+                  : `Seasonal Crop Production Table (${selectedSeason})`}
               </h4>
               <p className="text-xs text-muted mt-0.5">
-                Displays surveyed output, percentage change, and leading production districts for all monitored crops.
+                {isComparing
+                  ? `Displays surveyed output, percentage change, and leading production districts comparing ${selectedSeason} against ${appliedCompareSeason}.`
+                  : `Displays surveyed agricultural output, yield, and leading production districts across Rwanda for ${selectedSeason}.`}
               </p>
             </div>
 
@@ -1339,7 +1486,7 @@ export default function CropsSeasonsPage() {
                   <th className="p-3">Crop Name</th>
                   <th className="p-3">Category</th>
                   <th className="p-3 text-right">{selectedSeason} Output (MT)</th>
-                  <th className="p-3 text-right">{compareSeason} Output (MT)</th>
+                  <th className="p-3 text-right">{isComparing ? `${appliedCompareSeason} Output (MT)` : 'Compare Season (MT)'}</th>
                   <th className="p-3 text-right">Change (MT)</th>
                   <th className="p-3 text-right">Change (%)</th>
                   <th className="p-3 text-right">Yield (t/ha)</th>
@@ -1360,10 +1507,10 @@ export default function CropsSeasonsPage() {
                       {c.current_production_tonnes.toLocaleString()}
                     </td>
                     <td className="p-3 text-right text-muted">
-                      {c.prev_production_tonnes !== null ? c.prev_production_tonnes.toLocaleString() : '—'}
+                      {isComparing && c.prev_production_tonnes !== null ? c.prev_production_tonnes.toLocaleString() : '—'}
                     </td>
                     <td className="p-3 text-right font-medium">
-                      {c.change_tonnes !== null ? (
+                      {isComparing && c.change_tonnes !== null ? (
                         <span className={c.change_tonnes >= 0 ? 'text-agriculture font-bold' : 'text-danger font-bold'}>
                           {c.change_tonnes > 0 ? `+${c.change_tonnes.toLocaleString()}` : c.change_tonnes.toLocaleString()}
                         </span>
@@ -1372,7 +1519,7 @@ export default function CropsSeasonsPage() {
                       )}
                     </td>
                     <td className="p-3 text-right">
-                      {c.change_pct !== null ? (
+                      {isComparing && c.change_pct !== null ? (
                         <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                           c.change_pct >= 5.0 ? 'bg-agriculture-soft text-agriculture' :
                           c.change_pct <= -5.0 ? 'bg-red-50 text-danger' :
@@ -1381,7 +1528,7 @@ export default function CropsSeasonsPage() {
                           {c.change_pct > 0 ? `+${c.change_pct}%` : `${c.change_pct}%`}
                         </span>
                       ) : (
-                        <span className="text-muted text-[10px]">No comparison</span>
+                        <span className="text-muted text-[10px]">—</span>
                       )}
                     </td>
                     <td className="p-3 text-right text-text-main font-semibold">
