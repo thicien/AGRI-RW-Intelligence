@@ -5,6 +5,7 @@ import {
   RWANDA_DISTRICTS_GEOJSON, 
   DISTRICT_CENTROIDS, 
   enrichRwandaGeoJSON, 
+  BASEMAP_RASTER_TILES,
   type DistrictChoroplethData,
   type PerformanceTier 
 } from '../../data/rwandaMapData';
@@ -258,12 +259,136 @@ export default function CropsSeasonsPage() {
     return { mapData, min, p33, p66, max };
   }, [districts, indicatorConfig, facilities]);
 
+  // Synchronized refs for fresh map callbacks
+  const choroplethDataMapRef = useRef(choroplethDataMap);
+  const indicatorConfigRef = useRef(indicatorConfig);
+  const selectedCropRef = useRef(selectedCrop);
+  const selectedSeasonRef = useRef(selectedSeason);
+
+  // Helper to ensure district layers and interactivity are added reliably
+  const setupDistrictLayers = () => {
+    if (!map.current) return;
+    if (!map.current.isStyleLoaded()) return;
+    if (map.current.getSource('rwanda-districts')) return;
+
+    try {
+      const activeDataMap = choroplethDataMapRef.current?.mapData || choroplethDataMap.mapData || {};
+      const initialEnriched = enrichRwandaGeoJSON(activeDataMap, tierColors.NO_DATA);
+
+      map.current.addSource('rwanda-districts', {
+        type: 'geojson',
+        data: initialEnriched,
+      });
+
+      // District Fill Layer
+      map.current.addLayer({
+        id: 'district-fill',
+        type: 'fill',
+        source: 'rwanda-districts',
+        paint: {
+          'fill-color': ['coalesce', ['get', 'choroplethColor'], '#BBF7D0'],
+          'fill-opacity': 0.82,
+        },
+      });
+
+      // District Boundary Lines - Distinct dark borders for clear visibility
+      map.current.addLayer({
+        id: 'district-borders',
+        type: 'line',
+        source: 'rwanda-districts',
+        paint: {
+          'line-color': '#0F172A',
+          'line-width': 1.6,
+          'line-opacity': 0.85,
+        },
+      });
+
+      // Selected District Highlight Border
+      map.current.addLayer({
+        id: 'district-selected-border',
+        type: 'line',
+        source: 'rwanda-districts',
+        filter: ['==', 'shapeName', selectedDistrictNameRef.current || 'Nyagatare'],
+        paint: {
+          'line-color': '#0D47A1',
+          'line-width': 3.5,
+          'line-opacity': 1.0,
+        },
+      });
+
+      // Fit map bounds to Rwanda territory
+      map.current.fitBounds([
+        [28.86, -2.84],
+        [30.90, -1.05]
+      ], { padding: 25 });
+
+      // Hover interaction
+      map.current.on('mousemove', 'district-fill', (e) => {
+        if (!map.current || !e.features || e.features.length === 0) return;
+        map.current.getCanvas().style.cursor = 'pointer';
+
+        const props = e.features[0].properties;
+        const name = props?.districtName || props?.shapeName;
+        const tier = props?.tierLabel || 'Recorded';
+        const val = props?.formattedValue || '';
+        const rank = props?.rank ? `#${props.rank} of 30` : '';
+
+        if (!hoverPopupRef.current) {
+          hoverPopupRef.current = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            offset: 12,
+          });
+        }
+
+        hoverPopupRef.current
+          .setLngLat(e.lngLat)
+          .setHTML(`
+            <div style="font-family: inherit; padding: 6px 10px; min-width: 175px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${name}</span>
+                <span style="font-size: 10px; font-weight: 700; color: #15803D; text-transform: uppercase;">${tier}</span>
+              </div>
+              <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">
+                ${selectedCropRef.current} · ${indicatorConfigRef.current?.label || 'Metric'}:
+              </div>
+              <div style="font-size: 16px; font-weight: 800; color: #15803D; margin-bottom: 6px;">
+                ${val}
+              </div>
+              ${rank ? `<div style="font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">National Rank: <b>${rank}</b></div>` : ''}
+            </div>
+          `)
+          .addTo(map.current);
+      });
+
+      map.current.on('mouseleave', 'district-fill', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+        if (hoverPopupRef.current) hoverPopupRef.current.remove();
+      });
+
+      // Click on district polygon -> Highlights and updates dossier
+      map.current.on('click', 'district-fill', (e) => {
+        if (!e.features || e.features.length === 0) return;
+        const shapeName = e.features[0].properties?.shapeName || e.features[0].properties?.districtName;
+        if (shapeName) {
+          setSelectedDistrictName(shapeName);
+          selectedDistrictNameRef.current = shapeName;
+          const coords = DISTRICT_CENTROIDS[shapeName];
+          if (coords && map.current) {
+            map.current.flyTo({ center: coords, zoom: 9.8, duration: 1000 });
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Error initializing Rwanda district map layers:', err);
+    }
+  };
+
   // 2. Initialize MapLibre GL JS
   useEffect(() => {
     if (!mapContainer.current) return;
     if (map.current) return;
 
-    // Use OpenStreetMap standard tiles for guaranteed reliability across all environments
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -271,11 +396,9 @@ export default function CropsSeasonsPage() {
         sources: {
           'osm-tiles': {
             type: 'raster',
-            tiles: [
-              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-            ],
+            tiles: BASEMAP_RASTER_TILES,
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors, NISR Rwanda',
+            attribution: '© OpenStreetMap contributors, CARTO, NISR Rwanda',
           },
         },
         layers: [
@@ -297,122 +420,12 @@ export default function CropsSeasonsPage() {
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', () => {
-      if (!map.current) return;
-
-      try {
-        const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, tierColors.NO_DATA);
-
-        if (!map.current.getSource('rwanda-districts')) {
-          map.current.addSource('rwanda-districts', {
-            type: 'geojson',
-            data: initialEnriched,
-          });
-
-          // District Fill Layer
-          map.current.addLayer({
-            id: 'district-fill',
-            type: 'fill',
-            source: 'rwanda-districts',
-            paint: {
-              'fill-color': ['coalesce', ['get', 'choroplethColor'], '#BBF7D0'],
-              'fill-opacity': 0.82,
-            },
-          });
-
-          // District Boundary Lines - Distinct dark borders for clear visibility
-          map.current.addLayer({
-            id: 'district-borders',
-            type: 'line',
-            source: 'rwanda-districts',
-            paint: {
-              'line-color': '#0F172A',
-              'line-width': 1.6,
-              'line-opacity': 0.85,
-            },
-          });
-
-          // Selected District Highlight Border
-          map.current.addLayer({
-            id: 'district-selected-border',
-            type: 'line',
-            source: 'rwanda-districts',
-            filter: ['==', 'shapeName', selectedDistrictNameRef.current || ''],
-            paint: {
-              'line-color': '#0D47A1',
-              'line-width': 3.5,
-              'line-opacity': 1.0,
-            },
-          });
-
-          // Fit map bounds to Rwanda territory
-          map.current.fitBounds([
-            [28.86, -2.84],
-            [30.90, -1.05]
-          ], { padding: 25 });
-
-          // Hover interaction
-          map.current.on('mousemove', 'district-fill', (e) => {
-            if (!map.current || !e.features || e.features.length === 0) return;
-            map.current.getCanvas().style.cursor = 'pointer';
-
-            const props = e.features[0].properties;
-            const name = props?.districtName || props?.shapeName;
-            const tier = props?.tierLabel || 'Recorded';
-            const val = props?.formattedValue || '';
-            const rank = props?.rank ? `#${props.rank} of 30` : '';
-
-            if (!hoverPopupRef.current) {
-              hoverPopupRef.current = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                offset: 12,
-              });
-            }
-
-            hoverPopupRef.current
-              .setLngLat(e.lngLat)
-              .setHTML(`
-                <div style="font-family: inherit; padding: 6px 10px; min-width: 175px;">
-                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${name}</span>
-                    <span style="font-size: 10px; font-weight: 700; color: #15803D; text-transform: uppercase;">${tier}</span>
-                  </div>
-                  <div style="font-size: 11px; color: #475569; margin-bottom: 2px;">
-                    ${selectedCrop} · ${indicatorConfig.label}:
-                  </div>
-                  <div style="font-size: 16px; font-weight: 800; color: #15803D; margin-bottom: 6px;">
-                    ${val}
-                  </div>
-                  ${rank ? `<div style="font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">National Rank: <b>${rank}</b></div>` : ''}
-                </div>
-              `)
-              .addTo(map.current);
-          });
-
-          map.current.on('mouseleave', 'district-fill', () => {
-            if (map.current) map.current.getCanvas().style.cursor = '';
-            if (hoverPopupRef.current) hoverPopupRef.current.remove();
-          });
-
-          // Click on district polygon -> Highlights and updates dossier
-          map.current.on('click', 'district-fill', (e) => {
-            if (!e.features || e.features.length === 0) return;
-            const shapeName = e.features[0].properties?.shapeName || e.features[0].properties?.districtName;
-            if (shapeName) {
-              setSelectedDistrictName(shapeName);
-              selectedDistrictNameRef.current = shapeName;
-              const coords = DISTRICT_CENTROIDS[shapeName];
-              if (coords && map.current) {
-                map.current.flyTo({ center: coords, zoom: 9.8, duration: 1000 });
-              }
-            }
-          });
-        }
-      } catch (err) {
-        console.error('Error initializing Rwanda district map layers:', err);
-      }
-    });
+    if (map.current.isStyleLoaded()) {
+      setupDistrictLayers();
+    } else {
+      map.current.once('load', setupDistrictLayers);
+      map.current.once('styledata', setupDistrictLayers);
+    }
 
     const handleResize = () => {
       map.current?.resize();
@@ -437,8 +450,18 @@ export default function CropsSeasonsPage() {
     districtsRef.current = districts;
     selectedDistrictNameRef.current = selectedDistrictName;
     activeIndicatorRef.current = activeIndicator;
+    choroplethDataMapRef.current = choroplethDataMap;
+    indicatorConfigRef.current = indicatorConfig;
+    selectedCropRef.current = selectedCrop;
+    selectedSeasonRef.current = selectedSeason;
 
-    if (!map.current || !map.current.isStyleLoaded()) return;
+    if (!map.current) return;
+
+    if (!map.current.getSource('rwanda-districts')) {
+      if (map.current.isStyleLoaded()) {
+        setupDistrictLayers();
+      }
+    }
 
     const source = map.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
     if (source) {
@@ -447,9 +470,9 @@ export default function CropsSeasonsPage() {
     }
 
     if (map.current.getLayer('district-selected-border')) {
-      map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || ''] as any);
+      map.current.setFilter('district-selected-border', ['==', 'shapeName', selectedDistrictName || 'Nyagatare']);
     }
-  }, [choroplethDataMap, selectedDistrictName]);
+  }, [choroplethDataMap, selectedDistrictName, indicatorConfig, selectedCrop, selectedSeason]);
 
   // 4. Update Agricultural Facility Markers on Map
   useEffect(() => {

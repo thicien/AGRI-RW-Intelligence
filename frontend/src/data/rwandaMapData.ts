@@ -56,16 +56,23 @@ export interface DistrictChoroplethData {
   additionalInfo?: Record<string, any>;
 }
 
+export const BASEMAP_RASTER_TILES = [
+  'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+  'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+];
+
 export function enrichRwandaGeoJSON(
-  districtDataMap: Record<string, DistrictChoroplethData>,
+  districtDataMap: Record<string, DistrictChoroplethData> = {},
   defaultColor = '#CBD5E1'
 ) {
+  const dataMap = districtDataMap || {};
   const cloned = JSON.parse(JSON.stringify(RWANDA_DISTRICTS_GEOJSON));
   
-  cloned.features = cloned.features.map((feature: any) => {
+  cloned.features = (cloned.features || []).map((feature: any) => {
     const shapeName = feature.properties?.shapeName || '';
-    const match = districtDataMap[shapeName] || districtDataMap[shapeName.toLowerCase()] || Object.values(districtDataMap).find(
-      d => d.districtName.toLowerCase() === shapeName.toLowerCase()
+    const match = dataMap[shapeName] || dataMap[shapeName.toLowerCase()] || Object.values(dataMap).find(
+      d => d && d.districtName && d.districtName.toLowerCase() === shapeName.toLowerCase()
     );
 
     if (match) {
@@ -76,7 +83,7 @@ export function enrichRwandaGeoJSON(
         formattedValue: match.formattedValue,
         tier: match.tier,
         tierLabel: match.tierLabel,
-        choroplethColor: match.color,
+        choroplethColor: match.color || defaultColor,
         rank: match.rank || null,
         hasData: match.hasData,
         facilitiesCount: match.facilitiesCount || 0,
@@ -100,3 +107,4 @@ export function enrichRwandaGeoJSON(
 
   return cloned;
 }
+

@@ -9,6 +9,7 @@ import {
   Filter, Calendar, ChevronDown, Compass, Award, BarChart3
 } from 'lucide-react';
 import { apiUrl } from '../../config/api';
+import { RWANDA_DISTRICTS_GEOJSON, BASEMAP_RASTER_TILES } from '../../data/rwandaMapData';
 
 // Types for the 6 Intelligence Layers
 export type IntelligenceLayerId = 
@@ -628,117 +629,121 @@ export default function IntelligenceMapPage() {
     map.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    map.current.on('load', async () => {
-      if (!map.current) return;
+    const setupDistrictLayers = () => {
+      if (!map.current || !map.current.isStyleLoaded()) return;
+      if (map.current.getSource('rwanda-districts')) return;
 
       try {
-        // Load official Rwanda 30 districts GeoJSON
-        const res = await fetch('/rwanda-districts.geojson');
-        const geojson = await res.json();
+        const geojson = RWANDA_DISTRICTS_GEOJSON;
 
-        if (!map.current.getSource('rwanda-districts')) {
-          map.current.addSource('rwanda-districts', {
-            type: 'geojson',
-            data: geojson,
-          });
+        map.current.addSource('rwanda-districts', {
+          type: 'geojson',
+          data: geojson,
+        });
 
-          // Districts Fill Layer
-          map.current.addLayer({
-            id: 'district-fill',
-            type: 'fill',
-            source: 'rwanda-districts',
-            paint: {
-              'fill-color': '#10B981',
-              'fill-opacity': 0.78,
-            },
-          });
+        // Districts Fill Layer
+        map.current.addLayer({
+          id: 'district-fill',
+          type: 'fill',
+          source: 'rwanda-districts',
+          paint: {
+            'fill-color': '#10B981',
+            'fill-opacity': 0.78,
+          },
+        });
 
-          // Districts Border Lines
-          map.current.addLayer({
-            id: 'district-borders',
-            type: 'line',
-            source: 'rwanda-districts',
-            paint: {
-              'line-color': '#0F172A',
-              'line-width': 1.5,
-              'line-opacity': 0.8,
-            },
-          });
+        // Districts Border Lines
+        map.current.addLayer({
+          id: 'district-borders',
+          type: 'line',
+          source: 'rwanda-districts',
+          paint: {
+            'line-color': '#0F172A',
+            'line-width': 1.5,
+            'line-opacity': 0.8,
+          },
+        });
 
-          // Highlighted Selected District Border
-          map.current.addLayer({
-            id: 'district-selected-border',
-            type: 'line',
-            source: 'rwanda-districts',
-            filter: ['==', 'shapeName', ''],
-            paint: {
-              'line-color': '#0D47A1',
-              'line-width': 3.5,
-              'line-opacity': 1.0,
-            },
-          });
+        // Highlighted Selected District Border
+        map.current.addLayer({
+          id: 'district-selected-border',
+          type: 'line',
+          source: 'rwanda-districts',
+          filter: ['==', 'shapeName', selectedDistrictName || ''],
+          paint: {
+            'line-color': '#0D47A1',
+            'line-width': 3.5,
+            'line-opacity': 1.0,
+          },
+        });
 
-          // Hover interaction
-          map.current.on('mousemove', 'district-fill', (e) => {
-            if (!map.current || !e.features || e.features.length === 0) return;
-            map.current.getCanvas().style.cursor = 'pointer';
+        // Hover interaction
+        map.current.on('mousemove', 'district-fill', (e) => {
+          if (!map.current || !e.features || e.features.length === 0) return;
+          map.current.getCanvas().style.cursor = 'pointer';
 
-            const shapeName = e.features[0].properties?.shapeName;
-            if (!shapeName) return;
+          const shapeName = e.features[0].properties?.shapeName;
+          if (!shapeName) return;
 
-            const district = districts.find(d => d.name.toLowerCase() === shapeName.toLowerCase());
-            if (!district) return;
+          const district = districts.find(d => d.name.toLowerCase() === shapeName.toLowerCase());
+          if (!district) return;
 
-            const val = activeIndicator.getValue(district);
-            const formatted = activeIndicator.format(val);
+          const val = activeIndicator.getValue(district);
+          const formatted = activeIndicator.format(val);
 
-            if (!hoverPopupRef.current) {
-              hoverPopupRef.current = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                offset: 12,
-              });
-            }
+          if (!hoverPopupRef.current) {
+            hoverPopupRef.current = new maplibregl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              offset: 12,
+            });
+          }
 
-            hoverPopupRef.current
-              .setLngLat(e.lngLat)
-              .setHTML(`
-                <div style="font-family: inherit; padding: 6px 10px; min-width: 170px;">
-                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-                    <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${district.name}</span>
-                    <span style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">${district.province}</span>
-                  </div>
-                  <div style="font-size: 11px; color: #475569; margin-bottom: 4px;">${activeIndicator.label}:</div>
-                  <div style="font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 6px;">${formatted}</div>
-                  <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">
-                    <span>Prod. Rank: <b>#${district.cropProductivity.productivity_rank}</b></span>
-                    <span>Priority: <b>#${district.priorityAssessment.priority_rank}</b></span>
-                  </div>
+          hoverPopupRef.current
+            .setLngLat(e.lngLat)
+            .setHTML(`
+              <div style="font-family: inherit; padding: 6px 10px; min-width: 170px;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                  <span style="font-weight: 800; font-size: 14px; color: #0F172A;">${district.name}</span>
+                  <span style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">${district.province}</span>
                 </div>
-              `)
-              .addTo(map.current);
-          });
+                <div style="font-size: 11px; color: #475569; margin-bottom: 4px;">${activeIndicator.label}:</div>
+                <div style="font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 6px;">${formatted}</div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 4px;">
+                  <span>Prod. Rank: <b>#${district.cropProductivity.productivity_rank}</b></span>
+                  <span>Priority: <b>#${district.priorityAssessment.priority_rank}</b></span>
+                </div>
+              </div>
+            `)
+            .addTo(map.current);
+        });
 
-          map.current.on('mouseleave', 'district-fill', () => {
-            if (map.current) map.current.getCanvas().style.cursor = '';
-            if (hoverPopupRef.current) {
-              hoverPopupRef.current.remove();
-            }
-          });
+        map.current.on('mouseleave', 'district-fill', () => {
+          if (map.current) map.current.getCanvas().style.cursor = '';
+          if (hoverPopupRef.current) {
+            hoverPopupRef.current.remove();
+          }
+        });
 
-          // Click on district polygon
-          map.current.on('click', 'district-fill', (e) => {
-            if (!e.features || e.features.length === 0) return;
-            const shapeName = e.features[0].properties?.shapeName;
-            if (shapeName) {
-              setSelectedDistrictName(shapeName);
-            }
-          });
-        }
+        // Click on district polygon
+        map.current.on('click', 'district-fill', (e) => {
+          if (!e.features || e.features.length === 0) return;
+          const shapeName = e.features[0].properties?.shapeName;
+          if (shapeName) {
+            setSelectedDistrictName(shapeName);
+          }
+        });
       } catch (err) {
         console.error('Failed to load district boundaries GeoJSON:', err);
       }
-    });
+    };
+
+    if (map.current.isStyleLoaded()) {
+      setupDistrictLayers();
+    } else {
+      map.current.once('load', setupDistrictLayers);
+      map.current.once('styledata', setupDistrictLayers);
+    }
 
     return () => {
       map.current?.remove();
@@ -748,7 +753,49 @@ export default function IntelligenceMapPage() {
 
   // 3. Update Choropleth Colors when districts or indicator change
   useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded() || districts.length === 0) return;
+    if (!map.current) return;
+
+    if (!map.current.getSource('rwanda-districts') && map.current.isStyleLoaded()) {
+      try {
+        const geojson = RWANDA_DISTRICTS_GEOJSON;
+        map.current.addSource('rwanda-districts', {
+          type: 'geojson',
+          data: geojson,
+        });
+        map.current.addLayer({
+          id: 'district-fill',
+          type: 'fill',
+          source: 'rwanda-districts',
+          paint: {
+            'fill-color': '#10B981',
+            'fill-opacity': 0.78,
+          },
+        });
+        map.current.addLayer({
+          id: 'district-borders',
+          type: 'line',
+          source: 'rwanda-districts',
+          paint: {
+            'line-color': '#0F172A',
+            'line-width': 1.5,
+            'line-opacity': 0.8,
+          },
+        });
+        map.current.addLayer({
+          id: 'district-selected-border',
+          type: 'line',
+          source: 'rwanda-districts',
+          filter: ['==', 'shapeName', selectedDistrictName || ''],
+          paint: {
+            'line-color': '#0D47A1',
+            'line-width': 3.5,
+            'line-opacity': 1.0,
+          },
+        });
+      } catch (e) {}
+    }
+
+    if (!map.current.isStyleLoaded() || districts.length === 0) return;
     if (!map.current.getLayer('district-fill')) return;
 
     // Build MapLibre match expression

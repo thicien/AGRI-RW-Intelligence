@@ -5,6 +5,7 @@ import {
   RWANDA_DISTRICTS_GEOJSON, 
   DISTRICT_CENTROIDS, 
   enrichRwandaGeoJSON, 
+  BASEMAP_RASTER_TILES,
   type DistrictChoroplethData,
   type PerformanceTier 
 } from '../../data/rwandaMapData';
@@ -360,6 +361,140 @@ export default function ExportImportIntelligence() {
     return { mapData, highThreshold: highThresh, lowThreshold: lowThresh };
   }, [districts, selectedLayer, layerConfig]);
 
+  // Synchronized refs for fresh map callbacks
+  const choroplethDataMapRef = useRef(choroplethDataMap);
+  const layerConfigRef = useRef(layerConfig);
+
+  // Helper to ensure district layers and interactivity are added reliably
+  const setupDistrictLayers = () => {
+    if (!mapInstance.current) return;
+    if (!mapInstance.current.isStyleLoaded()) return;
+    if (mapInstance.current.getSource('rwanda-districts')) return;
+
+    try {
+      const activeDataMap = choroplethDataMapRef.current?.mapData || choroplethDataMap.mapData || {};
+      const initialEnriched = enrichRwandaGeoJSON(activeDataMap, '#BBF7D0');
+      geojsonLoadedRef.current = true;
+
+      mapInstance.current.addSource('rwanda-districts', {
+        type: 'geojson',
+        data: initialEnriched as any,
+      });
+
+      // 1. District Fill Layer (3-Tier Performance Choropleth)
+      mapInstance.current.addLayer({
+        id: 'district-fill',
+        type: 'fill',
+        source: 'rwanda-districts',
+        paint: {
+          'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
+          'fill-opacity': 0.82,
+        },
+      });
+
+      // 2. High-Contrast District Boundary Lines
+      mapInstance.current.addLayer({
+        id: 'district-borders',
+        type: 'line',
+        source: 'rwanda-districts',
+        paint: {
+          'line-color': '#0f172a',
+          'line-width': 1.6,
+          'line-opacity': 0.95,
+        },
+      });
+
+      // 3. Highlighted District Boundary
+      mapInstance.current.addLayer({
+        id: 'district-selected-line',
+        type: 'line',
+        source: 'rwanda-districts',
+        filter: ['==', 'shapeName', selectedDistrictRef.current || 'Nyagatare'],
+        paint: {
+          'line-color': '#0D47A1',
+          'line-width': 3.5,
+          'line-opacity': 1.0,
+        },
+      });
+
+      // Fit map bounds to Rwanda territory
+      mapInstance.current.fitBounds([
+        [28.86, -2.84],
+        [30.90, -1.05]
+      ], { padding: 25 });
+
+      // Tooltip Popup
+      popupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: 'export-tooltip',
+      });
+
+      // Hover Interactivity
+      mapInstance.current.on('mousemove', 'district-fill', (e) => {
+        if (!mapInstance.current || !e.features || e.features.length === 0) return;
+        mapInstance.current.getCanvas().style.cursor = 'pointer';
+
+        const shapeName = e.features[0].properties?.shapeName || '';
+        const match = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
+        const currentLayerConfig = layerConfigRef.current;
+
+        const valStr = match ? currentLayerConfig.format(currentLayerConfig.getValue(match)) : 'No data recorded';
+        const surpStr = match ? `${match.estimated_exportable_volume_mt.toLocaleString()} MT` : '—';
+        const hubStr = match ? match.nearest_exit_hub : '—';
+
+        popupRef.current?.setLngLat(e.lngLat).setHTML(`
+          <div class="p-3 bg-slate-900/95 text-slate-100 rounded-lg shadow-2xl border border-slate-700/80 backdrop-blur-md min-w-[210px] text-xs space-y-1.5 font-sans">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1">
+              <span class="font-bold text-sm text-emerald-400">${shapeName} District</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${match?.province_name || 'Rwanda'}</span>
+            </div>
+            <div class="pt-1 space-y-1">
+              <div class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-400">${currentLayerConfig.title}:</span>
+                <span class="font-bold text-amber-400 font-mono">${valStr}</span>
+              </div>
+              <div class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-400">Exportable Surplus:</span>
+                <span class="font-mono text-slate-200">${surpStr}</span>
+              </div>
+              <div class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-400">Nearest Exit Hub:</span>
+                <span class="text-[11px] text-cyan-300 truncate max-w-[120px]">${hubStr}</span>
+              </div>
+              <div class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-400">Readiness Score:</span>
+                <span class="font-bold text-emerald-400 font-mono">${match?.export_readiness_score || 0}/100</span>
+              </div>
+            </div>
+            <div class="text-[9px] text-slate-500 italic pt-1 border-t border-slate-800/80 text-right">Click district to zoom & inspect dossier</div>
+          </div>
+        `).addTo(mapInstance.current);
+      });
+
+      mapInstance.current.on('mouseleave', 'district-fill', () => {
+        if (!mapInstance.current) return;
+        mapInstance.current.getCanvas().style.cursor = '';
+        popupRef.current?.remove();
+      });
+
+      // Click Interactivity: Select district & flyTo centroid
+      mapInstance.current.on('click', 'district-fill', (e) => {
+        if (!e.features || e.features.length === 0) return;
+        const clickedName = e.features[0].properties?.shapeName;
+        if (clickedName) {
+          setSelectedDistrictName(clickedName);
+          const coords = DISTRICT_CENTROIDS[clickedName];
+          if (coords) {
+            focusOnCoordinates(coords[0], coords[1], 10.2);
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Error loading Rwanda export-import districts GeoJSON:', err);
+    }
+  };
+
   // Initialize MapLibre GL Map
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
@@ -371,9 +506,9 @@ export default function ExportImportIntelligence() {
         sources: {
           'osm-tiles': {
             type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tiles: BASEMAP_RASTER_TILES,
             tileSize: 256,
-            attribution: '&copy; OpenStreetMap contributors | NAEB, MINICOM & NISR Rwanda',
+            attribution: '&copy; OpenStreetMap contributors, CARTO | NAEB, MINICOM & NISR Rwanda',
           },
         },
         layers: [
@@ -395,126 +530,12 @@ export default function ExportImportIntelligence() {
     mapInstance.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     mapInstance.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    mapInstance.current.on('load', () => {
-      if (!mapInstance.current) return;
-
-      const initialEnriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#BBF7D0');
-      geojsonLoadedRef.current = true;
-
-      if (!mapInstance.current.getSource('rwanda-districts')) {
-        mapInstance.current.addSource('rwanda-districts', {
-          type: 'geojson',
-          data: initialEnriched as any,
-        });
-
-        // 1. District Fill Layer (3-Tier Performance Choropleth)
-        mapInstance.current.addLayer({
-          id: 'district-fill',
-          type: 'fill',
-          source: 'rwanda-districts',
-          paint: {
-            'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
-            'fill-opacity': 0.82,
-          },
-        });
-
-        // 2. High-Contrast District Boundary Lines
-        mapInstance.current.addLayer({
-          id: 'district-borders',
-          type: 'line',
-          source: 'rwanda-districts',
-          paint: {
-            'line-color': '#0f172a',
-            'line-width': 1.6,
-            'line-opacity': 0.95,
-          },
-        });
-
-        // 3. Highlighted District Boundary
-        mapInstance.current.addLayer({
-          id: 'district-selected-line',
-          type: 'line',
-          source: 'rwanda-districts',
-          paint: {
-            'line-color': '#0D47A1',
-            'line-width': 3.5,
-            'line-opacity': [
-              'case',
-              ['==', ['get', 'shapeName'], selectedDistrictRef.current],
-              1.0,
-              0.0,
-            ],
-          },
-        });
-
-        // Tooltip Popup
-        popupRef.current = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-          className: 'export-tooltip',
-        });
-
-        // Hover Interactivity
-        mapInstance.current.on('mousemove', 'district-fill', (e) => {
-          if (!mapInstance.current || !e.features || e.features.length === 0) return;
-          mapInstance.current.getCanvas().style.cursor = 'pointer';
-
-          const shapeName = e.features[0].properties?.shapeName || '';
-          const match = districtsRef.current.find(d => d.district_name.toLowerCase() === shapeName.toLowerCase());
-
-          const valStr = match ? layerConfig.format(layerConfig.getValue(match)) : 'No data recorded';
-          const surpStr = match ? `${match.estimated_exportable_volume_mt.toLocaleString()} MT` : '—';
-          const hubStr = match ? match.nearest_exit_hub : '—';
-
-          popupRef.current?.setLngLat(e.lngLat).setHTML(`
-            <div class="p-3 bg-slate-900/95 text-slate-100 rounded-lg shadow-2xl border border-slate-700/80 backdrop-blur-md min-w-[210px] text-xs space-y-1.5 font-sans">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-1">
-                <span class="font-bold text-sm text-emerald-400">${shapeName} District</span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${match?.province_name || 'Rwanda'}</span>
-              </div>
-              <div class="pt-1 space-y-1">
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400">${layerConfig.title}:</span>
-                  <span class="font-bold text-amber-400 font-mono">${valStr}</span>
-                </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400">Exportable Surplus:</span>
-                  <span class="font-mono text-slate-200">${surpStr}</span>
-                </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400">Nearest Exit Hub:</span>
-                  <span class="text-[11px] text-cyan-300 truncate max-w-[120px]">${hubStr}</span>
-                </div>
-                <div class="flex justify-between items-center text-slate-300">
-                  <span class="text-slate-400">Readiness Score:</span>
-                  <span class="font-bold text-emerald-400 font-mono">${match?.export_readiness_score || 0}/100</span>
-                </div>
-              </div>
-              <div class="text-[9px] text-slate-500 italic pt-1 border-t border-slate-800/80 text-right">Click district to zoom & inspect dossier</div>
-            </div>
-          `).addTo(mapInstance.current);
-        });
-
-        mapInstance.current.on('mouseleave', 'district-fill', () => {
-          if (!mapInstance.current) return;
-          mapInstance.current.getCanvas().style.cursor = '';
-          popupRef.current?.remove();
-        });
-
-        // Click Interactivity: Select district & flyTo centroid
-        mapInstance.current.on('click', 'district-fill', (e) => {
-          if (!e.features || e.features.length === 0) return;
-          const clickedName = e.features[0].properties?.shapeName;
-          if (clickedName) {
-            setSelectedDistrictName(clickedName);
-            const coords = DISTRICT_CENTROIDS[clickedName];
-            if (coords) {
-              focusOnCoordinates(coords[0], coords[1], 10.2);
-            }
-          }
-        });
-      }
-    });
+    if (mapInstance.current.isStyleLoaded()) {
+      setupDistrictLayers();
+    } else {
+      mapInstance.current.once('load', setupDistrictLayers);
+      mapInstance.current.once('styledata', setupDistrictLayers);
+    }
 
     return () => {
       mapInstance.current?.remove();
@@ -524,7 +545,17 @@ export default function ExportImportIntelligence() {
 
   // Update GeoJSON and highlighted boundary reactively
   useEffect(() => {
+    choroplethDataMapRef.current = choroplethDataMap;
+    layerConfigRef.current = layerConfig;
+
     if (!mapInstance.current) return;
+
+    if (!mapInstance.current.getSource('rwanda-districts')) {
+      if (mapInstance.current.isStyleLoaded()) {
+        setupDistrictLayers();
+      }
+    }
+
     const source = mapInstance.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
     if (source) {
       const enriched = enrichRwandaGeoJSON(choroplethDataMap.mapData, '#BBF7D0');
@@ -532,14 +563,9 @@ export default function ExportImportIntelligence() {
     }
 
     if (mapInstance.current.getLayer('district-selected-line')) {
-      mapInstance.current.setPaintProperty('district-selected-line', 'line-opacity', [
-        'case',
-        ['==', ['get', 'shapeName'], selectedDistrictName],
-        1.0,
-        0.0,
-      ] as any);
+      mapInstance.current.setFilter('district-selected-line', ['==', 'shapeName', selectedDistrictName || 'Nyagatare']);
     }
-  }, [choroplethDataMap, selectedDistrictName]);
+  }, [choroplethDataMap, selectedDistrictName, layerConfig]);
 
   // Update Export Hub Markers on Map
   useEffect(() => {
