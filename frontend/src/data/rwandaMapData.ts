@@ -57,9 +57,8 @@ export interface DistrictChoroplethData {
 }
 
 export const BASEMAP_RASTER_TILES = [
-  'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-  'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
 ];
 
 export function enrichRwandaGeoJSON(

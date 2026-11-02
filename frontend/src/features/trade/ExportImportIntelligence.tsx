@@ -367,58 +367,70 @@ export default function ExportImportIntelligence() {
 
   // Helper to ensure district layers and interactivity are added reliably
   const setupDistrictLayers = () => {
-    if (!mapInstance.current) return;
-    if (!mapInstance.current.isStyleLoaded()) return;
-    if (mapInstance.current.getSource('rwanda-districts')) return;
+    const m = mapInstance.current;
+    if (!m) return;
 
     try {
+      if (m.getSource('rwanda-districts')) {
+        const activeDataMap = choroplethDataMapRef.current?.mapData || choroplethDataMap.mapData || {};
+        const enriched = enrichRwandaGeoJSON(activeDataMap, '#BBF7D0');
+        (m.getSource('rwanda-districts') as maplibregl.GeoJSONSource).setData(enriched as any);
+        return;
+      }
+
       const activeDataMap = choroplethDataMapRef.current?.mapData || choroplethDataMap.mapData || {};
       const initialEnriched = enrichRwandaGeoJSON(activeDataMap, '#BBF7D0');
       geojsonLoadedRef.current = true;
 
-      mapInstance.current.addSource('rwanda-districts', {
+      m.addSource('rwanda-districts', {
         type: 'geojson',
         data: initialEnriched as any,
       });
 
       // 1. District Fill Layer (3-Tier Performance Choropleth)
-      mapInstance.current.addLayer({
-        id: 'district-fill',
-        type: 'fill',
-        source: 'rwanda-districts',
-        paint: {
-          'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
-          'fill-opacity': 0.82,
-        },
-      });
+      if (!m.getLayer('district-fill')) {
+        m.addLayer({
+          id: 'district-fill',
+          type: 'fill',
+          source: 'rwanda-districts',
+          paint: {
+            'fill-color': ['coalesce', ['get', 'choroplethColor'], '#4ADE80'],
+            'fill-opacity': 0.82,
+          },
+        });
+      }
 
       // 2. High-Contrast District Boundary Lines
-      mapInstance.current.addLayer({
-        id: 'district-borders',
-        type: 'line',
-        source: 'rwanda-districts',
-        paint: {
-          'line-color': '#0f172a',
-          'line-width': 1.6,
-          'line-opacity': 0.95,
-        },
-      });
+      if (!m.getLayer('district-borders')) {
+        m.addLayer({
+          id: 'district-borders',
+          type: 'line',
+          source: 'rwanda-districts',
+          paint: {
+            'line-color': '#0f172a',
+            'line-width': 1.6,
+            'line-opacity': 0.95,
+          },
+        });
+      }
 
       // 3. Highlighted District Boundary
-      mapInstance.current.addLayer({
-        id: 'district-selected-line',
-        type: 'line',
-        source: 'rwanda-districts',
-        filter: ['==', 'shapeName', selectedDistrictRef.current || 'Nyagatare'],
-        paint: {
-          'line-color': '#0D47A1',
-          'line-width': 3.5,
-          'line-opacity': 1.0,
-        },
-      });
+      if (!m.getLayer('district-selected-line')) {
+        m.addLayer({
+          id: 'district-selected-line',
+          type: 'line',
+          source: 'rwanda-districts',
+          filter: ['==', 'shapeName', selectedDistrictRef.current || 'Nyagatare'],
+          paint: {
+            'line-color': '#0D47A1',
+            'line-width': 3.5,
+            'line-opacity': 1.0,
+          },
+        });
+      }
 
       // Fit map bounds to Rwanda territory
-      mapInstance.current.fitBounds([
+      m.fitBounds([
         [28.86, -2.84],
         [30.90, -1.05]
       ], { padding: 25 });
@@ -431,7 +443,7 @@ export default function ExportImportIntelligence() {
       });
 
       // Hover Interactivity
-      mapInstance.current.on('mousemove', 'district-fill', (e) => {
+      m.on('mousemove', 'district-fill', (e) => {
         if (!mapInstance.current || !e.features || e.features.length === 0) return;
         mapInstance.current.getCanvas().style.cursor = 'pointer';
 
@@ -472,14 +484,14 @@ export default function ExportImportIntelligence() {
         `).addTo(mapInstance.current);
       });
 
-      mapInstance.current.on('mouseleave', 'district-fill', () => {
+      m.on('mouseleave', 'district-fill', () => {
         if (!mapInstance.current) return;
         mapInstance.current.getCanvas().style.cursor = '';
         popupRef.current?.remove();
       });
 
       // Click Interactivity: Select district & flyTo centroid
-      mapInstance.current.on('click', 'district-fill', (e) => {
+      m.on('click', 'district-fill', (e) => {
         if (!e.features || e.features.length === 0) return;
         const clickedName = e.features[0].properties?.shapeName;
         if (clickedName) {
@@ -491,7 +503,7 @@ export default function ExportImportIntelligence() {
         }
       });
     } catch (err) {
-      console.error('Error loading Rwanda export-import districts GeoJSON:', err);
+      // Style still initializing; continuous listener or interval will retry
     }
   };
 
@@ -508,7 +520,7 @@ export default function ExportImportIntelligence() {
             type: 'raster',
             tiles: BASEMAP_RASTER_TILES,
             tileSize: 256,
-            attribution: '&copy; OpenStreetMap contributors, CARTO | NAEB, MINICOM & NISR Rwanda',
+            attribution: '© Esri, HERE, Garmin, NAEB, MINICOM & NISR Rwanda',
           },
         },
         layers: [
@@ -530,14 +542,24 @@ export default function ExportImportIntelligence() {
     mapInstance.current.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     mapInstance.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
-    if (mapInstance.current.isStyleLoaded()) {
+    mapInstance.current.on('load', setupDistrictLayers);
+    mapInstance.current.on('styledata', setupDistrictLayers);
+    setupDistrictLayers();
+
+    const layerInterval = setInterval(() => {
+      if (!mapInstance.current) {
+        clearInterval(layerInterval);
+        return;
+      }
+      if (mapInstance.current.getSource('rwanda-districts')) {
+        clearInterval(layerInterval);
+        return;
+      }
       setupDistrictLayers();
-    } else {
-      mapInstance.current.once('load', setupDistrictLayers);
-      mapInstance.current.once('styledata', setupDistrictLayers);
-    }
+    }, 200);
 
     return () => {
+      clearInterval(layerInterval);
       mapInstance.current?.remove();
       mapInstance.current = null;
     };
@@ -550,11 +572,7 @@ export default function ExportImportIntelligence() {
 
     if (!mapInstance.current) return;
 
-    if (!mapInstance.current.getSource('rwanda-districts')) {
-      if (mapInstance.current.isStyleLoaded()) {
-        setupDistrictLayers();
-      }
-    }
+    setupDistrictLayers();
 
     const source = mapInstance.current.getSource('rwanda-districts') as maplibregl.GeoJSONSource;
     if (source) {

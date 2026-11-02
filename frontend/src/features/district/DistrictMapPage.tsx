@@ -66,9 +66,9 @@ export default function DistrictMapPage() {
         sources: {
           'osm': {
             type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'],
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors'
+            attribution: '© Esri, HERE, Garmin, NISR Rwanda'
           }
         },
         layers: [

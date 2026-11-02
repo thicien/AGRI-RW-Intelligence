@@ -592,9 +592,9 @@ export default function IntelligenceMapPage() {
     if (map.current) return;
 
     const basemapTiles: Record<string, string[]> = {
-      positron: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
+      positron: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'],
       satellite: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      streets: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      streets: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'],
     };
 
     map.current = new maplibregl.Map({
@@ -606,7 +606,7 @@ export default function IntelligenceMapPage() {
             type: 'raster',
             tiles: basemapTiles[basemapStyle],
             tileSize: 256,
-            attribution: '© OpenStreetMap, CARTO, NISR Rwanda',
+            attribution: '© Esri, HERE, Garmin, NISR Rwanda',
           },
         },
         layers: [
@@ -630,7 +630,7 @@ export default function IntelligenceMapPage() {
     map.current.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-left');
 
     const setupDistrictLayers = () => {
-      if (!map.current || !map.current.isStyleLoaded()) return;
+      if (!map.current) return;
       if (map.current.getSource('rwanda-districts')) return;
 
       try {
@@ -642,40 +642,46 @@ export default function IntelligenceMapPage() {
         });
 
         // Districts Fill Layer
-        map.current.addLayer({
-          id: 'district-fill',
-          type: 'fill',
-          source: 'rwanda-districts',
-          paint: {
-            'fill-color': '#10B981',
-            'fill-opacity': 0.78,
-          },
-        });
+        if (!map.current.getLayer('district-fill')) {
+          map.current.addLayer({
+            id: 'district-fill',
+            type: 'fill',
+            source: 'rwanda-districts',
+            paint: {
+              'fill-color': '#10B981',
+              'fill-opacity': 0.78,
+            },
+          });
+        }
 
         // Districts Border Lines
-        map.current.addLayer({
-          id: 'district-borders',
-          type: 'line',
-          source: 'rwanda-districts',
-          paint: {
-            'line-color': '#0F172A',
-            'line-width': 1.5,
-            'line-opacity': 0.8,
-          },
-        });
+        if (!map.current.getLayer('district-borders')) {
+          map.current.addLayer({
+            id: 'district-borders',
+            type: 'line',
+            source: 'rwanda-districts',
+            paint: {
+              'line-color': '#0F172A',
+              'line-width': 1.5,
+              'line-opacity': 0.8,
+            },
+          });
+        }
 
         // Highlighted Selected District Border
-        map.current.addLayer({
-          id: 'district-selected-border',
-          type: 'line',
-          source: 'rwanda-districts',
-          filter: ['==', 'shapeName', selectedDistrictName || ''],
-          paint: {
-            'line-color': '#0D47A1',
-            'line-width': 3.5,
-            'line-opacity': 1.0,
-          },
-        });
+        if (!map.current.getLayer('district-selected-border')) {
+          map.current.addLayer({
+            id: 'district-selected-border',
+            type: 'line',
+            source: 'rwanda-districts',
+            filter: ['==', 'shapeName', selectedDistrictName || ''],
+            paint: {
+              'line-color': '#0D47A1',
+              'line-width': 3.5,
+              'line-opacity': 1.0,
+            },
+          });
+        }
 
         // Hover interaction
         map.current.on('mousemove', 'district-fill', (e) => {
@@ -734,18 +740,28 @@ export default function IntelligenceMapPage() {
           }
         });
       } catch (err) {
-        console.error('Failed to load district boundaries GeoJSON:', err);
+        // Style not ready yet; continuous listener or interval will retry
       }
     };
 
-    if (map.current.isStyleLoaded()) {
+    map.current.on('load', setupDistrictLayers);
+    map.current.on('styledata', setupDistrictLayers);
+    setupDistrictLayers();
+
+    const layerInterval = setInterval(() => {
+      if (!map.current) {
+        clearInterval(layerInterval);
+        return;
+      }
+      if (map.current.getSource('rwanda-districts')) {
+        clearInterval(layerInterval);
+        return;
+      }
       setupDistrictLayers();
-    } else {
-      map.current.once('load', setupDistrictLayers);
-      map.current.once('styledata', setupDistrictLayers);
-    }
+    }, 200);
 
     return () => {
+      clearInterval(layerInterval);
       map.current?.remove();
       map.current = null;
     };
