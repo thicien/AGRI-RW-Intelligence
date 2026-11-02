@@ -649,6 +649,39 @@ export class CropStatisticsService {
   }
 
   /**
+   * 9b. Get verified crops cultivated strictly within a specific district during a season
+   */
+  async getDistrictCrops(districtNameOrCode: string, seasonCode: string = '2025A') {
+    const q = `
+      SELECT 
+        c.name AS crop_name,
+        c.category,
+        ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS production_tonnes,
+        ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS area_ha,
+        ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS yield_t_ha
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON cs.season_id = s.id
+      JOIN agrilens.crops c ON cs.crop_id = c.id
+      JOIN agrilens.administrative_units au ON cs.admin_unit_id = au.id
+      WHERE s.season_code = $1
+        AND (LOWER(au.name) = LOWER($2) OR LOWER(au.code) = LOWER($2))
+        AND (COALESCE(cs.production_tonnes, 0) > 0 OR COALESCE(cs.area_ha, 0) > 0)
+      GROUP BY c.name, c.category
+      ORDER BY SUM(cs.production_tonnes) DESC;
+    `;
+    const rows = await this.dataSource.query(q, [seasonCode, districtNameOrCode]);
+    const totalProd = rows.reduce((acc: number, r: any) => acc + Number(r.production_tonnes || 0), 0) || 1;
+    return rows.map((r: any) => ({
+      crop_name: r.crop_name,
+      category: r.category || 'Other Crops',
+      production_tonnes: Number(r.production_tonnes || 0),
+      area_ha: Number(r.area_ha || 0),
+      yield_t_ha: Number(r.yield_t_ha || 0),
+      share_pct: Math.round((Number(r.production_tonnes || 0) / totalProd) * 1000) / 10,
+    }));
+  }
+
+  /**
    * 10. National Agricultural Decision-Making Workspace
    * Powers the unified Crops & Seasons decision workspace with map, summary cards,
    * seasonal trends, crop comparison table, and district dossiers.
@@ -823,11 +856,12 @@ export class CropStatisticsService {
 
     const districtRows = await this.dataSource.query(districtStatsQuery, districtParams);
 
-    // 7. Dominant crops per district for selected season
+    // 7. Dominant and all cultivated crops per district for selected season
     const dominantCropsQuery = `
       SELECT 
         au.name AS district_name,
         c.name AS crop_name,
+        c.category AS crop_category,
         ROUND(COALESCE(SUM(cs.production_tonnes), 0)::numeric, 1) AS production_tonnes,
         ROUND(COALESCE(SUM(cs.area_ha), 0)::numeric, 1) AS area_ha,
         ROUND((COALESCE(SUM(cs.production_tonnes), 0) / NULLIF(SUM(cs.harvested_area_ha), 0))::numeric, 2) AS yield_t_ha
@@ -836,7 +870,8 @@ export class CropStatisticsService {
       JOIN agrilens.crops c ON cs.crop_id = c.id
       JOIN agrilens.administrative_units au ON cs.admin_unit_id = au.id
       WHERE s.season_code = $1
-      GROUP BY au.name, c.name
+        AND (COALESCE(cs.production_tonnes, 0) > 0 OR COALESCE(cs.area_ha, 0) > 0)
+      GROUP BY au.name, c.name, c.category
       ORDER BY au.name, SUM(cs.production_tonnes) DESC;
     `;
     const dominantCropsRes = await this.dataSource.query(dominantCropsQuery, [validSeason]);
@@ -847,6 +882,7 @@ export class CropStatisticsService {
       }
       dominantByDistrict[r.district_name].push({
         crop_name: r.crop_name,
+        category: r.crop_category || 'Other Crops',
         production_tonnes: Number(r.production_tonnes),
         area_ha: Number(r.area_ha),
         yield_t_ha: Number(r.yield_t_ha || 0),
@@ -863,10 +899,11 @@ export class CropStatisticsService {
 
       const crops = dominantByDistrict[r.district_name] || [];
       const districtTotalProd = crops.reduce((sum, c) => sum + c.production_tonnes, 0) || prod || 1;
-      const enrichedCrops = crops.slice(0, 5).map(c => ({
+      const enrichedAllCrops = crops.map(c => ({
         ...c,
         share_pct: Math.round((c.production_tonnes / districtTotalProd) * 1000) / 10,
       }));
+      const enrichedDominantCrops = enrichedAllCrops.slice(0, 5);
 
       return {
         district_id: r.district_id,
@@ -882,7 +919,9 @@ export class CropStatisticsService {
         national_share_pct: sharePct,
         rank: idx + 1,
         has_data: hasData,
-        dominant_crops: enrichedCrops,
+        dominant_crops: enrichedDominantCrops,
+        cultivated_crops: enrichedAllCrops,
+        total_cultivated_crops_count: enrichedAllCrops.length,
       };
     });
 

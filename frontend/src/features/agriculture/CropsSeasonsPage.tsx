@@ -46,6 +46,15 @@ export interface DistrictStat {
     yield_t_ha: number;
     share_pct: number;
   }>;
+  cultivated_crops?: Array<{
+    crop_name: string;
+    category?: string;
+    production_tonnes: number;
+    area_ha: number;
+    yield_t_ha: number;
+    share_pct: number;
+  }>;
+  total_cultivated_crops_count?: number;
 }
 
 export default function CropsSeasonsPage() {
@@ -64,6 +73,7 @@ export default function CropsSeasonsPage() {
   const [searchDistrict, setSearchDistrict] = useState<string>('');
   const [tableSearch, setTableSearch] = useState<string>('');
   const [totalCropsSearch, setTotalCropsSearch] = useState<string>('');
+  const [districtCropsCache, setDistrictCropsCache] = useState<Record<string, any[]>>({});
 
   // Selected District for Side Panel
   const [selectedDistrictName, setSelectedDistrictName] = useState<string>('Nyagatare');
@@ -150,6 +160,62 @@ export default function CropsSeasonsPage() {
   const selectedDistrict = useMemo(() => {
     return districts.find(d => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase()) || districts[0] || null;
   }, [districts, selectedDistrictName]);
+
+  // Fetch verified district crops list if not already present in district object
+  useEffect(() => {
+    if (!selectedDistrictName || !selectedSeason) return;
+    const cacheKey = `${selectedDistrictName.toLowerCase()}_${selectedSeason}`;
+    if (districtCropsCache[cacheKey]) return;
+
+    // Check if current district in districts array already has cultivated_crops
+    const currentDistrict = districts.find(d => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase());
+    if (currentDistrict?.cultivated_crops && currentDistrict.cultivated_crops.length > 0) {
+      setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: currentDistrict.cultivated_crops! }));
+      return;
+    }
+
+    let isMounted = true;
+    fetch(apiUrl(`crop-statistics/district-crops?district=${encodeURIComponent(selectedDistrictName)}&season=${encodeURIComponent(selectedSeason)}`))
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: data }));
+        }
+      })
+      .catch(() => {
+        // Fallback gracefully to dominant_crops
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedDistrictName, selectedSeason, districts]);
+
+  // Derived list of crops cultivated strictly in the selected district during the selected season
+  const districtCultivatedCrops = useMemo(() => {
+    if (!selectedDistrict) return [];
+    const cacheKey = `${selectedDistrict.district_name.toLowerCase()}_${selectedSeason}`;
+    if (districtCropsCache[cacheKey] && districtCropsCache[cacheKey].length > 0) {
+      return districtCropsCache[cacheKey];
+    }
+    if (selectedDistrict.cultivated_crops && selectedDistrict.cultivated_crops.length > 0) {
+      return selectedDistrict.cultivated_crops;
+    }
+    if (selectedDistrict.dominant_crops && selectedDistrict.dominant_crops.length > 0) {
+      return selectedDistrict.dominant_crops.map(c => ({
+        crop_name: c.crop_name,
+        category: (c as any).category || 'Monitored Crop',
+        production_tonnes: c.production_tonnes,
+        area_ha: c.area_ha,
+        yield_t_ha: c.yield_t_ha,
+        share_pct: c.share_pct,
+      }));
+    }
+    return [];
+  }, [selectedDistrict, selectedSeason, districtCropsCache]);
 
   // Indicator Label, Unit & Extents
   const indicatorConfig = useMemo(() => {
@@ -1081,7 +1147,7 @@ export default function CropsSeasonsPage() {
                   <Sprout className="w-3.5 h-3.5" />
                   <span>Total Crops</span>
                   <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-primary/10 text-primary font-bold">
-                    {cropComparisonTable.length}
+                    {districtCultivatedCrops.length}
                   </span>
                 </button>
               </div>
@@ -1185,28 +1251,30 @@ export default function CropsSeasonsPage() {
                   </div>
                 )}
 
-                {/* TAB 4: TOTAL CROPS IN MONITORED SEASON */}
+                {/* TAB 4: TOTAL CROPS IN MONITORED DISTRICT & SEASON */}
                 {districtTab === 'TOTAL_CROPS' && (
                   <div className="space-y-3">
-                    {/* Header Summary */}
+                    {/* Header Summary for Clicked District */}
                     <div className="p-3 bg-agriculture-soft/40 rounded-xl border border-agriculture/30 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="font-bold text-agriculture flex items-center gap-1.5">
                           <Sprout className="w-4 h-4" />
-                          <span>All Crops Cultivated in {selectedSeason}</span>
+                          <span>Crops Cultivated in {selectedDistrict.district_name}</span>
                         </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-agriculture text-white">
-                          {cropComparisonTable.length} Crops
+                          {districtCultivatedCrops.length} Crops ({selectedSeason})
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-muted">
-                        <span>Total Verified Harvest:</span>
+                        <span>District Total Harvest:</span>
                         <b className="text-text-main font-mono">
-                          {nationalSummary?.total_production_tonnes ? `${Math.round(nationalSummary.total_production_tonnes).toLocaleString()} MT` : '—'}
+                          {selectedDistrict.production_tonnes !== null 
+                            ? `${Math.round(selectedDistrict.production_tonnes).toLocaleString()} MT` 
+                            : '—'}
                         </b>
                       </div>
-                      <p className="text-[10px] text-muted">
-                        All crops cultivated nationally during the {selectedSeason} agricultural cycle. Click any crop to filter map view.
+                      <p className="text-[10px] text-muted leading-tight">
+                        Only crops recorded for {selectedDistrict.district_name} in Season {selectedSeason}. Click any crop to inspect national geographic distribution.
                       </p>
                     </div>
 
@@ -1217,7 +1285,7 @@ export default function CropsSeasonsPage() {
                         type="text"
                         value={totalCropsSearch}
                         onChange={(e) => setTotalCropsSearch(e.target.value)}
-                        placeholder="Search cultivated crops..."
+                        placeholder={`Search crops in ${selectedDistrict.district_name}...`}
                         className="w-full pl-8 pr-7 py-1.5 bg-background border border-border-main rounded-lg text-xs text-text-main focus:outline-none focus:border-agriculture"
                       />
                       {totalCropsSearch && (
@@ -1232,56 +1300,65 @@ export default function CropsSeasonsPage() {
 
                     {/* Crops List with Production */}
                     <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
-                      {cropComparisonTable
-                        .filter((c: any) => {
-                          if (!totalCropsSearch.trim()) return true;
-                          const q = totalCropsSearch.toLowerCase();
-                          return c.crop_name.toLowerCase().includes(q) || (c.category && c.category.toLowerCase().includes(q));
-                        })
-                        .map((c: any, idx: number) => {
-                          const isCurrentCrop = selectedCrop.toLowerCase() === c.crop_name.toLowerCase();
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => setSelectedCrop(c.crop_name)}
-                              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                                isCurrentCrop
-                                  ? 'bg-agriculture-soft/30 border-agriculture shadow-xs'
-                                  : 'bg-surface hover:bg-background/80 border-border-main'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <span className="w-2 h-2 rounded-full bg-agriculture shrink-0"></span>
-                                  <span className="font-bold text-text-main truncate text-xs">{c.crop_name}</span>
-                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-muted/10 text-muted border border-border-main shrink-0">
-                                    {c.category}
-                                  </span>
+                      {districtCultivatedCrops.length === 0 ? (
+                        <div className="p-6 text-center text-muted bg-background/50 rounded-xl border border-border-main">
+                          <Sprout className="w-6 h-6 text-muted/40 mx-auto mb-1.5" />
+                          <div className="font-bold text-xs text-text-main">No Cultivated Crops Recorded</div>
+                          <p className="text-[11px] mt-0.5">
+                            No crop production recorded for {selectedDistrict.district_name} in Season {selectedSeason}.
+                          </p>
+                        </div>
+                      ) : (
+                        districtCultivatedCrops
+                          .filter((c: any) => {
+                            if (!totalCropsSearch.trim()) return true;
+                            const q = totalCropsSearch.toLowerCase();
+                            return c.crop_name.toLowerCase().includes(q) || (c.category && c.category.toLowerCase().includes(q));
+                          })
+                          .map((c: any, idx: number) => {
+                            const isCurrentCrop = selectedCrop.toLowerCase() === c.crop_name.toLowerCase();
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedCrop(c.crop_name)}
+                                className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                  isCurrentCrop
+                                    ? 'bg-agriculture-soft/30 border-agriculture shadow-xs'
+                                    : 'bg-surface hover:bg-background/80 border-border-main'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="w-2 h-2 rounded-full bg-agriculture shrink-0"></span>
+                                    <span className="font-bold text-text-main truncate text-xs">{c.crop_name}</span>
+                                    {c.category && (
+                                      <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-muted/10 text-muted border border-border-main shrink-0">
+                                        {c.category}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span className="font-black text-agriculture text-xs">
+                                      {c.production_tonnes ? `${Number(c.production_tonnes).toLocaleString()} MT` : '0 MT'}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="text-right shrink-0">
-                                  <span className="font-black text-agriculture text-xs">
-                                    {c.current_production_tonnes ? `${Number(c.current_production_tonnes).toLocaleString()} MT` : '0 MT'}
-                                  </span>
-                                </div>
-                              </div>
 
-                              <div className="mt-1.5 grid grid-cols-2 gap-1 text-[10px] text-muted border-t border-border-main/50 pt-1.5">
-                                <div>
-                                  Yield: <strong className="text-text-main">{c.current_yield_t_ha} t/ha</strong>
-                                </div>
-                                <div>
-                                  Area: <strong className="text-text-main">{c.current_area_ha ? Number(c.current_area_ha).toLocaleString() : 0} ha</strong>
-                                </div>
-                                <div>
-                                  Share: <strong className="text-primary">{c.national_share_pct}%</strong>
-                                </div>
-                                <div className="truncate" title={c.leading_district ? `Top: ${c.leading_district.name}` : undefined}>
-                                  Top: <strong className="text-text-main">{c.leading_district?.name || '—'}</strong>
+                                <div className="mt-1.5 grid grid-cols-3 gap-1 text-[10px] text-muted border-t border-border-main/50 pt-1.5">
+                                  <div>
+                                    Yield: <strong className="text-text-main">{c.yield_t_ha !== null ? `${c.yield_t_ha} t/ha` : '—'}</strong>
+                                  </div>
+                                  <div>
+                                    Area: <strong className="text-text-main">{c.area_ha ? Number(c.area_ha).toLocaleString() : 0} ha</strong>
+                                  </div>
+                                  <div>
+                                    Share: <strong className="text-primary">{c.share_pct}%</strong>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                      )}
                     </div>
                   </div>
                 )}

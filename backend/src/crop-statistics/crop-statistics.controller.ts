@@ -80,6 +80,17 @@ export class CropStatisticsController {
     return this.service.getSeasonsMasterList();
   }
 
+  @Get('district-crops')
+  async getDistrictCrops(
+    @Query('district') district?: string,
+    @Query('season') season?: string,
+  ) {
+    return this.service.getDistrictCrops(
+      district || 'Nyabihu',
+      season || '2025A',
+    );
+  }
+
   @Get('data-quality')
   async getDataQualityReport() {
     return this.service.getDataQualityReport();
