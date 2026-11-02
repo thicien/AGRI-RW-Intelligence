@@ -161,33 +161,68 @@ export default function CropsSeasonsPage() {
     return districts.find(d => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase()) || districts[0] || null;
   }, [districts, selectedDistrictName]);
 
-  // Fetch verified district crops list if not already present in district object
+  // Fetch verified district crops list (all crops cultivated in this district & season)
   useEffect(() => {
     if (!selectedDistrictName || !selectedSeason) return;
     const cacheKey = `${selectedDistrictName.toLowerCase()}_${selectedSeason}`;
-    if (districtCropsCache[cacheKey]) return;
+    if (districtCropsCache[cacheKey] && districtCropsCache[cacheKey].length > 5) return;
 
-    // Check if current district in districts array already has cultivated_crops
+    // Check if current district in districts array already has cultivated_crops with > 5 items
     const currentDistrict = districts.find(d => d.district_name.toLowerCase() === selectedDistrictName.toLowerCase());
-    if (currentDistrict?.cultivated_crops && currentDistrict.cultivated_crops.length > 0) {
+    if (currentDistrict?.cultivated_crops && currentDistrict.cultivated_crops.length > 5) {
       setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: currentDistrict.cultivated_crops! }));
       return;
     }
 
     let isMounted = true;
-    fetch(apiUrl(`crop-statistics/district-crops?district=${encodeURIComponent(selectedDistrictName)}&season=${encodeURIComponent(selectedSeason)}`))
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: data }));
+
+    const fetchFullDistrictCrops = async () => {
+      try {
+        // Source 1: Query district/productivity (provides all cultivated crops recorded for this district & season)
+        const prodRes = await fetch(apiUrl(`district/productivity?district=${encodeURIComponent(selectedDistrictName)}&season=${encodeURIComponent(selectedSeason)}`));
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          if (prodData && Array.isArray(prodData.crops) && prodData.crops.length > 0) {
+            const rawCrops = prodData.crops;
+            const validCrops = rawCrops
+              .map((c: any) => ({
+                crop_name: c.crop_name || c.cropName || c.name,
+                category: c.crop_category || c.category || 'Monitored Crop',
+                production_tonnes: Number(c.production_tonnes ?? c.currentProductionTonnes ?? 0),
+                area_ha: Number(c.area_ha ?? c.currentAreaHa ?? 0),
+                yield_t_ha: Number(c.yield_t_ha ?? c.currentYieldTonnesHa ?? 0),
+              }))
+              .filter((c: any) => c.production_tonnes > 0 || c.area_ha > 0)
+              .sort((a: any, b: any) => b.production_tonnes - a.production_tonnes);
+
+            const totalDistrictProd = validCrops.reduce((sum: number, c: any) => sum + c.production_tonnes, 0) || 1;
+            const enrichedCrops = validCrops.map((c: any) => ({
+              ...c,
+              share_pct: Math.round((c.production_tonnes / totalDistrictProd) * 1000) / 10,
+            }));
+
+            if (isMounted && enrichedCrops.length > 0) {
+              setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: enrichedCrops }));
+              return;
+            }
+          }
         }
-      })
-      .catch(() => {
-        // Fallback gracefully to dominant_crops
-      });
+
+        // Source 2: Fallback to crop-statistics/district-crops
+        const statRes = await fetch(apiUrl(`crop-statistics/district-crops?district=${encodeURIComponent(selectedDistrictName)}&season=${encodeURIComponent(selectedSeason)}`));
+        if (statRes.ok) {
+          const statData = await statRes.json();
+          if (isMounted && Array.isArray(statData) && statData.length > 0) {
+            setDistrictCropsCache(prev => ({ ...prev, [cacheKey]: statData }));
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback gracefully to dominant_crops if network is temporarily unreachable
+      }
+    };
+
+    fetchFullDistrictCrops();
 
     return () => {
       isMounted = false;
