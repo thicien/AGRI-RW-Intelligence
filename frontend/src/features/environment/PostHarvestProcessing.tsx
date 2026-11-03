@@ -18,7 +18,7 @@ import {
   TrendingUp, BarChart3, Compass, Check, Search, Layers,
   Thermometer, AlertTriangle, Snowflake, Sparkles, Building2,
   Calendar, CheckCircle2, ChevronDown, Eye, SlidersHorizontal,
-  Target, ShieldCheck, Box, Flame, ArrowRight
+  Target, Box, Flame, ArrowRight
 } from 'lucide-react';
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, 
@@ -1032,24 +1032,6 @@ export default function PostHarvestProcessing() {
       <div className="space-y-10">
         {/* SECTION 1: NATIONAL POST-HARVEST SUMMARY CARDS */}
         <section id="overview" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-text-main uppercase tracking-wider flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 bg-agriculture rounded-sm"></span>
-              <span>1. National Post-Harvest & Storage Overview</span>
-            </h2>
-            <div className="text-xs text-muted flex items-center space-x-3">
-              <span className="flex items-center">
-                <CheckCircle2 className="w-3.5 h-3.5 text-agriculture mr-1" />
-                Coverage: <strong className="ml-1 text-text-main">30 of 30 Districts (100%)</strong>
-              </span>
-              <span className="text-border-main">|</span>
-              <span className="flex items-center">
-                <Database className="w-3.5 h-3.5 text-primary mr-1" />
-                Documented Facilities: <strong className="ml-1 text-text-main">{facilitiesList.length} Facilities (100% Verified)</strong>
-              </span>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Documented Storage Capacity */}
             <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
@@ -1136,40 +1118,6 @@ export default function PostHarvestProcessing() {
             </div>
           </div>
 
-          {/* Sub-indicators: District Coverage & Facility Status Coverage */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-surface border border-border-main rounded-xl p-3 flex items-center justify-between text-xs shadow-xs">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded bg-emerald-50 text-agriculture border border-emerald-200">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-semibold text-text-main">District Infrastructure Coverage</div>
-                  <div className="text-[11px] text-muted">30 of 30 administrative districts documented with seasonal data and facilities</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-base font-bold text-agriculture font-mono">100%</span>
-                <div className="text-[10px] text-muted">Full National Frame</div>
-              </div>
-            </div>
-
-            <div className="bg-surface border border-border-main rounded-xl p-3 flex items-center justify-between text-xs shadow-xs">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded bg-cyan-50 text-cyan-700 border border-cyan-200">
-                  <Database className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-semibold text-text-main">Facility Status & Registry Coverage</div>
-                  <div className="text-[11px] text-muted">97 distinct facilities with recorded operational status, coordinates, and operators</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-base font-bold text-cyan-600 font-mono">100%</span>
-                <div className="text-[10px] text-muted">Verified Georeferenced</div>
-              </div>
-            </div>
-          </div>
 
           {/* INTERACTIVE RWANDA POST-HARVEST MAP & DISTRICT PROFILE DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
