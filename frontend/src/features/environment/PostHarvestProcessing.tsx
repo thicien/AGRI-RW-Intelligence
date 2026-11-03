@@ -882,7 +882,7 @@ export default function PostHarvestProcessing() {
 
       {/* 2. UNIFIED MASTER FILTER BAR */}
       <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
           {/* A. Agricultural Season */}
           <div className="space-y-1">
             <label className="text-[11px] font-semibold text-muted flex items-center">
@@ -964,25 +964,6 @@ export default function PostHarvestProcessing() {
             </select>
           </div>
 
-          {/* E. Geographic Scope */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-muted flex items-center">
-              <MapPin className="w-3 h-3 mr-1 text-agriculture" />
-              Geographic Scope
-            </label>
-            <select
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.target.value)}
-              className="w-full bg-background text-text-main border border-border-main rounded-lg px-2.5 py-1.5 font-medium focus:ring-2 focus:ring-agriculture focus:outline-none"
-            >
-              <option value="ALL">All Districts (National View)</option>
-              <option value="Kigali City">Kigali City</option>
-              <option value="Northern Province">Northern Province</option>
-              <option value="Southern Province">Southern Province</option>
-              <option value="Eastern Province">Eastern Province</option>
-              <option value="Western Province">Western Province</option>
-            </select>
-          </div>
 
           {/* F. Comparison Season with Compare Season Button */}
           <div className="space-y-1.5">
