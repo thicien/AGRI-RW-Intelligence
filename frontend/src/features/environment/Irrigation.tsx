@@ -94,7 +94,7 @@ export default function Irrigation() {
   const [showFacilityMarkers, setShowFacilityMarkers] = useState<boolean>(true);
   const [searchDistrict, setSearchDistrict] = useState<string>('');
   const [facilitySearch, setFacilitySearch] = useState<string>('');
-  const [rankingFilter, setRankingFilter] = useState<'ALL' | 'TOP_IRRIGATED' | 'HIGH_COVERAGE' | 'EXPANDING' | 'DECLINING' | 'CRITICAL_GAP'>('ALL');
+  const [rankingFilter, setRankingFilter] = useState<'ALL' | 'TOP_IRRIGATED' | 'HIGH_COVERAGE' | 'EXPANDING' | 'DECLINING' | 'CRITICAL_GAP' | 'FACILITIES'>('ALL');
 
   // Selected District for Side Panel
   const [selectedDistrictName, setSelectedDistrictName] = useState<string>('Nyagatare');
@@ -117,6 +117,7 @@ export default function Irrigation() {
   const selectedDistrictNameRef = useRef<string>('Nyagatare');
   const geojsonLoadedRef = useRef<boolean>(false);
   const activeIndicatorRef = useRef<IrrigationIndicatorType>('coverage_pct');
+  const facilitiesSectionRef = useRef<HTMLDivElement | null>(null);
 
   // 1. Fetch Decision Workspace Data from Backend
   const fetchWorkspaceData = async () => {
@@ -598,7 +599,7 @@ export default function Irrigation() {
       let matchTab = true;
       if (rankingFilter === 'TOP_IRRIGATED') matchTab = (d.area_irrigated_ha || 0) >= 1500;
       if (rankingFilter === 'HIGH_COVERAGE') matchTab = (d.coverage_pct || 0) >= 2.5;
-      if (rankingFilter === 'EXPANDING') matchTab = (d.irrigated_change_pct ?? 0) >= 8;
+      if (rankingFilter === 'EXPANDING' || rankingFilter === 'FACILITIES') matchTab = (d.facility_count || 0) > 0;
       if (rankingFilter === 'DECLINING') matchTab = (d.irrigated_change_pct ?? 0) <= -5;
       if (rankingFilter === 'CRITICAL_GAP') matchTab = (d.coverage_pct || 0) < 1.5 && (d.cultivated_area_ha || 0) > 40000;
 
@@ -1325,12 +1326,19 @@ export default function Irrigation() {
                 { id: 'ALL', label: 'All' },
                 { id: 'TOP_IRRIGATED', label: 'Top Irrigated' },
                 { id: 'HIGH_COVERAGE', label: 'High Coverage' },
-                { id: 'EXPANDING', label: 'Expanding' },
+                { id: 'FACILITIES', label: 'Irrigation Facilities' },
                 { id: 'CRITICAL_GAP', label: 'Critical Gap' },
               ].map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setRankingFilter(tab.id as any)}
+                  onClick={() => {
+                    setRankingFilter(tab.id as any);
+                    if (tab.id === 'FACILITIES') {
+                      setTimeout(() => {
+                        facilitiesSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 80);
+                    }
+                  }}
                   className={`px-2.5 py-1 rounded-lg transition-all ${
                     rankingFilter === tab.id
                       ? 'bg-cyan-700 text-white shadow-xs'
@@ -1419,84 +1427,103 @@ export default function Irrigation() {
         </div>
       </div>
 
-      {/* 7. National Irrigation Facilities & Infrastructure Directory */}
-      <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-600" />
-              <h2 className="text-base font-extrabold text-text-main uppercase tracking-wider">
-                National Irrigation Facilities & Schemes Directory
-              </h2>
+      {/* 7. National Irrigation Facilities & Infrastructure Directory (Visible only when Irrigation Facilities tab is active) */}
+      {rankingFilter === 'FACILITIES' && (
+        <div 
+          ref={facilitiesSectionRef} 
+          id="facilities-section" 
+          className="bg-surface border-2 border-cyan-500/40 rounded-2xl p-6 shadow-md space-y-4 animate-in fade-in slide-in-from-top-4 duration-300"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-blue-600" />
+                <h2 className="text-base font-extrabold text-text-main uppercase tracking-wider">
+                  National Irrigation Facilities & Schemes Directory
+                </h2>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 border border-cyan-200">
+                  {filteredFacilitiesTable.length} Documented Schemes
+                </span>
+              </div>
+              <p className="text-xs text-muted mt-0.5">
+                Searchable inventory of documented public and cooperative irrigation schemes recorded in engineering databases.
+              </p>
             </div>
-            <p className="text-xs text-muted mt-0.5">
-              Searchable inventory of documented public and cooperative irrigation schemes recorded in engineering databases.
-            </p>
+
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="text"
+                  value={facilitySearch}
+                  onChange={(e) => setFacilitySearch(e.target.value)}
+                  placeholder="Search scheme name, water source, operator..."
+                  className="bg-background border border-border-main rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-main focus:outline-none focus:border-cyan-600 w-64"
+                />
+              </div>
+              <button
+                onClick={() => setRankingFilter('ALL')}
+                className="px-2.5 py-1.5 rounded-xl border border-border-main bg-background hover:bg-slate-100 text-xs font-bold text-muted hover:text-text-main transition-all flex items-center gap-1 shadow-xs"
+                title="Close facilities directory"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Close</span>
+              </button>
+            </div>
           </div>
 
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              type="text"
-              value={facilitySearch}
-              onChange={(e) => setFacilitySearch(e.target.value)}
-              placeholder="Search scheme name, water source, operator..."
-              className="bg-background border border-border-main rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-main focus:outline-none focus:border-cyan-600 w-64"
-            />
-          </div>
-        </div>
-
-        {/* Facilities Table */}
-        <div className="overflow-x-auto border border-border-main rounded-xl custom-scrollbar max-h-96">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-background/80 text-muted font-bold uppercase tracking-wider text-[10px] border-b border-border-main sticky top-0 backdrop-blur-xs">
-              <tr>
-                <th className="p-3">Scheme Name</th>
-                <th className="p-3">District</th>
-                <th className="p-3">Facility Type</th>
-                <th className="p-3">Water Source</th>
-                <th className="p-3 text-right">Command Area</th>
-                <th className="p-3 text-right">Irrigable Area</th>
-                <th className="p-3 text-right">Beneficiaries</th>
-                <th className="p-3">Operator</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-main">
-              {filteredFacilitiesTable.map(fac => (
-                <tr key={fac.id} className="hover:bg-background/50 transition-colors">
-                  <td className="p-3 font-bold text-text-main">{fac.name}</td>
-                  <td className="p-3 text-muted">{fac.district_name}</td>
-                  <td className="p-3">
-                    <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 text-[10px] font-bold">
-                      {fac.irrigation_type.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="p-3 text-muted font-medium">{fac.water_source || 'Stream Intake'}</td>
-                  <td className="p-3 text-right font-bold text-text-main">{Math.round(fac.area_command_ha).toLocaleString()} ha</td>
-                  <td className="p-3 text-right text-muted">{Math.round(fac.area_irrigable_ha).toLocaleString()} ha</td>
-                  <td className="p-3 text-right font-semibold text-cyan-800">{fac.beneficiaries_count.toLocaleString()}</td>
-                  <td className="p-3 text-muted max-w-[140px] truncate" title={fac.operator_name}>{fac.operator_name}</td>
-                  <td className="p-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      {fac.status}
-                    </span>
-                  </td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => handleFocusFacility(fac)}
-                      className="px-2 py-1 rounded bg-slate-100 hover:bg-cyan-100 text-cyan-800 text-[10px] font-bold transition-all"
-                    >
-                      Locate
-                    </button>
-                  </td>
+          {/* Facilities Table */}
+          <div className="overflow-x-auto border border-border-main rounded-xl custom-scrollbar max-h-96">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-background/80 text-muted font-bold uppercase tracking-wider text-[10px] border-b border-border-main sticky top-0 backdrop-blur-xs">
+                <tr>
+                  <th className="p-3">Scheme Name</th>
+                  <th className="p-3">District</th>
+                  <th className="p-3">Facility Type</th>
+                  <th className="p-3">Water Source</th>
+                  <th className="p-3 text-right">Command Area</th>
+                  <th className="p-3 text-right">Irrigable Area</th>
+                  <th className="p-3 text-right">Beneficiaries</th>
+                  <th className="p-3">Operator</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-center">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border-main">
+                {filteredFacilitiesTable.map(fac => (
+                  <tr key={fac.id} className="hover:bg-background/50 transition-colors">
+                    <td className="p-3 font-bold text-text-main">{fac.name}</td>
+                    <td className="p-3 text-muted">{fac.district_name}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 text-[10px] font-bold">
+                        {fac.irrigation_type.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="p-3 text-muted font-medium">{fac.water_source || 'Stream Intake'}</td>
+                    <td className="p-3 text-right font-bold text-text-main">{Math.round(fac.area_command_ha).toLocaleString()} ha</td>
+                    <td className="p-3 text-right text-muted">{Math.round(fac.area_irrigable_ha).toLocaleString()} ha</td>
+                    <td className="p-3 text-right font-semibold text-cyan-800">{fac.beneficiaries_count.toLocaleString()}</td>
+                    <td className="p-3 text-muted max-w-[140px] truncate" title={fac.operator_name}>{fac.operator_name}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        {fac.status}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => handleFocusFacility(fac)}
+                        className="px-2 py-1 rounded bg-slate-100 hover:bg-cyan-100 text-cyan-800 text-[10px] font-bold transition-all"
+                      >
+                        Locate
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 8. Potential Irrigation Intervention Opportunities (Evidence-Based Screening) */}
       <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4">
