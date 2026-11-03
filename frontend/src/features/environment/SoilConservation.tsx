@@ -10,8 +10,8 @@ import {
 } from '../../data/rwandaMapData';
 import { apiUrl } from '../../config/api';
 import { 
-  Layers, ShieldAlert, Sprout, AlertTriangle, CheckCircle2, 
-  MapPin, RefreshCw, FileText, Filter, Download, 
+  Layers, Sprout, AlertTriangle, CheckCircle2, 
+  MapPin, RefreshCw, FileText, Download, 
   Database, Award, ChevronRight, ArrowUpRight, ArrowDownRight, 
   Info, HelpCircle, Sun, Activity, Zap, ExternalLink, Mountain, Shovel,
   TrendingUp, BarChart3, Compass, Check, Search, Eye, SlidersHorizontal,
@@ -930,16 +930,6 @@ export default function SoilConservation() {
 
       {/* 2. Unified Master Filter Bar */}
       <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm text-text-main">
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-main text-xs text-muted font-bold">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-emerald-600" />
-            <span className="uppercase tracking-wider">NATIONAL SOIL & FERTILITY FILTER CONTROLS</span>
-          </div>
-          <span className="text-[11px] font-normal text-muted italic">
-            Filters synchronize across map, KPI cards, charts, and ranked league tables.
-          </span>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Filter 1: Agricultural Season */}
           <div className="space-y-1">
@@ -1086,29 +1076,6 @@ export default function SoilConservation() {
         </div>
       </div>
 
-      {/* 3. Mandatory Pre-Feasibility & Agronomic Safeguard Banner */}
-      <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/80 flex items-start gap-3.5 shadow-xs text-amber-900">
-        <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div className="space-y-1 text-xs">
-          <div className="font-bold text-amber-950 uppercase tracking-wide flex items-center gap-2">
-            METHODOLOGICAL SAFEGUARD: INDICATOR SEPARATION & EVIDENCE REQUIREMENT
-          </div>
-          <p className="text-amber-900/90 leading-relaxed">
-            <strong>Distinguish between reported practice adoption, laboratory-measured soil properties, and modelled terrain hazard:</strong> A district with high fertilizer adoption does not automatically possess healthy soil; likewise, low adoption of terraces is not identical to measured severe erosion.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2 text-[11px]">
-            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
-              <span className="font-bold text-amber-950">1. Reported Practices:</span> Survey-declared farm practices (NISR SAS: terraces, agroforestry, organic manure, mineral fertilizer).
-            </div>
-            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
-              <span className="font-bold text-amber-950">2. Measured Soil Condition:</span> Laboratory tested parameters (RAB archives: pH, organic carbon %, CEC, lime requirement).
-            </div>
-            <div className="p-2.5 rounded-xl bg-amber-100/60 border border-amber-300/40 text-amber-900">
-              <span className="font-bold text-amber-950">3. Modelled Hazard:</span> Simulation index based on terrain slope gradient (DEM), rainfall erosivity, and soil erodibility.
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* 4. National Soil & Fertility Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
