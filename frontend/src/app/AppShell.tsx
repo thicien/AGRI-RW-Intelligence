@@ -43,26 +43,11 @@ export default function AppShell() {
       title: 'MAIN DASHBOARDS',
       items: [
         { to: '/admin/dashboard', label: 'Executive Dashboard', icon: LayoutDashboard, minRoles: [] },
-      ]
-    },
-    {
-      title: 'AGRICULTURAL SECTORS',
-      items: [
         { to: '/admin/crops', label: 'Crops & Seasons production', icon: Leaf, minRoles: [] },
-      ]
-    },
-    {
-      title: 'OPPORTUNITY ASSESSMENT',
-      items: [
         { to: '/admin/irrigation', label: 'Irrigation Opportunity', icon: Droplets, minRoles: ['COOPERATIVE_FARMER'] },
         { to: '/admin/soil-conservation', label: 'Soil & Fertility', icon: Layers, minRoles: ['COOPERATIVE_FARMER'] },
         { to: '/admin/post-harvest', label: 'Post-Harvest & Storage', icon: Package, minRoles: [] },
         { to: '/admin/imports-exports', label: 'Export Opportunities', icon: Globe, minRoles: ['COOPERATIVE_FARMER'] },
-      ]
-    },
-    {
-      title: 'REPORTS & ACCOUNT',
-      items: [
         { to: '/admin/reports', label: 'Evidence Reports & Exports', icon: FileText, minRoles: [] },
         { to: '/admin/profile', label: 'Planner Profile & Security', icon: User, minRoles: [] },
       ]
@@ -108,9 +93,11 @@ export default function AppShell() {
         <nav className="flex-1 py-4 px-3 overflow-y-auto custom-scrollbar space-y-5 relative z-10">
           {visibleSections.map((section, idx) => (
             <div key={idx}>
-              <div className="px-3 text-[10px] font-extrabold text-[#7CB998] uppercase tracking-wider mb-1.5 drop-shadow-xs">
-                {section.title}
-              </div>
+              {section.title && (
+                <div className="px-3 text-[10px] font-extrabold text-[#7CB998] uppercase tracking-wider mb-1.5 drop-shadow-xs">
+                  {section.title}
+                </div>
+              )}
               <div className="space-y-1">
                 {section.items.map((item) => {
                   const Icon = item.icon;
