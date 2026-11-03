@@ -632,6 +632,15 @@ export default function ExportImportIntelligence() {
     }
   };
 
+  // Resize map canvas when switching back to overview tab
+  useEffect(() => {
+    if (activeSection === 'overview' && mapInstance.current) {
+      setTimeout(() => {
+        mapInstance.current?.resize();
+      }, 50);
+    }
+  }, [activeSection]);
+
   // Initialize MapLibre GL Map
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
@@ -936,12 +945,10 @@ export default function ExportImportIntelligence() {
                 key={tab.id}
                 onClick={() => {
                   setActiveSection(tab.id);
-                  const el = document.getElementById(tab.id);
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className={`inline-flex items-center px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                className={`inline-flex items-center px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-50 text-agriculture border border-emerald-200 shadow-sm font-semibold'
+                    ? 'bg-emerald-50 text-agriculture border border-emerald-300 shadow-xs font-bold ring-1 ring-emerald-400'
                     : 'text-muted hover:text-text-main hover:bg-slate-100'
                 }`}
               >
@@ -1060,7 +1067,7 @@ export default function ExportImportIntelligence() {
       {/* MAIN ANALYTICAL BODY */}
       <div className="space-y-10">
         {/* SECTION 1: NATIONAL EXPORT PERFORMANCE OVERVIEW */}
-        <section id="overview" className="space-y-4">
+        <section id="overview" className={`space-y-4 ${activeSection === 'overview' ? '' : 'hidden'}`}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-text-main uppercase tracking-wider flex items-center space-x-2">
               <span className="w-2.5 h-2.5 bg-agriculture rounded-sm"></span>
@@ -1578,7 +1585,8 @@ export default function ExportImportIntelligence() {
         </section>
 
         {/* SECTION 2: EXPORT COMMODITY CATALOGUE & QUALITY SPECIFICATIONS */}
-        <section id="catalogue" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'catalogue' && (
+          <section id="catalogue" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1730,10 +1738,12 @@ export default function ExportImportIntelligence() {
               </div>
             </div>
           )}
-        </section>
+          </section>
+        )}
 
         {/* SECTION 3: INTERNATIONAL EXPORT MARKETS */}
-        <section id="markets" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'markets' && (
+          <section id="markets" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1794,10 +1804,12 @@ export default function ExportImportIntelligence() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 4: SEASONAL EXPORT TRENDS */}
-        <section id="trends" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'trends' && (
+          <section id="trends" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1842,10 +1854,12 @@ export default function ExportImportIntelligence() {
               <span className="text-amber-700 font-medium">Historical trends use dated shipment records. Trade periods are matched to official customs reporting dates.</span>
             </div>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 5: EXPORT EXIT HUBS & INFRASTRUCTURE */}
-        <section id="hubs" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'hubs' && (
+          <section id="hubs" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1889,10 +1903,12 @@ export default function ExportImportIntelligence() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 6: DISTRICT EXPORT CONTRIBUTIONS LEAGUE TABLE */}
-        <section id="districts" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'districts' && (
+          <section id="districts" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1995,10 +2011,12 @@ export default function ExportImportIntelligence() {
               </tbody>
             </table>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 7: COMMODITY EARNINGS RANKINGS */}
-        <section id="rankings" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'rankings' && (
+          <section id="rankings" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2071,10 +2089,12 @@ export default function ExportImportIntelligence() {
               </tbody>
             </table>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 8: EXPORT SUPPORTING FACILITIES REGISTER */}
-        <section id="facilities" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'facilities' && (
+          <section id="facilities" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2167,9 +2187,151 @@ export default function ExportImportIntelligence() {
             </table>
           </div>
         </section>
+        )}
 
-        {/* SECTION 9: STRATEGIC OPPORTUNITIES & PRE-FEASIBILITY SCREENING */}
-        <section id="opportunities" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm">
+        {/* SECTION 9: SUPPLY, QUALITY & EXPORT READINESS FRAMEWORK */}
+        {activeSection === 'readiness' && (
+          <section id="readiness" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
+              <div>
+                <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
+                  National Quality & Compliance Architecture
+                </div>
+                <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
+                  <ShieldCheck className="w-5 h-5 text-agriculture" />
+                  <span>9. Supply, Quality & Export Readiness Framework</span>
+                </h2>
+                <p className="text-xs text-muted">
+                  Institutional standards architecture assessing export readiness across 5 structural pillars: supply consistency, quality compliance, processing, cold-chain logistics, and target market protocols.
+                </p>
+              </div>
+            </div>
+
+            {/* 5-Pillar Architecture Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {[
+                { title: '1. Supply Pillar', desc: 'Commercial surplus volume, cooperative density, and harvest availability.', score: '88/100', color: 'text-agriculture', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+                { title: '2. Quality Pillar', desc: 'Moisture control, laboratory grading, and GlobalGAP/Organic certifications.', score: '92/100', color: 'text-primary', bg: 'bg-blue-50', border: 'border-blue-200' },
+                { title: '3. Processing Pillar', desc: 'Primary washing, sorting, pulp processing, and food-grade packaging capability.', score: '84/100', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200' },
+                { title: '4. Logistics Pillar', desc: 'Refrigerated transit, exit hub proximity, and air/dry border corridor access.', score: '79/100', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
+                { title: '5. Market Pillar', desc: 'Trade agreements, tariff protocol alignment, phytosanitary certificates, and buyer contracts.', score: '91/100', color: 'text-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-200' },
+              ].map((pillar, i) => (
+                <div key={i} className={`p-3.5 rounded-xl border ${pillar.bg} ${pillar.border} space-y-1.5 shadow-xs`}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-xs text-text-main">{pillar.title}</span>
+                    <span className={`font-mono font-bold text-xs ${pillar.color}`}>{pillar.score}</span>
+                  </div>
+                  <p className="text-[11px] text-muted leading-relaxed">{pillar.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Priority Export Crops: Quality & Phytosanitary Matrix */}
+            <div className="bg-background border border-border-main rounded-xl p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <h3 className="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-1.5">
+                  <Package className="w-4 h-4 text-agriculture" />
+                  <span>Priority Export Crops: Quality & Phytosanitary Specifications</span>
+                </h3>
+                <span className="text-[11px] text-muted">
+                  Standards aligned with NAEB, RSB, EU TRACES & EAC Phytosanitary Framework
+                </span>
+              </div>
+
+              <div className="overflow-x-auto rounded-lg border border-border-main">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-surface text-muted uppercase font-semibold border-b border-border-main">
+                    <tr>
+                      <th className="py-2.5 px-3">Commodity</th>
+                      <th className="py-2.5 px-3">Category</th>
+                      <th className="py-2.5 px-3">Quality Grade</th>
+                      <th className="py-2.5 px-3">Moisture Limit</th>
+                      <th className="py-2.5 px-3">Required Packaging</th>
+                      <th className="py-2.5 px-3">Key Certifications</th>
+                      <th className="py-2.5 px-3 text-center">Readiness Index</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-main">
+                    {commoditiesCatalogue.map((c: CommodityProfile) => {
+                      const avgPillars = c.quality_standards?.readinessPillars ? Math.round(
+                        (c.quality_standards.readinessPillars.supply +
+                         c.quality_standards.readinessPillars.quality +
+                         c.quality_standards.readinessPillars.processing +
+                         c.quality_standards.readinessPillars.logistics +
+                         c.quality_standards.readinessPillars.market) / 5
+                      ) : 85;
+                      return (
+                        <tr key={c.id} className="hover:bg-surface/60 transition">
+                          <td className="py-2.5 px-3 font-bold text-text-main">{c.product_name}</td>
+                          <td className="py-2.5 px-3 text-muted">{c.product_category}</td>
+                          <td className="py-2.5 px-3 font-medium text-text-main">{c.quality_standards?.qualityGrade || 'Grade A'}</td>
+                          <td className="py-2.5 px-3 font-mono text-muted">{c.quality_standards?.moistureLimit || '≤ 12.5%'}</td>
+                          <td className="py-2.5 px-3 text-muted">{c.quality_standards?.packaging || 'Standard Export'}</td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex flex-wrap gap-1">
+                              {(c.quality_standards?.certifications || ['GlobalGAP', 'Organic']).map((cert: string, ci: number) => (
+                                <span key={ci} className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-agriculture border border-emerald-200">
+                                  {cert}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="font-mono font-bold text-agriculture px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200">
+                              {avgPillars}/100
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Sourcing Districts Readiness Benchmark */}
+            <div className="bg-background border border-border-main rounded-xl p-4 space-y-3">
+              <h3 className="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-amber-600" />
+                <span>District Export Readiness & Quality Infrastructure Benchmark ({selectedSeason})</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {districts.slice(0, 6).map((d) => (
+                  <div key={d.id} className="p-3 rounded-xl bg-surface border border-border-main space-y-2 shadow-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-sm text-text-main">{d.district_name}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200">
+                        Score: {d.export_readiness_score}/100
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-border-main">
+                      <div>
+                        <span className="text-muted block text-[10px]">Tier</span>
+                        <strong className="text-text-main">{d.export_tier.replace(/_/g, ' ')}</strong>
+                      </div>
+                      <div>
+                        <span className="text-muted block text-[10px]">Ready Cooperatives</span>
+                        <strong className="text-agriculture">{d.cooperatives_export_ready_count} Cooperatives</strong>
+                      </div>
+                      <div>
+                        <span className="text-muted block text-[10px]">Certified Farmland</span>
+                        <strong className="text-text-main">{d.quality_certification_pct}%</strong>
+                      </div>
+                      <div>
+                        <span className="text-muted block text-[10px]">Nearest Exit</span>
+                        <strong className="text-muted truncate">{d.nearest_exit_hub} ({d.distance_to_exit_km}km)</strong>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* SECTION 10: STRATEGIC OPPORTUNITIES & PRE-FEASIBILITY SCREENING */}
+        {activeSection === 'opportunities' && (
+          <section id="opportunities" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
@@ -2177,7 +2339,7 @@ export default function ExportImportIntelligence() {
               </div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
                 <Target className="w-5 h-5 text-agriculture" />
-                <span>9. Strategic Planning & Export Investment Opportunities</span>
+                <span>10. Strategic Opportunities & Reports</span>
               </h2>
               <p className="text-xs text-muted">
                 Evidence-based screening signals identifying high-potential product-market pairings requiring feasibility audits.
@@ -2233,7 +2395,8 @@ export default function ExportImportIntelligence() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        )}
       </div>
 
       {/* FOOTER */}
