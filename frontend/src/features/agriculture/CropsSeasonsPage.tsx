@@ -716,16 +716,6 @@ export default function CropsSeasonsPage() {
 
       {/* 2. Unified Master Filter Bar */}
       <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-main">
-          <div className="flex items-center gap-2 text-xs font-bold text-text-main uppercase tracking-wider">
-            <SlidersHorizontal className="w-4 h-4 text-primary" />
-            Decision-Making Parameters (Controls All Visualizations)
-          </div>
-          <span className="text-[11px] text-muted">
-            All maps, charts, comparisons, and district dossiers sync to these 4 parameters.
-          </span>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           
           {/* Season Selector */}
@@ -1433,49 +1423,6 @@ export default function CropsSeasonsPage() {
           </div>
         </div>
 
-        {/* Multi-Season Trend Chart */}
-        <div className="bg-surface border border-border-main rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-muted">Historical Trajectory</div>
-              <h4 className="text-base font-extrabold text-text-main">
-                {selectedCrop} Production Over Monitored Seasons (Tonnes)
-              </h4>
-            </div>
-
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-background border border-border-main text-muted">
-              Chronological NISR Dataset
-            </span>
-          </div>
-
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={seasonalTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="cropProdGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2E7D32" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#2E7D32" stopOpacity={0.0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="season_code" tick={{ fontSize: 11 }} stroke="#64748B" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#64748B" tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} />
-                <RechartsTooltip 
-                  formatter={(val: any) => [`${Number(val).toLocaleString()} MT`, 'Production']}
-                  labelFormatter={(lbl) => `Season ${lbl}`}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="production_tonnes" 
-                  stroke="#2E7D32" 
-                  strokeWidth={2.5}
-                  fillOpacity={1} 
-                  fill="url(#cropProdGradient)" 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
         {/* Alerts & Stability Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -43,30 +43,8 @@ export default function AppShell() {
       title: 'MAIN DASHBOARDS',
       items: [
         { to: '/admin/dashboard', label: 'Executive Dashboard', icon: LayoutDashboard, minRoles: [] },
-        { to: '/admin/analytics', label: 'Seasonal Analytics', icon: BarChart3, minRoles: [] },
-      ]
-    },
-    {
-      title: 'AGRICULTURAL SECTORS',
-      items: [
-        { to: '/admin/crops', label: 'Crops & Seasons (2014-2026A)', icon: Leaf, minRoles: [] },
-        { to: '/admin/facilities', label: 'Agricultural Facilities Map', icon: Building2, minRoles: [] },
-      ]
-    },
-    {
-      title: 'OPPORTUNITY ASSESSMENT',
-      items: [
-        { to: '/admin/irrigation', label: 'Irrigation Opportunity', icon: Droplets, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/soil-conservation', label: 'Soil & Fertility', icon: Layers, minRoles: ['COOPERATIVE_FARMER'] },
-        { to: '/admin/post-harvest', label: 'Post-Harvest & Storage', icon: Package, minRoles: [] },
+        { to: '/admin/crops', label: 'Crops & Seasons production', icon: Leaf, minRoles: [] },
         { to: '/admin/imports-exports', label: 'Export Opportunities', icon: Globe, minRoles: ['COOPERATIVE_FARMER'] },
-      ]
-    },
-    {
-      title: 'REPORTS & ACCOUNT',
-      items: [
-        { to: '/admin/reports', label: 'Evidence Reports & Exports', icon: FileText, minRoles: [] },
-        { to: '/admin/profile', label: 'Planner Profile & Security', icon: User, minRoles: [] },
       ]
     }
   ];

@@ -6,13 +6,11 @@ import LoginPage from '../features/auth/LoginPage';
 import CropsSeasonsPage from '../features/agriculture/CropsSeasonsPage';
 import ProfilePage from '../features/profile/ProfilePage';
 import RolesPage from '../features/admin/RolesPage';
-import AgriculturalIntelligenceHubPage from '../features/intelligence/AgriculturalIntelligenceHubPage';
 import Irrigation from '../features/environment/Irrigation';
 import SoilConservation from '../features/environment/SoilConservation';
 import PostHarvestProcessing from '../features/environment/PostHarvestProcessing';
 import ExportImportIntelligence from '../features/trade/ExportImportIntelligence';
 import DataManagementPage from '../features/admin/DataManagementPage';
-import AgriculturalFacilitiesPage from '../features/facilities/AgriculturalFacilitiesPage';
 import DistrictLayout from '../features/district/DistrictLayout';
 import DistrictOverviewPage from '../features/district/DistrictOverviewPage';
 import DistrictProductivityPage from '../features/district/DistrictProductivityPage';
@@ -258,11 +256,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'analytics',
-        element: <AgriculturalIntelligenceHubPage />,
+        element: <Navigate to="/admin/crops" replace />,
       },
       {
         path: 'intelligence-hub',
-        element: <AgriculturalIntelligenceHubPage />,
+        element: <Navigate to="/admin/dashboard" replace />,
       },
       {
         path: 'irrigation',
@@ -282,15 +280,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'facilities',
-        element: <AgriculturalFacilitiesPage />,
+        element: <Navigate to="/admin/dashboard" replace />,
       },
       {
         path: 'environment',
-        element: <AgriculturalIntelligenceHubPage />,
+        element: <Navigate to="/admin/dashboard" replace />,
       },
       {
         path: 'energy',
-        element: <AgriculturalIntelligenceHubPage />,
+        element: <Navigate to="/admin/dashboard" replace />,
       },
       {
         path: 'imports-exports',
