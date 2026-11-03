@@ -12,10 +12,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, PRESET_PERSONAS } from '../features/auth/AuthContext';
 
 export default function AppShell() {
-  const { currentUser, switchPersona, updateGeographicScope, canAccessRoute } = useAuth();
+  const { currentUser, switchPersona, canAccessRoute } = useAuth();
   const location = useLocation();
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
-  const [showScopeMenu, setShowScopeMenu] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
     return localStorage.getItem('agrilens_user_avatar') || null;
@@ -173,76 +172,6 @@ export default function AppShell() {
           {/* Right Controls */}
           <div className="flex items-center gap-3">
             
-            {/* Geographic Scope Badge & Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowScopeMenu(!showScopeMenu)}
-                className="flex items-center gap-2 bg-background border border-border-main px-3 py-1.5 rounded-lg text-xs font-semibold hover:border-primary transition-all"
-              >
-                <MapPin className="w-3.5 h-3.5 text-primary" />
-                <span className="text-muted font-normal hidden sm:inline">Jurisdiction:</span>
-                <span className="font-bold text-text-main">
-                  {currentUser.scopeLevel === 'DISTRICT' && currentUser.district 
-                    ? `${currentUser.district} District` 
-                    : (currentUser.scopeLevel === 'SECTOR' && currentUser.sector 
-                        ? `${currentUser.sector} Sector` 
-                        : 'Rwanda (National)')}
-                </span>
-                <ChevronDown className="w-3 h-3 text-muted ml-1" />
-              </button>
-
-              {showScopeMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-surface border border-border-main rounded-xl shadow-xl p-3 z-50 animate-in fade-in space-y-2">
-                  <div className="text-[11px] font-bold text-muted uppercase tracking-wider">
-                    Test Scoped Jurisdiction (ABAC)
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    <button
-                      onClick={() => { updateGeographicScope(null, null); setShowScopeMenu(false); }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded font-medium flex items-center justify-between ${!currentUser.district ? 'bg-primary text-white font-bold' : 'hover:bg-background'}`}
-                    >
-                      <span>Rwanda (National Scope)</span>
-                      {!currentUser.district && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => { updateGeographicScope('Nyagatare', null); setShowScopeMenu(false); }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded font-medium flex items-center justify-between ${currentUser.district === 'Nyagatare' ? 'bg-primary text-white font-bold' : 'hover:bg-background'}`}
-                    >
-                      <span>Nyagatare District (Eastern)</span>
-                      {currentUser.district === 'Nyagatare' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => { updateGeographicScope('Musanze', null); setShowScopeMenu(false); }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded font-medium flex items-center justify-between ${currentUser.district === 'Musanze' ? 'bg-primary text-white font-bold' : 'hover:bg-background'}`}
-                    >
-                      <span>Musanze District (Northern)</span>
-                      {currentUser.district === 'Musanze' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => { updateGeographicScope('Huye', null); setShowScopeMenu(false); }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded font-medium flex items-center justify-between ${currentUser.district === 'Huye' ? 'bg-primary text-white font-bold' : 'hover:bg-background'}`}
-                    >
-                      <span>Huye District (Southern)</span>
-                      {currentUser.district === 'Huye' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                  <div className="pt-2 border-t border-border-main text-[10px] text-muted leading-tight">
-                    *Changing district simulates administrative boundary checks. Out-of-scope queries trigger 403 Forbidden.
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Profile Link */}
-            <NavLink
-              to="/admin/profile"
-              className="p-1.5 px-3 rounded-xl text-slate-700 hover:text-emerald-700 hover:bg-slate-100 transition-colors border border-border-main hidden sm:flex items-center gap-1.5 text-xs font-bold"
-              title="View and edit profile / change password"
-            >
-              <User className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Profile</span>
-            </NavLink>
-
             {/* Persona Switcher Dropdown */}
             <div className="relative">
               <button
