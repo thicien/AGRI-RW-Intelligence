@@ -612,6 +612,15 @@ export default function PostHarvestProcessing() {
     }
   }, [choroplethDataMap, selectedDistrictName, layerConfig]);
 
+  // Resize map canvas when switching back to overview tab
+  useEffect(() => {
+    if (activeSection === 'overview' && mapInstance.current) {
+      setTimeout(() => {
+        mapInstance.current?.resize();
+      }, 50);
+    }
+  }, [activeSection]);
+
   // Update Facility Markers on the Map
   useEffect(() => {
     if (!mapInstance.current) return;
@@ -863,12 +872,10 @@ export default function PostHarvestProcessing() {
                 key={tab.id}
                 onClick={() => {
                   setActiveSection(tab.id);
-                  const el = document.getElementById(tab.id);
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className={`inline-flex items-center px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                className={`inline-flex items-center px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-50 text-agriculture border border-emerald-200 shadow-sm font-semibold'
+                    ? 'bg-emerald-50 text-agriculture border border-emerald-300 shadow-xs font-bold ring-1 ring-emerald-400'
                     : 'text-muted hover:text-text-main hover:bg-slate-100'
                 }`}
               >
@@ -1031,7 +1038,7 @@ export default function PostHarvestProcessing() {
       {/* MAIN ANALYTICAL BODY */}
       <div className="space-y-10">
         {/* SECTION 1: NATIONAL POST-HARVEST SUMMARY CARDS */}
-        <section id="overview" className="space-y-4">
+        <section id="overview" className={`space-y-4 ${activeSection === 'overview' ? '' : 'hidden'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Documented Storage Capacity */}
             <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
@@ -1478,7 +1485,8 @@ export default function PostHarvestProcessing() {
         </section>
 
         {/* SECTION 2: STORAGE & COLLECTION INFRASTRUCTURE ANALYSIS */}
-        <section id="infrastructure" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'infrastructure' && (
+          <section id="infrastructure" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1594,9 +1602,11 @@ export default function PostHarvestProcessing() {
             </div>
           </div>
         </section>
+        )}
 
         {/* SECTION 3: PRODUCTION VERSUS STORAGE CAPACITY GAP */}
-        <section id="gap_analysis" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'gap_analysis' && (
+          <section id="gap_analysis" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1">
@@ -1679,10 +1689,12 @@ export default function PostHarvestProcessing() {
               </p>
             </div>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 4: CROP-SPECIFIC POST-HARVEST INTELLIGENCE */}
-        <section id="crop_intelligence" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'crop_intelligence' && (
+          <section id="crop_intelligence" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1722,10 +1734,12 @@ export default function PostHarvestProcessing() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 5: SEASONAL POST-HARVEST TRENDS */}
-        <section id="seasonal_trends" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'seasonal_trends' && (
+          <section id="seasonal_trends" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1770,10 +1784,12 @@ export default function PostHarvestProcessing() {
               <span className="text-amber-800 font-medium">Historical trends use dated historical records. Missing data is distinct from zero capacity.</span>
             </div>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 6: DISTRICT POST-HARVEST PERFORMANCE RANKINGS LEAGUE TABLE */}
-        <section id="rankings" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'rankings' && (
+          <section id="rankings" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1882,10 +1898,12 @@ export default function PostHarvestProcessing() {
               </tbody>
             </table>
           </div>
-        </section>
+          </section>
+        )}
 
         {/* SECTION 7: NATIONAL POST-HARVEST FACILITY REGISTER */}
-        <section id="facility_register" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm">
+        {activeSection === 'facility_register' && (
+          <section id="facility_register" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1996,10 +2014,12 @@ export default function PostHarvestProcessing() {
               Showing first 30 of {filteredFacilityRegister.length} matching facility records.
             </div>
           )}
-        </section>
+          </section>
+        )}
 
         {/* SECTION 8: FUTURE PLANNING & POST-HARVEST INVESTMENT OPPORTUNITIES */}
-        <section id="investment" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm">
+        {activeSection === 'investment' && (
+          <section id="investment" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
@@ -2092,7 +2112,8 @@ export default function PostHarvestProcessing() {
               ))}
             </div>
           </div>
-        </section>
+          </section>
+        )}
       </div>
 
       {/* FOOTER */}
