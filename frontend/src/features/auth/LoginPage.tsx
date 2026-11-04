@@ -74,12 +74,6 @@ export default function LoginPage() {
     }
   };
 
-  const setQuickCredentials = (em: string, pass: string) => {
-    setEmail(em);
-    setPassword(pass);
-    setErrors({});
-  };
-
   return (
     <div className="flex h-screen w-full bg-[#f3f7f4] font-sans">
       {/* Left Panel: Visual/Map (Hidden on small screens) - Forest Green Theme */}
@@ -248,91 +242,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Credentials Panel */}
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <div className="text-xs font-bold uppercase tracking-wider text-emerald-900/70 mb-3">
-              Quick Role Sign-In (Official Credentials):
-            </div>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setQuickCredentials('admin@agrilens.rw', 'Admin@2026!')}
-                className="w-full text-left p-2.5 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100/90 transition-colors flex items-center justify-between group cursor-pointer"
-              >
-                <div>
-                  <div className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
-                    <span>🌾</span>
-                    <span>National Agricultural Planner (Hon. Jean-Claude Musabyimana)</span>
-                  </div>
-                  <div className="text-[11px] text-emerald-800">
-                    admin@agrilens.rw
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-800 text-white shadow-xs">
-                  Fill Credentials
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setQuickCredentials('sysadmin@agrilens.gov.rw', 'Admin@2026!')}
-                className="w-full text-left p-2.5 rounded-lg border border-slate-300 bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center justify-between group cursor-pointer"
-              >
-                <div>
-                  <div className="font-bold text-xs text-emerald-400 flex items-center gap-1.5">
-                    <span>👑</span>
-                    <span>Platform System Administrator (Technical Governance Center)</span>
-                  </div>
-                  <div className="text-[11px] text-slate-300">
-                    sysadmin@agrilens.gov.rw
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-extrabold shadow-xs">
-                  Fill Credentials
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setQuickCredentials('datamanager@agrilens.gov.rw', 'Data@2026!')}
-                className="w-full text-left p-2.5 rounded-lg border border-emerald-200 bg-[#f0fdf4] hover:bg-emerald-100/70 transition-colors flex items-center justify-between group cursor-pointer"
-              >
-                <div>
-                  <div className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
-                    <span>📊</span>
-                    <span>Data Manager (National Data Pipeline & Governance)</span>
-                  </div>
-                  <div className="text-[11px] text-emerald-800">
-                    datamanager@agrilens.gov.rw
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-emerald-900 border border-emerald-300 shadow-2xs">
-                  Fill Credentials
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setQuickCredentials('officer.musanze@minagri.gov.rw', 'Musanze@2026!')}
-                className="w-full text-left p-2.5 rounded-lg border border-slate-200 bg-[#fafcfa] hover:bg-emerald-50 transition-colors flex items-center justify-between group cursor-pointer"
-              >
-                <div>
-                  <div className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span>🥔</span>
-                    <span>District Agricultural Officer (Musanze District)</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    officer.musanze@minagri.gov.rw
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                  Fill Credentials
-                </span>
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
