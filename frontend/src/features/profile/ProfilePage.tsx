@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  UserCheck, ShieldCheck, Key, Lock, CheckCircle2, 
-  AlertTriangle, Save, User, Mail, Shield, Phone, 
-  Building2, MapPin, Eye, EyeOff, Calendar, Award,
+  Key, Lock, CheckCircle2, 
+  AlertTriangle, Save, User, Mail, Phone, 
+  Building2, MapPin, Eye, EyeOff, Calendar,
   Sparkles, Check, RefreshCw
 } from 'lucide-react';
 import { apiUrl } from '../../config/api';
@@ -199,48 +199,11 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 font-sans">
       
-      {/* 1. Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              National Agricultural Planner · Account & Identity Governance
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <UserCheck className="w-8 h-8 text-emerald-400" />
-              <span>Agricultural Planner Profile & Security</span>
-            </h1>
-            <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
-              Manage your personal profile picture, identity credentials, institutional contact details, and account security parameters.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
-            <span className="px-3.5 py-1.5 rounded-xl bg-slate-800/80 text-emerald-300 text-xs font-bold border border-slate-700 shadow-md flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Level 4 Clearance</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column: Profile Photo & Identity Overview */}
-        <div className="lg:col-span-1 space-y-6">
-          
-          {/* Profile Photo Card */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
-            <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-slate-900">
-                Official Profile Photo
-              </h3>
-              <span className="text-xs text-slate-400">
-                Visible across dashboard
-              </span>
-            </div>
-
+        {/* Left Column: Profile Photo */}
+        <div className="lg:col-span-1">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
             {/* Profile Picture Uploader Component */}
             <ProfilePictureUploader
               currentAvatar={plannerUser.avatarUrl || null}
@@ -248,49 +211,9 @@ export default function ProfilePage() {
               userEmail={plannerUser.email}
               initials={initials}
               onAvatarUpdated={handleAvatarUpdated}
+              hideHelperText={true}
             />
-
-            <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-              <div className="flex items-center justify-between text-slate-600">
-                <span className="text-slate-400">Role Authority:</span>
-                <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  {plannerUser.roleName}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-slate-600">
-                <span className="text-slate-400">Jurisdiction:</span>
-                <span className="font-semibold text-slate-800">Rwanda (30 Districts)</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-600">
-                <span className="text-slate-400">Institution:</span>
-                <span className="font-semibold text-slate-800">MINAGRI / NISR</span>
-              </div>
-            </div>
           </div>
-
-          {/* Institutional Clearance Badges Card */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-              Governance & Clearances
-            </h4>
-            <div className="space-y-2">
-              <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-start gap-2.5">
-                <Award className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                <div className="text-xs">
-                  <div className="font-bold text-emerald-900">Strategic Agricultural Planner</div>
-                  <div className="text-emerald-700 text-[11px]">Full access to macro productivity, opportunity pipelines, and policy indicators.</div>
-                </div>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
-                <Shield className="w-4 h-4 text-slate-600 mt-0.5 flex-shrink-0" />
-                <div className="text-xs">
-                  <div className="font-bold text-slate-900">NISR SAS Certified Data Consumer</div>
-                  <div className="text-slate-600 text-[11px]">Access to 2014–2026A national agricultural survey datasets and verified facility registries.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
         {/* Right Column: Profile Edit & Password Reset */}

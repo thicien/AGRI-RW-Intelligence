@@ -9,6 +9,7 @@ interface ProfilePictureUploaderProps {
   userEmail: string;
   initials: string;
   onAvatarUpdated: (newAvatarUrl: string | null) => void;
+  hideHelperText?: boolean;
 }
 
 export default function ProfilePictureUploader({
@@ -16,7 +17,8 @@ export default function ProfilePictureUploader({
   userName,
   userEmail,
   initials,
-  onAvatarUpdated
+  onAvatarUpdated,
+  hideHelperText = false
 }: ProfilePictureUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -191,9 +193,11 @@ export default function ProfilePictureUploader({
             )}
           </div>
 
-          <p className="text-[11px] text-slate-400 leading-normal">
-            PNG, JPG, WEBP supported. Image is automatically optimized and displayed at the bottom of the navigation sidebar.
-          </p>
+          {!hideHelperText && (
+            <p className="text-[11px] text-slate-400 leading-normal">
+              PNG, JPG, WEBP supported. Image is automatically optimized and displayed at the bottom of the navigation sidebar.
+            </p>
+          )}
         </div>
       </div>
     </div>
