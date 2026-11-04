@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { 
-  BarChart3, Map, Network, Target, ChevronRight, 
-  ArrowRight, Activity, Database, CheckCircle2, ShieldAlert
+  BarChart3, Map, Network, Target, 
+  ArrowRight
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import RwandaSignatureMapBanner from './components/RwandaSignatureMapBanner';
@@ -35,8 +35,7 @@ export default function LandingPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" /> Public Portal
             </Link>
             <a href="#portal-sections" className="hover:text-emerald-700 transition-colors">5 Intelligence Sections</a>
-            <a href="#platform" className="hover:text-emerald-700 transition-colors">Platform</a>
-            <a href="#how-it-works" className="hover:text-emerald-700 transition-colors">How It Works</a>
+            <a href="#intelligence" className="hover:text-emerald-700 transition-colors">Capabilities</a>
           </div>
 
           <div className="flex items-center gap-4">
@@ -67,22 +66,13 @@ export default function LandingPage() {
               Transform national agricultural surveys into spatial intelligence, evidence-based priorities, and actionable interventions across Rwanda's 30 districts.
             </p>
             
-            <div className="flex flex-wrap items-center gap-4 mb-10">
+            <div className="flex flex-wrap items-center gap-4">
               <Link to="/public-portal" className="bg-[#14532d] hover:bg-[#166534] text-white px-7 py-3.5 rounded-xl font-bold flex items-center transition-all shadow-md shadow-emerald-950/20 group cursor-pointer text-sm">
                 Access the Platform <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link to="/login" className="bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-950 px-6 py-3.5 rounded-xl font-bold transition-colors shadow-xs cursor-pointer text-sm">
                 Staff Sign In
               </Link>
-            </div>
-            
-            {/* Bottom Statement */}
-            <div className="flex items-center gap-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
-              <span className="flex items-center gap-1.5"><Database className="w-4 h-4 text-emerald-700" /> Data-driven</span>
-              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="flex items-center gap-1.5"><Map className="w-4 h-4 text-emerald-600" /> Spatial</span>
-              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Evidence-based</span>
             </div>
           </div>
 
@@ -242,51 +232,6 @@ export default function LandingPage() {
               </div>
             </Link>
           </div>
-
-          {/* Banner: How Public Access Works */}
-          <div className="p-6 rounded-2xl bg-emerald-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-1">
-              <div className="text-xs font-extrabold text-emerald-300 uppercase tracking-wider">
-                Step 1: Access the Platform · Step 2: Explore the 5 Sections · Step 3: Shared Filters · Step 4: Compare Results
-              </div>
-              <div className="text-lg font-black tracking-tight">
-                Open Agricultural Evidence For Everyone
-              </div>
-              <p className="text-xs text-emerald-100/80 max-w-xl">
-                Distinguishes recorded NISR survey statistics from modelled decision assessments. No account required for public exploration.
-              </p>
-            </div>
-
-            <Link
-              to="/public-portal"
-              className="bg-white text-emerald-950 hover:bg-emerald-100 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer"
-            >
-              Enter Public Portal
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. From Data to Action */}
-      <section id="platform" className="py-24 bg-white border-y border-emerald-100">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="text-xs font-extrabold tracking-widest text-[#14532d] uppercase mb-3">The AgriLens Approach</div>
-          <h2 className="text-3xl lg:text-4xl font-extrabold mb-6 text-slate-900">From Agricultural Data to Actionable Intelligence</h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto mb-16 leading-relaxed">
-            Agricultural data tells us what is happening. AgriLens transforms raw survey datasets into where attention is needed, why it matters, and what targeted intervention should follow.
-          </p>
-
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-            <FlowStep icon={<Database className="w-6 h-6"/>} label="DATA" />
-            <ChevronRight className="w-5 h-5 text-emerald-300 hidden md:block" />
-            <FlowStep icon={<BarChart3 className="w-6 h-6"/>} label="ANALYSIS" />
-            <ChevronRight className="w-5 h-5 text-emerald-300 hidden md:block" />
-            <FlowStep icon={<Network className="w-6 h-6"/>} label="INTELLIGENCE" />
-            <ChevronRight className="w-5 h-5 text-emerald-300 hidden md:block" />
-            <FlowStep icon={<ShieldAlert className="w-6 h-6"/>} label="PRIORITY" />
-            <ChevronRight className="w-5 h-5 text-emerald-300 hidden md:block" />
-            <FlowStep icon={<Target className="w-6 h-6"/>} label="ACTION" active />
-          </div>
         </div>
       </section>
 
@@ -322,25 +267,6 @@ export default function LandingPage() {
               icon={<Target className="w-6 h-6" />}
               imageSrc="/intervention_intelligence.jpg"
             />
-          </div>
-        </div>
-      </section>
-
-      {/* 10. How AgriLens Works */}
-      <section id="how-it-works" className="py-24 bg-white border-y border-emerald-100 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-extrabold text-center mb-16 text-slate-900">From Data to Decision</h2>
-          
-          <div className="relative">
-            {/* Connecting Line */}
-            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-emerald-200 -translate-y-1/2 hidden lg:block"></div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <WorkStage num="01" title="Data" desc="Agricultural and geospatial information." />
-              <WorkStage num="02" title="Intelligence" desc="Analyze patterns, risks and opportunities." />
-              <WorkStage num="03" title="Priority" desc="Identify areas requiring attention." />
-              <WorkStage num="04" title="Action" desc="Recommend and track interventions." isLast />
-            </div>
           </div>
         </div>
       </section>
@@ -391,7 +317,6 @@ export default function LandingPage() {
               <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-emerald-300">About</h4>
               <ul className="space-y-3 text-sm text-emerald-100/70">
                 <li><a href="#intelligence" className="hover:text-emerald-300 transition-colors">Intelligence</a></li>
-                <li><a href="#how-it-works" className="hover:text-emerald-300 transition-colors">How It Works</a></li>
               </ul>
             </div>
           </div>
@@ -403,19 +328,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-    </div>
-  );
-}
-
-/* Helper Components */
-
-function FlowStep({ icon, label, active = false }: { icon: React.ReactNode, label: string, active?: boolean }) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-sm border transition-all ${active ? 'bg-[#14532d] text-white border-[#14532d] shadow-md shadow-emerald-950/20' : 'bg-white text-[#14532d] border-emerald-200 hover:border-emerald-400'}`}>
-        {icon}
-      </div>
-      <span className={`text-sm font-bold tracking-wider uppercase ${active ? 'text-slate-900' : 'text-slate-500'}`}>{label}</span>
     </div>
   );
 }
@@ -459,15 +371,4 @@ function CapabilityCard({ num, title, desc, icon, imageSrc }: { num: string, tit
   );
 }
 
-function WorkStage({ num, title, desc, isLast = false }: { num: string, title: string, desc: string, isLast?: boolean }) {
-  return (
-    <div className="relative bg-white p-6 z-10 flex flex-col items-center text-center lg:items-start lg:text-left rounded-xl border border-emerald-100/70 shadow-2xs">
-      <div className="w-12 h-12 rounded-full bg-emerald-100 text-[#14532d] font-black flex items-center justify-center mb-6 shadow-xs border border-emerald-300">
-        {num}
-      </div>
-      <h3 className="text-xl font-bold mb-2 text-slate-900">{title}</h3>
-      <p className="text-slate-600 text-sm leading-relaxed">{desc}</p>
-      {!isLast && <div className="mt-4 lg:hidden"><ArrowRight className="w-6 h-6 text-emerald-300 transform rotate-90" /></div>}
-    </div>
-  );
-}
+
