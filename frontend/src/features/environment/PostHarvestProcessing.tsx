@@ -821,9 +821,6 @@ export default function PostHarvestProcessing() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
               <Warehouse className="w-8 h-8 text-emerald-400" />
               <span>National Post-Harvest & Storage Intelligence</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Decision Support Workspace
-              </span>
             </h1>
             <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
               Monitor storage infrastructure, collection facilities, processing capacity, post-harvest performance, and potential infrastructure gaps across Rwanda.

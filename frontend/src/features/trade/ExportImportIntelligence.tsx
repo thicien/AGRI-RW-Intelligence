@@ -892,9 +892,6 @@ export default function ExportImportIntelligence() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
               <Plane className="w-8 h-8 text-emerald-400" />
               <span>National Export Opportunities Intelligence</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Planning & Intelligence Centre
-              </span>
             </h1>
             <p className="text-emerald-100/70 text-sm mt-1 max-w-3xl leading-relaxed">
               National planning focus: export crops, product quality, market access, seasonal supply, district contributions and infrastructure readiness.
