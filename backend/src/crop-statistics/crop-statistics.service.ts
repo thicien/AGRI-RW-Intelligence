@@ -13,6 +13,34 @@ export interface ProductivityFilter {
 export class CropStatisticsService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  /** Public, district-level production evidence. Nulls are preserved. */
+  async getPublicProduction() {
+    const records = await this.dataSource.query(`
+      SELECT s.season_code, s.year, c.name AS crop,
+        au.name AS district, prov.name AS province,
+        cs.production_tonnes AS production, cs.area_ha AS area,
+        cs.harvested_area_ha AS harvested,
+        ds.name AS source_name, ds.provider AS source_provider,
+        d.name AS dataset_name, dv.version AS dataset_version
+      FROM agrilens.crop_statistics cs
+      JOIN agrilens.seasons s ON s.id = cs.season_id
+      JOIN agrilens.crops c ON c.id = cs.crop_id
+      JOIN agrilens.administrative_units au ON au.id = cs.admin_unit_id
+      LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+      LEFT JOIN agrilens.dataset_versions dv ON dv.id = cs.dataset_version_id
+      LEFT JOIN agrilens.datasets d ON d.id = dv.dataset_id
+      LEFT JOIN agrilens.data_sources ds ON ds.id = d.source_id
+      WHERE au.unit_type = 'DISTRICT'
+      ORDER BY s.season_code, au.name, c.name
+    `);
+    return {
+      records,
+      source: 'AgriLens crop_statistics database',
+      reportingNote: 'District crop records loaded into AgriLens. Consult the underlying survey publications for original methodology and revisions.',
+      yieldBasis: 'Production divided by harvested area, using only records with both measurements and positive harvested area.',
+    };
+  }
+
   /**
    * 1. Overview Summary of Agricultural Productivity
    */

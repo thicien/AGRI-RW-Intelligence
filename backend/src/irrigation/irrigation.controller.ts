@@ -8,6 +8,11 @@ export class IrrigationController {
   /**
    * 1. Overview summary across national irrigation footprint
    */
+  @Get('public-explorer')
+  async getPublicExplorer() {
+    return this.service.getPublicExplorer();
+  }
+
   @Get('summary')
   async getSummary(@Query('season') season?: string) {
     return this.service.getSummary(season || '2026B');

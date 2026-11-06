@@ -6,6 +6,79 @@ import { DataSource } from 'typeorm';
 export class IrrigationService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  /** Explicit public projections; no operator details, user records, or storage paths. */
+  async getPublicExplorer() {
+    const [records, production, schemes, schemeSeasons] = await Promise.all([
+      this.dataSource.query(`
+        SELECT iss.id, au.name AS district, prov.name AS province,
+          s.season_code, s.year, iss.area_irrigated_ha AS irrigated,
+          iss.total_cultivated_ha AS cultivated,
+          iss.modern_irrigated_ha AS modern, iss.traditional_irrigated_ha AS traditional,
+          iss.irrigation_type_breakdown AS methods, iss.source_reference,
+          CASE WHEN iss.notes ILIKE '%model%' THEN 'MODELLED' ELSE 'UNVERIFIED' END AS evidence,
+          ds.name AS source_name, d.name AS dataset_name, dv.version AS dataset_version
+        FROM agrilens.irrigation_season_statistics iss
+        JOIN agrilens.administrative_units au ON au.id = iss.admin_unit_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+        JOIN agrilens.seasons s ON s.id = iss.season_id
+        LEFT JOIN agrilens.dataset_versions dv ON dv.id = iss.dataset_version_id
+        LEFT JOIN agrilens.datasets d ON d.id = dv.dataset_id
+        LEFT JOIN agrilens.data_sources ds ON ds.id = d.source_id
+        WHERE au.unit_type = 'DISTRICT' AND iss.crop_id IS NULL AND iss.irrigation_asset_id IS NULL
+        ORDER BY s.season_code, au.name
+      `),
+      this.dataSource.query(`
+        SELECT au.name AS district, prov.name AS province, c.name AS crop,
+          s.season_code, s.year, cs.irrigated_area_ha AS irrigated,
+          cs.area_ha AS area, cs.production_tonnes AS production, cs.harvested_area_ha AS harvested,
+          cs.data_quality_status AS quality_status,
+          ds.name AS source_name, d.name AS dataset_name, dv.version AS dataset_version
+        FROM agrilens.crop_statistics cs
+        JOIN agrilens.administrative_units au ON au.id = cs.admin_unit_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+        JOIN agrilens.crops c ON c.id = cs.crop_id
+        JOIN agrilens.seasons s ON s.id = cs.season_id
+        LEFT JOIN agrilens.dataset_versions dv ON dv.id = cs.dataset_version_id
+        LEFT JOIN agrilens.datasets d ON d.id = dv.dataset_id
+        LEFT JOIN agrilens.data_sources ds ON ds.id = d.source_id
+        WHERE au.unit_type = 'DISTRICT'
+        ORDER BY s.season_code, au.name, c.name
+      `),
+      this.dataSource.query(`
+        SELECT ia.id, ia.name, au.name AS district, prov.name AS province,
+          ia.irrigation_type AS type, ia.irrigation_method AS method,
+          ia.area_command_ha AS command_area, ia.area_irrigable_ha AS irrigable_area,
+          ia.status, ST_X(ia.location) AS longitude, ST_Y(ia.location) AS latitude,
+          ia.last_verified_at, ds.name AS source_name, d.name AS dataset_name
+        FROM agrilens.irrigation_assets ia
+        JOIN agrilens.administrative_units au ON au.id = ia.admin_unit_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+        LEFT JOIN agrilens.dataset_versions dv ON dv.id = ia.dataset_version_id
+        LEFT JOIN agrilens.datasets d ON d.id = dv.dataset_id
+        LEFT JOIN agrilens.data_sources ds ON ds.id = d.source_id
+        WHERE au.unit_type = 'DISTRICT'
+        ORDER BY au.name, ia.name
+      `),
+      this.dataSource.query(`
+        SELECT DISTINCT iss.irrigation_asset_id AS id, s.season_code
+        FROM agrilens.irrigation_season_statistics iss
+        JOIN agrilens.seasons s ON s.id = iss.season_id
+        WHERE iss.irrigation_asset_id IS NOT NULL
+      `),
+    ]);
+    return {
+      records, production, schemes, schemeSeasons,
+      methodology: {
+        source: 'AgriLens irrigation_season_statistics, crop_statistics and irrigation_assets',
+        districtBasis: 'District totals only; asset and crop rows are not added to district totals.',
+        cropBasis: 'Crop irrigation uses explicitly recorded irrigated_area_ha in crop_statistics. Missing measurements remain unavailable.',
+        coverageBasis: 'Irrigated area / cultivated area, weighted across compatible pairs at the same district, crop and season. Values greater than cultivated area are flagged, not clamped.',
+        methodBasis: 'Breakdown keys ending in _pct are stored percentages. Their denominator is not documented; they are not converted to hectares or averaged into national shares.',
+        schemeBasis: 'Registry records are not seasonal observations. Seasonal scheme counts require explicit asset-to-season links.',
+      },
+    };
+  }
+
   /**
    * 1. Overview Summary of Seasonal Irrigation Coverage
    */

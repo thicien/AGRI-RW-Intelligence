@@ -5,6 +5,11 @@ import { CropStatisticsService } from './crop-statistics.service';
 export class CropStatisticsController {
   constructor(private readonly service: CropStatisticsService) {}
 
+  @Get('public-production')
+  async getPublicProduction() {
+    return this.service.getPublicProduction();
+  }
+
   @Get('decision-workspace')
   async getDecisionWorkspace(
     @Query('season') season?: string,
