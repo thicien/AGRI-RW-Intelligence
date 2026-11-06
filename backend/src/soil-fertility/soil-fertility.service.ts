@@ -6,6 +6,80 @@ import { DataSource } from 'typeorm';
 export class SoilFertilityService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  /** Public soil evidence; sample observations and district summaries remain separate. */
+  async getPublicExplorer() {
+    const [observations, summaries, production] = await Promise.all([
+      this.dataSource.query(`
+        WITH RECURSIVE district_scope AS (
+          SELECT id, id AS district_id FROM agrilens.administrative_units WHERE unit_type = 'DISTRICT'
+          UNION ALL
+          SELECT child.id, parent.district_id FROM agrilens.administrative_units child
+          JOIN district_scope parent ON child.parent_id = parent.id
+        )
+        SELECT so.id, du.name AS district, prov.name AS province,
+          au.unit_type AS geographic_resolution, s.season_code, s.year,
+          so.observed_at::text AS observed_at, it.code AS indicator, it.name AS indicator_name,
+          so.value_numeric AS value, so.value_text AS category, so.unit,
+          so.sampling_depth_cm AS depth, so.measurement_method AS method,
+          CASE WHEN ST_GeometryType(so.geometry) = 'ST_Point' THEN md5(ST_AsEWKB(so.geometry)::text) ELSE NULL END AS site_key,
+          ds.name AS source_name, d.name AS dataset_name, dv.version AS dataset_version
+        FROM agrilens.soil_observations so
+        JOIN agrilens.administrative_units au ON au.id = so.admin_unit_id
+        JOIN district_scope scope ON scope.id = au.id
+        JOIN agrilens.administrative_units du ON du.id = scope.district_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = du.parent_id
+        JOIN agrilens.soil_indicator_types it ON it.id = so.indicator_type_id
+        LEFT JOIN agrilens.seasons s ON s.id = so.season_id
+        LEFT JOIN agrilens.dataset_versions dv ON dv.id = so.dataset_version_id
+        LEFT JOIN agrilens.datasets d ON d.id = dv.dataset_id
+        LEFT JOIN agrilens.data_sources ds ON ds.id = d.source_id
+        ORDER BY s.season_code, du.name, it.code, so.observed_at
+      `),
+      this.dataSource.query(`
+        SELECT sf.id, COALESCE(au.name,sf.district_name) AS district,
+          COALESCE(prov.name,sf.province_name) AS province, sf.season_code, sf.year,
+          sf.total_cultivated_ha AS cultivated,
+          jsonb_build_object(
+            'SOIL_PH',sf.soil_ph,'ORGANIC_CARBON',sf.organic_carbon_pct,
+            'CEC_UNSPECIFIED',sf.cation_exchange_capacity_meq,'SOIL_TEXTURE',sf.soil_texture,
+            'ACIDITY_STATUS',sf.acidity_status,'NITROGEN_RATING',sf.nitrogen_rating,
+            'PHOSPHORUS_RATING',sf.phosphorus_rating,'POTASSIUM_RATING',sf.potassium_rating,
+            'EROSION_MODEL_INDEX',sf.modelled_erosion_susceptibility_index
+          ) AS properties,
+          jsonb_build_object(
+            'erosion_control_ha',sf.erosion_control_ha,'agroforestry_ha',sf.agroforestry_ha,
+            'organic_fertilizer_ha',sf.organic_fertilizer_ha,'inorganic_fertilizer_ha',sf.inorganic_fertilizer_ha,
+            'organic_farmer_pct',sf.organic_farmer_pct,'inorganic_farmer_pct',sf.inorganic_farmer_pct,
+            'fert_npk_pct',sf.fert_npk_pct,'fert_urea_pct',sf.fert_urea_pct,'fert_dap_pct',sf.fert_dap_pct,'fert_lime_pct',sf.fert_lime_pct
+          ) AS practices,
+          sf.evidence_sources AS sources
+        FROM agrilens.soil_fertility_season_statistics sf
+        LEFT JOIN agrilens.administrative_units au ON au.id = sf.admin_unit_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+        ORDER BY sf.season_code,sf.district_name
+      `),
+      this.dataSource.query(`
+        SELECT au.name AS district, prov.name AS province, s.season_code, s.year, c.name AS crop,
+          cs.production_tonnes AS production, cs.area_ha AS area, cs.harvested_area_ha AS harvested
+        FROM agrilens.crop_statistics cs
+        JOIN agrilens.administrative_units au ON au.id = cs.admin_unit_id
+        LEFT JOIN agrilens.administrative_units prov ON prov.id = au.parent_id
+        JOIN agrilens.seasons s ON s.id = cs.season_id
+        JOIN agrilens.crops c ON c.id = cs.crop_id
+        WHERE au.unit_type = 'DISTRICT'
+        ORDER BY s.season_code,au.name,c.name
+      `),
+    ]);
+    return { observations, summaries, production, methodology: {
+      coverage: 'Represented sampling area is not recorded. Cultivated district hectares are not treated as hectares covered by soil sampling.',
+      observations: 'One observation row is one property record, not necessarily a distinct sample site. Source methods, depths, units and dates are shown as stored.',
+      summaries: 'District summaries are not linked to individual observations. Their observation counts, sampling depths and methods are undocumented.',
+      ranking: 'Only observations with the same recorded method, depth and unit can be ordered as descriptive sample medians. They do not represent district-wide soil quality.',
+      comparison: 'Changes require matched site keys, identical method, depth, unit and indicator, and separate observation dates within assigned periods. Summary rows do not establish seasonal soil change.',
+      practices: 'Practice reporting is separate from evidence of effectiveness. Farmer percentages are not hectare percentages; practice areas may overlap or exceed cultivated-area totals.',
+    } };
+  }
+
   /**
    * 1. Overview Summary of Soil Conservation & Fertility
    */

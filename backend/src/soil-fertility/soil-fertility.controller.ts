@@ -5,6 +5,11 @@ import { SoilFertilityService } from './soil-fertility.service';
 export class SoilFertilityController {
   constructor(private readonly soilFertilityService: SoilFertilityService) {}
 
+  @Get('public-explorer')
+  async getPublicExplorer() {
+    return this.soilFertilityService.getPublicExplorer();
+  }
+
   @Get('decision-workspace')
   async getDecisionWorkspace(
     @Query('season') season: string = '2025A',
