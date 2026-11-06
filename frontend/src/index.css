@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./responsive.css";
+@import "./planner.css";
 
 @theme {
   --color-primary: #0D47A1;

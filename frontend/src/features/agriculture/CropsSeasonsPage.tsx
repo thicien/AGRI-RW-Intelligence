@@ -676,10 +676,10 @@ export default function CropsSeasonsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300 planner-workspace" data-planner-page="crops">
       
       {/* 1. Page Header & Planning Workspace Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20 planner-page-header">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
@@ -716,7 +716,7 @@ export default function CropsSeasonsPage() {
       </div>
 
       {/* 2. Unified Master Filter Bar */}
-      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-filter-panel">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           
           {/* Season Selector */}
@@ -841,7 +841,7 @@ export default function CropsSeasonsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Total Production Card */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Total Production</span>
               <Sprout className="w-4 h-4 text-agriculture" />
@@ -871,7 +871,7 @@ export default function CropsSeasonsPage() {
           </div>
 
           {/* Cultivated Area Card */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Cultivated Area</span>
               <Layers className="w-4 h-4 text-primary" />
@@ -888,7 +888,7 @@ export default function CropsSeasonsPage() {
           </div>
 
           {/* Average Yield (Area-Weighted Method) */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span className="flex items-center gap-1">
                 Average Yield
@@ -916,7 +916,7 @@ export default function CropsSeasonsPage() {
           </div>
 
           {/* District Data Coverage Card */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>District Data Coverage</span>
               <CheckCircle2 className="w-4 h-4 text-primary-light" />
@@ -939,7 +939,7 @@ export default function CropsSeasonsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Rwanda Production Map (Occupies 7 cols on desktop ~ 60-70%) */}
-        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] relative">
+        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] relative" data-planner-map="preserved">
           
           {/* Map Sub-Header */}
           <div className="p-4 border-b border-border-main flex items-center justify-between bg-background/50 z-10 shrink-0">
@@ -1411,7 +1411,7 @@ export default function CropsSeasonsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* Large Increases */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-panel">
             <div className="flex items-center gap-2 text-agriculture font-bold text-xs uppercase tracking-wider mb-2">
               <TrendingUp className="w-4 h-4" /> Expanding Crops (&gt;+15%)
             </div>
@@ -1434,7 +1434,7 @@ export default function CropsSeasonsPage() {
           </div>
 
           {/* Large Decreases */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-panel">
             <div className="flex items-center gap-2 text-danger font-bold text-xs uppercase tracking-wider mb-2">
               <AlertTriangle className="w-4 h-4" /> Declining Crops (&lt;-15%)
             </div>
@@ -1457,7 +1457,7 @@ export default function CropsSeasonsPage() {
           </div>
 
           {/* Stable Production */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-panel">
             <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-2">
               <CheckCircle2 className="w-4 h-4" /> Stable Output Crops (±4%)
             </div>

@@ -652,10 +652,10 @@ export default function Irrigation() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300 planner-workspace" data-planner-page="irrigation">
       
       {/* 1. Top Header Banner */}
-      <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-cyan-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-cyan-500/20">
+      <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-cyan-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-cyan-500/20 planner-page-header">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-cyan-500/30">
@@ -692,7 +692,7 @@ export default function Irrigation() {
       </div>
 
       {/* 2. Unified Master Filter Bar */}
-      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-filter-panel">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           
           {/* Season Selector */}
@@ -818,7 +818,7 @@ export default function Irrigation() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Recorded Irrigated Area */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Recorded Irrigated Area</span>
               <Droplets className="w-4 h-4 text-cyan-600" />
@@ -848,7 +848,7 @@ export default function Irrigation() {
           </div>
 
           {/* Irrigation Coverage Rate */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Irrigation Coverage</span>
               <Gauge className="w-4 h-4 text-blue-600" />
@@ -865,7 +865,7 @@ export default function Irrigation() {
           </div>
 
           {/* Documented Infrastructure Facilities */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Documented Schemes</span>
               <Building2 className="w-4 h-4 text-teal-600" />
@@ -882,7 +882,7 @@ export default function Irrigation() {
           </div>
 
           {/* District Data Coverage Card */}
-          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden planner-panel">
             <div className="flex items-center justify-between text-muted text-xs font-bold uppercase tracking-wider mb-1">
               <span>Reporting Completeness</span>
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -905,7 +905,7 @@ export default function Irrigation() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Rwanda Irrigation Map (7 cols ~ 60-70%) */}
-        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] relative">
+        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] relative" data-planner-map="preserved">
           
           {/* Map Header */}
           <div className="p-4 border-b border-border-main flex items-center justify-between bg-background/50 z-10 shrink-0">
@@ -1293,7 +1293,7 @@ export default function Irrigation() {
 
 
       {/* 6. District Irrigation Performance Ranking Table */}
-      <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4 planner-panel">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -1433,7 +1433,7 @@ export default function Irrigation() {
         <div 
           ref={facilitiesSectionRef} 
           id="facilities-section" 
-          className="bg-surface border-2 border-cyan-500/40 rounded-2xl p-6 shadow-md space-y-4 animate-in fade-in slide-in-from-top-4 duration-300"
+          className="bg-surface border-2 border-cyan-500/40 rounded-2xl p-6 shadow-md space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 planner-panel"
         >
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -1527,7 +1527,7 @@ export default function Irrigation() {
       )}
 
       {/* 8. Potential Irrigation Intervention Opportunities (Evidence-Based Screening) */}
-      <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-surface border border-border-main rounded-2xl p-6 shadow-sm space-y-4 planner-panel">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div>
             <div className="flex items-center gap-2">

@@ -65,3 +65,18 @@ The storage overview counts actual distinct registry rows (97 in the current dat
 Public export profiles now include the planner's 380 commodity-season scenarios and 1,140 district-season supply profiles, alongside all 18,432 crop production records. Reference markets are presented without invented destination allocations. All-season source downloads preserve source/dataset and stored data-quality metadata. Missing source links stay blank. Baseline estimates remain distinct from customs measurements.
 
 The backend no longer kills an arbitrary process occupying its port at startup. Stop the specific older backend before starting another instance; production builds can stop a Nest watch child, so restart the development watcher after building when required.
+
+## National planner design refinement
+
+The five analytical workspaces and the routed executive dashboard (`AdminDashboardPage`) share a scoped presentation layer in `frontend/src/planner.css`. Their original data requests, calculations, filters, comparison logic, report handlers and map markup were checked against the pre-change source and remain unchanged. Map frames carry a presentation-only `data-planner-map="preserved"` marker; their original classes, controls, overlays, map effects, camera behavior, legends and layers are retained. Generic planner table/focus styling excludes map descendants.
+
+The executive dashboard now presents an overview header with section links, analysis scope, national indicators, five planning-area summaries, district intelligence, priority assessments and the crop explorer. Planning notes use native expandable details. The existing data and assessments remain unchanged; this update does not validate or change the dashboard service's estimates or fallback values.
+
+The two additional public hero elements (the Open Public Evidence badge and Read-Only Public Portal card) have been removed. Footer source/download entry points remain available.
+
+With the local frontend and backend running, verify season filtering, retained map controls, responsive widths, executive navigation and public removals with:
+
+```powershell
+cd frontend
+node node_modules/@playwright/test/cli.js test planner-design.spec.ts
+```

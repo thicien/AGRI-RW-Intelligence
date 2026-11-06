@@ -881,9 +881,9 @@ export default function ExportImportIntelligence() {
   }, [exportFacilities, facilityTypeFilter, facilitySearch]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 pt-2 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 pt-2 font-sans select-none animate-in fade-in duration-300 planner-workspace" data-planner-page="exports">
       {/* 1. Top Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20 planner-page-header">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
@@ -922,7 +922,7 @@ export default function ExportImportIntelligence() {
       </div>
 
       {/* Workspace Quick-Jump Navigation Tabs */}
-      <div className="bg-surface border border-border-main rounded-2xl p-2.5 shadow-sm flex items-center justify-between overflow-x-auto gap-2 no-scrollbar text-xs">
+      <div className="bg-surface border border-border-main rounded-2xl p-2.5 shadow-sm flex items-center justify-between overflow-x-auto gap-2 no-scrollbar text-xs planner-section-nav">
         <div className="flex items-center space-x-1.5">
           {[
             { id: 'overview', label: '1. National Overview & Map', icon: Compass },
@@ -959,7 +959,7 @@ export default function ExportImportIntelligence() {
       </div>
 
       {/* 2. UNIFIED MASTER FILTER BAR */}
-      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-filter-panel">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
           {/* A. Agricultural Season */}
           <div className="space-y-1">
@@ -1086,7 +1086,7 @@ export default function ExportImportIntelligence() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Total Export Income */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Total Export Income</span>
                 <DollarSign className="w-4 h-4 text-agriculture" />
@@ -1107,7 +1107,7 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Card 2: Exported Quantity Volume */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Exported Quantity</span>
                 <Scale className="w-4 h-4 text-primary" />
@@ -1128,7 +1128,7 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Card 3: Exporting Commodities */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Exporting Commodities</span>
                 <Package className="w-4 h-4 text-amber-600" />
@@ -1144,7 +1144,7 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Card 4: Documented Export Hubs */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Documented Export Hubs</span>
                 <Plane className="w-4 h-4 text-purple-600" />
@@ -1185,7 +1185,7 @@ export default function ExportImportIntelligence() {
           {/* INTERACTIVE RWANDA EXPORT HUB MAP & DISTRICT EXPORT DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Left Column: Rwanda Export Map (7 cols) */}
-            <div className="lg:col-span-7 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
+            <div className="lg:col-span-7 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm" data-planner-map="preserved">
               <div className="p-3.5 border-b border-border-main bg-surface flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div>
                   <h3 className="font-bold text-text-main flex items-center space-x-2">
@@ -1584,7 +1584,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 2: EXPORT COMMODITY CATALOGUE & QUALITY SPECIFICATIONS */}
         {activeSection === 'catalogue' && (
-          <section id="catalogue" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="catalogue" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1741,7 +1741,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 3: INTERNATIONAL EXPORT MARKETS */}
         {activeSection === 'markets' && (
-          <section id="markets" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="markets" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1807,7 +1807,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 4: SEASONAL EXPORT TRENDS */}
         {activeSection === 'trends' && (
-          <section id="trends" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="trends" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1857,7 +1857,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 5: EXPORT EXIT HUBS & INFRASTRUCTURE */}
         {activeSection === 'hubs' && (
-          <section id="hubs" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="hubs" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1906,7 +1906,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 6: DISTRICT EXPORT CONTRIBUTIONS LEAGUE TABLE */}
         {activeSection === 'districts' && (
-          <section id="districts" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="districts" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2014,7 +2014,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 7: COMMODITY EARNINGS RANKINGS */}
         {activeSection === 'rankings' && (
-          <section id="rankings" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="rankings" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2092,7 +2092,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 8: EXPORT SUPPORTING FACILITIES REGISTER */}
         {activeSection === 'facilities' && (
-          <section id="facilities" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="facilities" className="bg-surface border border-border-main rounded-xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2189,7 +2189,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 9: SUPPLY, QUALITY & EXPORT READINESS FRAMEWORK */}
         {activeSection === 'readiness' && (
-          <section id="readiness" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="readiness" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
               <div>
                 <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
@@ -2329,7 +2329,7 @@ export default function ExportImportIntelligence() {
 
         {/* SECTION 10: STRATEGIC OPPORTUNITIES & PRE-FEASIBILITY SCREENING */}
         {activeSection === 'opportunities' && (
-          <section id="opportunities" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="opportunities" className="bg-surface border border-border-main rounded-xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">

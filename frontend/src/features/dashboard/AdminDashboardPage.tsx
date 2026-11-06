@@ -351,22 +351,39 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-6 pb-16 font-sans text-slate-800">
+    <div className="space-y-6 pb-16 font-sans text-slate-800 planner-workspace planner-executive" data-planner-page="executive">
+      <section className="planner-executive-intro" aria-labelledby="planner-executive-heading">
+        <div className="planner-executive-eyebrow"><Leaf className="h-3.5 w-3.5" /> National agricultural planner</div>
+        <h1 id="planner-executive-heading">Executive dashboard</h1>
+        <p>Seasonal performance, infrastructure and planning priorities across Rwanda's five agricultural workspaces.</p>
+        <div className="planner-executive-context" aria-label="Current analysis scope">
+          <span>{analysisMode === 'HISTORICAL' ? 'Historical overview' : 'Period analysis'}</span>
+          <span>{selectedSeason === 'all' ? 'All seasons' : selectedSeason}</span>
+          <span>{selectedRegion === 'All Regions' ? 'All Rwanda' : selectedRegion}</span>
+          <span>{loading ? 'Updating overview...' : dashboardData ? 'Workspace overview loaded' : 'Overview connection unavailable'}</span>
+        </div>
+        <nav className="planner-executive-links" aria-label="Executive dashboard sections">
+          <a href="#planner-national-indicators">National indicators <ArrowUpRight className="h-3.5 w-3.5" /></a>
+          <a href="#planner-planning-areas">Five planning areas <ArrowUpRight className="h-3.5 w-3.5" /></a>
+          <a href="#planner-national-map">District intelligence <ArrowUpRight className="h-3.5 w-3.5" /></a>
+          <a href="#planner-priority-assessments">Priority assessments <ArrowUpRight className="h-3.5 w-3.5" /></a>
+          <a href="#all-crops-matrix-section">Crop performance <ArrowUpRight className="h-3.5 w-3.5" /></a>
+        </nav>
+      </section>
+
 
       {/* SECTION A: HEADER & GLOBAL FILTERS */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 space-y-4">
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 space-y-4 planner-executive-scope planner-filter-panel">
         
         {/* Top Header & Coverage Banner */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <h1 className="text-xl font-black tracking-tight text-slate-900">
-                AgriLens Rwanda — National Agricultural Intelligence Dashboard
-              </h1>
+              <h2 className="text-base font-semibold text-slate-900">Analysis scope &amp; reporting</h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5 font-medium">
-              Consolidated official statistics across all years, seasons, crops, and administrative jurisdictions.
+              Choose the reporting period, geography and crop for the current workspace.
             </p>
           </div>
 
@@ -392,7 +409,7 @@ export default function AdminDashboardPage() {
                   analysisMode === 'PERIOD' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Period Analysis
+                Seasonal view
               </button>
               <button
                 onClick={() => setAnalysisMode('HISTORICAL')}
@@ -400,7 +417,7 @@ export default function AdminDashboardPage() {
                   analysisMode === 'HISTORICAL' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Historical Overview (2014–2026A)
+                Historical view
               </button>
             </div>
 
@@ -414,7 +431,7 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setSelectedYear(e.target.value)}
                   className="bg-transparent font-bold text-xs text-slate-800 cursor-pointer focus:outline-none"
                 >
-                  <option value="all">All Available Years (2014–2026A)</option>
+                  <option value="all">All available years</option>
                   {[2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014].map(y => (
                     <option key={y} value={y.toString()}>{y}</option>
                   ))}
@@ -509,10 +526,10 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* SECTION B: NATIONAL AGRICULTURAL PERFORMANCE INDICATORS (6 COMPACT CARDS) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5 planner-metric-grid planner-executive-kpis" id="planner-national-indicators">
         
         {/* Card 1: Total Crop Production */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0">
               <Leaf className="w-4 h-4" />
@@ -537,7 +554,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 2: Average Yield */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center flex-shrink-0">
               <BarChart3 className="w-4 h-4" />
@@ -562,7 +579,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 3: Cultivated Area */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0">
               <Compass className="w-4 h-4" />
@@ -587,7 +604,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 4: Documented Facilities */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center flex-shrink-0">
               <Package className="w-4 h-4" />
@@ -612,7 +629,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 5: Irrigation Coverage */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center flex-shrink-0">
               <Droplets className="w-4 h-4" />
@@ -637,7 +654,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 6: Soil Health & Fertility */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:shadow-md transition-all planner-panel">
           <div className="flex items-center gap-2 text-slate-600 mb-2">
             <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center flex-shrink-0">
               <Layers className="w-4 h-4" />
@@ -664,7 +681,192 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* SECTION C & D: MAP-CENTERED GIS COMMAND CENTER & SEASONAL ANALYTICS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <div className="space-y-3 planner-domain-overview" id="planner-planning-areas">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-black text-slate-900 tracking-tight">
+              Five planning areas
+            </h2>
+            <p className="text-xs text-slate-500">
+              Explore each planning area, review its current workspace summary and open the detailed analysis.
+            </p>
+          </div>
+          <span className="text-xs font-bold text-emerald-800 hidden sm:inline">
+            NISR Integrated Evidence Synthesis
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+          {/* Module 1: Productivity */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-md transition-all group planner-panel planner-module-card">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
+                  <Leaf className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Area 01
+                </span>
+              </div>
+              <h3 className="text-xs font-black text-slate-900">
+                {moduleSummaries.productivity.title}
+              </h3>
+              <div className="text-lg font-black text-slate-900">
+                {moduleSummaries.productivity.primaryMetric}
+              </div>
+              <details className="planner-module-details"><summary>Planning notes</summary><p className="text-[11px] text-slate-600 leading-snug">
+                {moduleSummaries.productivity.highlight}
+              </p>
+<div className="p-2 bg-amber-50/70 border border-amber-100 rounded-lg text-[10px] text-amber-900 leading-tight">
+                <strong>Attention:</strong> {moduleSummaries.productivity.attentionNeeded}
+              </div></details>
+            </div>
+            <Link
+              to="/admin/crops"
+              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between"
+            >
+              <span>Explore Productivity</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Module 2: Small-Scale Irrigation */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-md transition-all group planner-panel planner-module-card">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-xl bg-cyan-50 text-cyan-700">
+                  <Droplets className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">
+                  Area 02
+                </span>
+              </div>
+              <h3 className="text-xs font-black text-slate-900">
+                {moduleSummaries.irrigation.title}
+              </h3>
+              <div className="text-lg font-black text-slate-900">
+                {moduleSummaries.irrigation.primaryMetric}
+              </div>
+              <details className="planner-module-details"><summary>Planning notes</summary><p className="text-[11px] text-slate-600 leading-snug">
+                {moduleSummaries.irrigation.highlight}
+              </p>
+<div className="p-2 bg-cyan-50/70 border border-cyan-100 rounded-lg text-[10px] text-cyan-900 leading-tight">
+                <strong>Attention:</strong> {moduleSummaries.irrigation.attentionNeeded}
+              </div></details>
+            </div>
+            <Link
+              to="/admin/irrigation"
+              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-cyan-700 group-hover:text-cyan-900 flex items-center justify-between"
+            >
+              <span>Assess Irrigation</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Module 3: Soil Conservation & Fertility */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-amber-500/50 hover:shadow-md transition-all group planner-panel planner-module-card">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-xl bg-amber-50 text-amber-800">
+                  <Layers className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+                  Area 03
+                </span>
+              </div>
+              <h3 className="text-xs font-black text-slate-900">
+                {moduleSummaries.soilConservation.title}
+              </h3>
+              <div className="text-lg font-black text-slate-900">
+                {moduleSummaries.soilConservation.primaryMetric}
+              </div>
+              <details className="planner-module-details"><summary>Planning notes</summary><p className="text-[11px] text-slate-600 leading-snug">
+                {moduleSummaries.soilConservation.highlight}
+              </p>
+<div className="p-2 bg-rose-50/70 border border-rose-100 rounded-lg text-[10px] text-rose-900 leading-tight">
+                <strong>Attention:</strong> {moduleSummaries.soilConservation.attentionNeeded}
+              </div></details>
+            </div>
+            <Link
+              to="/admin/soil-conservation"
+              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-amber-800 group-hover:text-amber-950 flex items-center justify-between"
+            >
+              <span>Review Soil Health</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Module 4: Post-Harvest & Processing */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-purple-500/50 hover:shadow-md transition-all group planner-panel planner-module-card">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-xl bg-purple-50 text-purple-700">
+                  <Package className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">
+                  Area 04
+                </span>
+              </div>
+              <h3 className="text-xs font-black text-slate-900">
+                {moduleSummaries.postHarvest.title}
+              </h3>
+              <div className="text-lg font-black text-slate-900">
+                {moduleSummaries.postHarvest.primaryMetric}
+              </div>
+              <details className="planner-module-details"><summary>Planning notes</summary><p className="text-[11px] text-slate-600 leading-snug">
+                {moduleSummaries.postHarvest.highlight}
+              </p>
+<div className="p-2 bg-purple-50/70 border border-purple-100 rounded-lg text-[10px] text-purple-900 leading-tight">
+                <strong>Attention:</strong> {moduleSummaries.postHarvest.attentionNeeded}
+              </div></details>
+            </div>
+            <Link
+              to="/admin/post-harvest"
+              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-purple-700 group-hover:text-purple-950 flex items-center justify-between"
+            >
+              <span>Inspect Facilities</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Module 5: Export Markets */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-md transition-all group planner-panel planner-module-card">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
+                  <Globe className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Area 05
+                </span>
+              </div>
+              <h3 className="text-xs font-black text-slate-900">
+                {moduleSummaries.exportMarkets.title}
+              </h3>
+              <div className="text-lg font-black text-slate-900">
+                {moduleSummaries.exportMarkets.primaryMetric}
+              </div>
+              <details className="planner-module-details"><summary>Planning notes</summary><p className="text-[11px] text-slate-600 leading-snug">
+                {moduleSummaries.exportMarkets.highlight}
+              </p>
+<div className="p-2 bg-emerald-50/70 border border-emerald-100 rounded-lg text-[10px] text-emerald-900 leading-tight">
+                <strong>Attention:</strong> {moduleSummaries.exportMarkets.attentionNeeded}
+              </div></details>
+            </div>
+            <Link
+              to="/admin/imports-exports"
+              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between"
+            >
+              <span>Explore Trade Data</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start" id="planner-national-map">
         
         {/* SECTION C: RWANDA AGRICULTURAL INTELLIGENCE MAP (Col 6.5) */}
         <div className="lg:col-span-7 bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4">
@@ -836,7 +1038,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Vector SVG Map */}
-              <svg viewBox="0 0 620 490" className="w-full h-full">
+              <svg viewBox="0 0 620 490" className="w-full h-full" data-planner-map="preserved">
                 {/* Lake Kivu */}
                 <path 
                   d="M 60 110 Q 120 180 110 240 Q 90 300 70 380 Q 50 420 50 480 L 20 480 L 20 110 Z" 
@@ -944,7 +1146,7 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-5 space-y-4">
           
           {/* Main Chart Card */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-3">
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-3 planner-panel">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-slate-900 tracking-tight">
@@ -1056,7 +1258,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Top Crops Ranked Card */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-2.5">
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-2.5 planner-panel">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                 Top Crops by Production &amp; Yield ({selectedYear === 'all' ? '2025' : selectedYear})
@@ -1100,8 +1302,63 @@ export default function AdminDashboardPage() {
 
       </div>
 
-      {/* SECTION D.2: NATIONAL AGRICULTURAL CROP PERFORMANCE EXPLORER (ALL 26 CROPS ACROSS ALL SEASONS) */}
-      <div id="all-crops-matrix-section" className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm space-y-4 planner-panel planner-priority-assessments" id="planner-priority-assessments">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-700" />
+              Priority Opportunities and Recommended Actions
+            </h2>
+            <p className="text-xs text-slate-500">
+              Evidence-supported actions for agricultural planners, identifying feasibility and missing field information.
+            </p>
+          </div>
+          <span className="text-[11px] font-semibold text-slate-400">
+            5 Active Priorities
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {priorityOpportunities.map((opp: any) => (
+            <div
+              key={opp.id}
+              className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between space-y-2 group planner-panel"
+            >
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                    opp.priorityLevel === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                    opp.priorityLevel === 'HIGH' ? 'bg-amber-100 text-amber-800' :
+                    opp.priorityLevel === 'ADMINISTRATIVE' ? 'bg-blue-100 text-blue-700' :
+                    'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    {opp.priorityLevel}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">{opp.area}</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-900">{opp.location}</h4>
+                <p className="text-xs font-semibold text-slate-800 leading-snug">{opp.recommendation}</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{opp.evidenceBasis}</p>
+                {opp.requiresFieldVerification && (
+                  <div className="flex items-center gap-1 text-[10px] text-amber-700 font-semibold mt-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>Requires field verification</span>
+                  </div>
+                )}
+              </div>
+              <Link
+                to={opp.link}
+                className="pt-2 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between border-t border-slate-200/60"
+              >
+                <span>Assess Opportunity</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div id="all-crops-matrix-section" className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-5 planner-panel planner-crop-explorer">
         
         {/* Header & Meta */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
@@ -1224,7 +1481,7 @@ export default function AdminDashboardPage() {
                 <div
                   key={crop.id || crop.crop_name}
                   onClick={() => setSelectedCropDossier(crop)}
-                  className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all flex flex-col justify-between cursor-pointer group"
+                  className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all flex flex-col justify-between cursor-pointer group planner-panel"
                 >
                   <div>
                     {/* Top Card Header */}
@@ -1357,249 +1614,6 @@ export default function AdminDashboardPage() {
 
       </div>
 
-      {/* SECTION E: FIVE AGRICULTURAL INTELLIGENCE MODULE SUMMARIES */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-black text-slate-900 tracking-tight">
-              Five Agricultural Intelligence Areas
-            </h2>
-            <p className="text-xs text-slate-500">
-              Integrated overview connecting all 5 challenge areas. Click any module to navigate to its detailed analytical workspace.
-            </p>
-          </div>
-          <span className="text-xs font-bold text-emerald-800 hidden sm:inline">
-            NISR Integrated Evidence Synthesis
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          
-          {/* Module 1: Productivity */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-md transition-all group">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
-                  <Leaf className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  Challenge 1
-                </span>
-              </div>
-              <h3 className="text-xs font-black text-slate-900">
-                {moduleSummaries.productivity.title}
-              </h3>
-              <div className="text-lg font-black text-slate-900">
-                {moduleSummaries.productivity.primaryMetric}
-              </div>
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {moduleSummaries.productivity.highlight}
-              </p>
-              <div className="p-2 bg-amber-50/70 border border-amber-100 rounded-lg text-[10px] text-amber-900 leading-tight">
-                <strong>Attention:</strong> {moduleSummaries.productivity.attentionNeeded}
-              </div>
-            </div>
-            <Link
-              to="/admin/crops"
-              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between"
-            >
-              <span>Explore Productivity</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Module 2: Small-Scale Irrigation */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-md transition-all group">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-xl bg-cyan-50 text-cyan-700">
-                  <Droplets className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">
-                  Challenge 2
-                </span>
-              </div>
-              <h3 className="text-xs font-black text-slate-900">
-                {moduleSummaries.irrigation.title}
-              </h3>
-              <div className="text-lg font-black text-slate-900">
-                {moduleSummaries.irrigation.primaryMetric}
-              </div>
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {moduleSummaries.irrigation.highlight}
-              </p>
-              <div className="p-2 bg-cyan-50/70 border border-cyan-100 rounded-lg text-[10px] text-cyan-900 leading-tight">
-                <strong>Attention:</strong> {moduleSummaries.irrigation.attentionNeeded}
-              </div>
-            </div>
-            <Link
-              to="/admin/irrigation"
-              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-cyan-700 group-hover:text-cyan-900 flex items-center justify-between"
-            >
-              <span>Assess Irrigation</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Module 3: Soil Conservation & Fertility */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-amber-500/50 hover:shadow-md transition-all group">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-xl bg-amber-50 text-amber-800">
-                  <Layers className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  Challenge 3
-                </span>
-              </div>
-              <h3 className="text-xs font-black text-slate-900">
-                {moduleSummaries.soilConservation.title}
-              </h3>
-              <div className="text-lg font-black text-slate-900">
-                {moduleSummaries.soilConservation.primaryMetric}
-              </div>
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {moduleSummaries.soilConservation.highlight}
-              </p>
-              <div className="p-2 bg-rose-50/70 border border-rose-100 rounded-lg text-[10px] text-rose-900 leading-tight">
-                <strong>Attention:</strong> {moduleSummaries.soilConservation.attentionNeeded}
-              </div>
-            </div>
-            <Link
-              to="/admin/soil-conservation"
-              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-amber-800 group-hover:text-amber-950 flex items-center justify-between"
-            >
-              <span>Review Soil Health</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Module 4: Post-Harvest & Processing */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-purple-500/50 hover:shadow-md transition-all group">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-xl bg-purple-50 text-purple-700">
-                  <Package className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">
-                  Challenge 4
-                </span>
-              </div>
-              <h3 className="text-xs font-black text-slate-900">
-                {moduleSummaries.postHarvest.title}
-              </h3>
-              <div className="text-lg font-black text-slate-900">
-                {moduleSummaries.postHarvest.primaryMetric}
-              </div>
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {moduleSummaries.postHarvest.highlight}
-              </p>
-              <div className="p-2 bg-purple-50/70 border border-purple-100 rounded-lg text-[10px] text-purple-900 leading-tight">
-                <strong>Attention:</strong> {moduleSummaries.postHarvest.attentionNeeded}
-              </div>
-            </div>
-            <Link
-              to="/admin/post-harvest"
-              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-purple-700 group-hover:text-purple-950 flex items-center justify-between"
-            >
-              <span>Inspect Facilities</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Module 5: Export Markets */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm flex flex-col justify-between hover:border-emerald-500/50 hover:shadow-md transition-all group">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
-                  <Globe className="w-4 h-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  Challenge 5
-                </span>
-              </div>
-              <h3 className="text-xs font-black text-slate-900">
-                {moduleSummaries.exportMarkets.title}
-              </h3>
-              <div className="text-lg font-black text-slate-900">
-                {moduleSummaries.exportMarkets.primaryMetric}
-              </div>
-              <p className="text-[11px] text-slate-600 leading-snug">
-                {moduleSummaries.exportMarkets.highlight}
-              </p>
-              <div className="p-2 bg-emerald-50/70 border border-emerald-100 rounded-lg text-[10px] text-emerald-900 leading-tight">
-                <strong>Attention:</strong> {moduleSummaries.exportMarkets.attentionNeeded}
-              </div>
-            </div>
-            <Link
-              to="/admin/imports-exports"
-              className="mt-3 pt-2 border-t border-slate-100 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between"
-            >
-              <span>Explore Trade Data</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-        </div>
-      </div>
-
-      {/* SECTION F: PRIORITY OPPORTUNITIES & RECOMMENDED ACTIONS */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-          <div>
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-700" />
-              Priority Opportunities and Recommended Actions
-            </h2>
-            <p className="text-xs text-slate-500">
-              Evidence-supported actions for agricultural planners, identifying feasibility and missing field information.
-            </p>
-          </div>
-          <span className="text-[11px] font-semibold text-slate-400">
-            5 Active Priorities
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {priorityOpportunities.map((opp: any) => (
-            <div
-              key={opp.id}
-              className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between space-y-2 group"
-            >
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                    opp.priorityLevel === 'CRITICAL' ? 'bg-red-100 text-red-700' :
-                    opp.priorityLevel === 'HIGH' ? 'bg-amber-100 text-amber-800' :
-                    opp.priorityLevel === 'ADMINISTRATIVE' ? 'bg-blue-100 text-blue-700' :
-                    'bg-emerald-100 text-emerald-700'
-                  }`}>
-                    {opp.priorityLevel}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400">{opp.area}</span>
-                </div>
-                <h4 className="text-xs font-bold text-slate-900">{opp.location}</h4>
-                <p className="text-xs font-semibold text-slate-800 leading-snug">{opp.recommendation}</p>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{opp.evidenceBasis}</p>
-                {opp.requiresFieldVerification && (
-                  <div className="flex items-center gap-1 text-[10px] text-amber-700 font-semibold mt-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    <span>Requires field verification</span>
-                  </div>
-                )}
-              </div>
-              <Link
-                to={opp.link}
-                className="pt-2 text-xs font-bold text-emerald-700 group-hover:text-emerald-900 flex items-center justify-between border-t border-slate-200/60"
-              >
-                <span>Assess Opportunity</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* FOOTER BAR */}
       <div className="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 font-medium">
         <div className="flex items-center gap-2">
@@ -1614,7 +1628,7 @@ export default function AdminDashboardPage() {
       {/* DISTRICT DETAIL DOSSIER MODAL (Opened by Map click) */}
       {activeDistrict && (
         <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto planner-panel">
             
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
@@ -1751,7 +1765,7 @@ export default function AdminDashboardPage() {
       {/* GENERATE CERTIFIED REPORT MODAL */}
       {reportModalOpen && (
         <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center planner-panel">
             
             <div className="w-12 h-12 bg-emerald-50 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto">
               <FileText className="w-6 h-6" />

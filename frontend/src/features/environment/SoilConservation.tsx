@@ -887,10 +887,10 @@ export default function SoilConservation() {
   const ns = nationalSummary;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans select-none animate-in fade-in duration-300 planner-workspace" data-planner-page="soil">
       
       {/* 1. Top Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20 planner-page-header">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
@@ -930,7 +930,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 2. Unified Master Filter Bar */}
-      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm text-text-main">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm text-text-main planner-filter-panel">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Filter 1: Agricultural Season */}
           <div className="space-y-1">
@@ -1079,9 +1079,9 @@ export default function SoilConservation() {
 
 
       {/* 4. National Soil & Fertility Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 planner-metric-grid">
         {/* Card 1: Fertility Practice Adoption */}
-        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all planner-panel">
           <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
             <span>Fertility Practice Adoption</span>
             <Activity className="w-4 h-4 text-emerald-600" />
@@ -1106,7 +1106,7 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 2: Organic Fertility Inputs */}
-        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all planner-panel">
           <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
             <span>Organic Fertility Inputs</span>
             <Shovel className="w-4 h-4 text-amber-600" />
@@ -1131,7 +1131,7 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 3: Erosion-Control Adoption */}
-        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all planner-panel">
           <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
             <span>Erosion-Control Adoption</span>
             <Mountain className="w-4 h-4 text-teal-600" />
@@ -1156,7 +1156,7 @@ export default function SoilConservation() {
         </div>
 
         {/* Card 4: District Data Coverage */}
-        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+        <div className="p-4 rounded-2xl bg-surface border border-border-main shadow-sm relative overflow-hidden group hover:border-emerald-500/50 transition-all planner-panel">
           <div className="flex items-center justify-between text-muted text-xs font-semibold uppercase tracking-wider">
             <span>District Data Coverage</span>
             <Database className="w-4 h-4 text-cyan-600" />
@@ -1182,7 +1182,7 @@ export default function SoilConservation() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column (65%): MapLibre Map */}
-        <div className="lg:col-span-8 flex flex-col space-y-3">
+        <div className="lg:col-span-8 flex flex-col space-y-3" data-planner-map="preserved">
           <div className="p-4 rounded-2xl bg-surface border border-border-main flex flex-wrap items-center justify-between gap-3 shadow-sm text-text-main">
             <div>
               <div className="flex items-center gap-2">
@@ -1621,7 +1621,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 6. Analytical Section A: Fertility-Management Adoption: Modern, Traditional & Integrated Practices */}
-      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main planner-panel">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
           <div>
             <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
@@ -1739,7 +1739,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 7. Analytical Section B: Seasonal Soil Management Trends */}
-      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main planner-panel">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
           <div>
             <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
@@ -1832,7 +1832,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 8. District Soil & Fertility Performance Ranking Table */}
-      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main planner-panel">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
           <div>
             <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
@@ -1955,7 +1955,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 9. National Documented Soil Conservation Projects Directory */}
-      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main planner-panel">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
           <div>
             <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
@@ -2030,7 +2030,7 @@ export default function SoilConservation() {
       </div>
 
       {/* 10. Soil Management Intervention Priorities (Evidence-Based Pre-Screening) */}
-      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main">
+      <div className="p-5 rounded-2xl bg-surface border border-border-main space-y-4 shadow-sm text-text-main planner-panel">
         <div className="border-b border-border-main pb-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">

@@ -260,10 +260,7 @@ export default function PublicPortalPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 mb-3.5 border border-emerald-600/30 bg-emerald-100/80 text-emerald-950 text-[11px] font-extrabold tracking-widest uppercase rounded-full shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                AgriLens Rwanda · Open Public Evidence
-              </div>
+
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
                 Public Agricultural <span className="text-[#15803d]">Intelligence</span> Portal
               </h1>
@@ -273,31 +270,7 @@ export default function PublicPortalPage() {
             </div>
 
             {/* Quick Access Badges & Mode Notice */}
-            <div className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-emerald-100 shadow-md text-xs space-y-2.5 max-w-sm shrink-0">
-              <div className="flex items-center justify-between font-extrabold text-slate-900 text-sm">
-                <span className="flex items-center gap-1.5 text-emerald-900">
-                  <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                  Read-Only Public Portal
-                </span>
-                <span className="bg-emerald-100 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
-                  No Login Required
-                </span>
-              </div>
-              <p className="text-slate-600 text-[11px] leading-relaxed">
-                {filters.section !== 'productivity' ? 'Explore the evidence held in AgriLens. Sources, sampling support, classifications and reporting limits accompany each selected series.' : <>Empowered by verified datasets from the <strong>National Institute of Statistics of Rwanda (NISR)</strong> and <strong>MINAGRI</strong>. Visitors can explore, compare, and download approved research summaries.</>}
-              </p>
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                <button
-                  onClick={() => filters.section !== 'productivity' ? document.getElementById(filters.section + '-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
-                  className="text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <BookOpen className="w-3.5 h-3.5" /> View Methodology
-                </button>
-                <Link to="/login" className="text-slate-500 font-bold hover:text-emerald-800 transition-colors">
-                  Staff Workspace →
-                </Link>
-              </div>
-            </div>
+
           </div>
 
           {/* Five Sections Switcher Grid */}

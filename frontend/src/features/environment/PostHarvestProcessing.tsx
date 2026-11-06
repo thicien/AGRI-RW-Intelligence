@@ -810,9 +810,9 @@ export default function PostHarvestProcessing() {
   }, [facilitiesList]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 px-4 sm:px-6 pt-6 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 px-4 sm:px-6 pt-6 font-sans select-none animate-in fade-in duration-300 planner-workspace" data-planner-page="post-harvest">
       {/* 1. Top Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20 planner-page-header">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2 border border-emerald-500/30">
@@ -851,7 +851,7 @@ export default function PostHarvestProcessing() {
       </div>
 
       {/* Workspace Quick-Jump Navigation Tabs */}
-      <div className="bg-surface border border-border-main rounded-2xl p-2.5 shadow-sm flex items-center justify-between overflow-x-auto gap-2 no-scrollbar text-xs">
+      <div className="bg-surface border border-border-main rounded-2xl p-2.5 shadow-sm flex items-center justify-between overflow-x-auto gap-2 no-scrollbar text-xs planner-section-nav">
         <div className="flex items-center space-x-1.5">
           {[
             { id: 'overview', label: '1. National Overview & Map', icon: Compass },
@@ -886,7 +886,7 @@ export default function PostHarvestProcessing() {
       </div>
 
       {/* 2. UNIFIED MASTER FILTER BAR */}
-      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm">
+      <div className="bg-surface border border-border-main rounded-2xl p-4 shadow-sm planner-filter-panel">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
           {/* A. Agricultural Season */}
           <div className="space-y-1">
@@ -1039,7 +1039,7 @@ export default function PostHarvestProcessing() {
         <section id="overview" className={`space-y-4 ${activeSection === 'overview' ? '' : 'hidden'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Documented Storage Capacity */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Documented Storage Capacity</span>
                 <Warehouse className="w-4 h-4 text-agriculture" />
@@ -1062,7 +1062,7 @@ export default function PostHarvestProcessing() {
             </div>
 
             {/* Card 2: Documented Facilities */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Documented Facilities</span>
                 <Building2 className="w-4 h-4 text-cyan-600" />
@@ -1080,7 +1080,7 @@ export default function PostHarvestProcessing() {
             </div>
 
             {/* Card 3: Relevant Agricultural Production */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Relevant Agricultural Production</span>
                 <Box className="w-4 h-4 text-amber-600" />
@@ -1103,7 +1103,7 @@ export default function PostHarvestProcessing() {
             </div>
 
             {/* Card 4: Potential Capacity Gap */}
-            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden">
+            <div className="bg-surface border border-border-main rounded-xl p-4 shadow-sm relative overflow-hidden planner-panel">
               <div className="flex items-center justify-between text-xs text-muted">
                 <span className="font-semibold uppercase tracking-wider">Potential Capacity Gap</span>
                 <AlertTriangle className="w-4 h-4 text-rose-500" />
@@ -1127,7 +1127,7 @@ export default function PostHarvestProcessing() {
           {/* INTERACTIVE RWANDA POST-HARVEST MAP & DISTRICT PROFILE DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Left Column: Rwanda Post-Harvest Choropleth Map (7 cols) */}
-            <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
+            <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm" data-planner-map="preserved">
               <div className="p-3.5 border-b border-border-main bg-surface flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div>
                   <h3 className="font-bold text-text-main flex items-center space-x-2">
@@ -1484,7 +1484,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 2: STORAGE & COLLECTION INFRASTRUCTURE ANALYSIS */}
         {activeSection === 'infrastructure' && (
-          <section id="infrastructure" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="infrastructure" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1604,7 +1604,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 3: PRODUCTION VERSUS STORAGE CAPACITY GAP */}
         {activeSection === 'gap_analysis' && (
-          <section id="gap_analysis" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="gap_analysis" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1">
@@ -1692,7 +1692,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 4: CROP-SPECIFIC POST-HARVEST INTELLIGENCE */}
         {activeSection === 'crop_intelligence' && (
-          <section id="crop_intelligence" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="crop_intelligence" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1737,7 +1737,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 5: SEASONAL POST-HARVEST TRENDS */}
         {activeSection === 'seasonal_trends' && (
-          <section id="seasonal_trends" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="seasonal_trends" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1787,7 +1787,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 6: DISTRICT POST-HARVEST PERFORMANCE RANKINGS LEAGUE TABLE */}
         {activeSection === 'rankings' && (
-          <section id="rankings" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="rankings" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -1901,7 +1901,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 7: NATIONAL POST-HARVEST FACILITY REGISTER */}
         {activeSection === 'facility_register' && (
-          <section id="facility_register" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200">
+          <section id="facility_register" className="bg-surface border border-border-main rounded-2xl p-5 space-y-4 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border-main pb-3">
             <div>
               <h2 className="text-base font-bold text-text-main flex items-center space-x-2">
@@ -2017,7 +2017,7 @@ export default function PostHarvestProcessing() {
 
         {/* SECTION 8: FUTURE PLANNING & POST-HARVEST INVESTMENT OPPORTUNITIES */}
         {activeSection === 'investment' && (
-          <section id="investment" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200">
+          <section id="investment" className="bg-surface border border-border-main rounded-2xl p-5 space-y-5 shadow-sm animate-in fade-in duration-200 planner-panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-border-main pb-3">
             <div>
               <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-agriculture border border-emerald-200 mb-1">
