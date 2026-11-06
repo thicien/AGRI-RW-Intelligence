@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
@@ -929,7 +930,7 @@ export default function DistrictIrrigationPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3 pl-6">Sector Name</th>
@@ -965,7 +966,7 @@ export default function DistrictIrrigationPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -995,7 +996,7 @@ export default function DistrictIrrigationPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3.5 pl-6">Core Indicator</th>
@@ -1042,7 +1043,7 @@ export default function DistrictIrrigationPage() {
                         <td className="py-3.5 pr-6 text-right text-slate-500 font-mono text-[11px]">Capacity verified</td>
                       </tr>
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
 
                 <div className="bg-slate-50 p-4 border-t border-slate-200 text-xs text-slate-500 space-y-1">
@@ -1063,7 +1064,7 @@ export default function DistrictIrrigationPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3 pl-6">Season</th>
@@ -1088,7 +1089,7 @@ export default function DistrictIrrigationPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1218,7 +1219,7 @@ export default function DistrictIrrigationPage() {
               {/* Priority Table */}
               <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3.5 pl-6">Rank</th>
@@ -1264,7 +1265,7 @@ export default function DistrictIrrigationPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1310,7 +1311,7 @@ export default function DistrictIrrigationPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3.5 pl-6">Crop Name</th>
@@ -1343,7 +1344,7 @@ export default function DistrictIrrigationPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1428,7 +1429,7 @@ export default function DistrictIrrigationPage() {
 
       {/* SCHEME DETAIL MODAL */}
       {selectedSchemeModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">

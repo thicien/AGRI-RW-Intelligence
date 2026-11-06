@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState } from 'react';
 import { 
   UserPlus, ShieldCheck, MapPin, Key, Lock, Eye, EyeOff, 
@@ -388,7 +389,7 @@ export default function RegisterDistrictOfficerForm({ onSuccess, existingUsers =
 
         {districtOfficers.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <ResponsiveTable className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                   <th className="pb-3 pl-1">Officer Name</th>
@@ -447,7 +448,7 @@ export default function RegisterDistrictOfficerForm({ onSuccess, existingUsers =
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         ) : (
           <div className="text-center py-8 text-slate-400 text-xs">

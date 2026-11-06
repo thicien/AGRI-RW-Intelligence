@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { 
@@ -154,7 +155,7 @@ export default function AdminReportsPage() {
       </div>
 
       {/* 2. Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold text-slate-500">Total User Accounts</span>
           <div className="text-2xl font-extrabold text-slate-900 mt-1">
@@ -270,7 +271,7 @@ export default function AdminReportsPage() {
         {/* Tab 1: Datasets Catalog */}
         {activeTab === 'datasets' && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <ResponsiveTable className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-5">Dataset Name</th>
@@ -327,14 +328,14 @@ export default function AdminReportsPage() {
                   ))
                 )}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         )}
 
         {/* Tab 2: User Accounts Directory */}
         {activeTab === 'users' && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <ResponsiveTable className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-5">Name</th>
@@ -359,7 +360,7 @@ export default function AdminReportsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         )}
 

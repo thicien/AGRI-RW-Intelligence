@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -880,7 +881,7 @@ export default function ExportImportIntelligence() {
   }, [exportFacilities, facilityTypeFilter, facilitySearch]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 px-4 sm:px-6 pt-6 font-sans select-none animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 pt-2 font-sans select-none animate-in fade-in duration-300">
       {/* 1. Top Header Banner */}
       <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1184,7 +1185,7 @@ export default function ExportImportIntelligence() {
           {/* INTERACTIVE RWANDA EXPORT HUB MAP & DISTRICT EXPORT DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Left Column: Rwanda Export Map (7 cols) */}
-            <div className="lg:col-span-7 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+            <div className="lg:col-span-7 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
               <div className="p-3.5 border-b border-border-main bg-surface flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div>
                   <h3 className="font-bold text-text-main flex items-center space-x-2">
@@ -1250,7 +1251,7 @@ export default function ExportImportIntelligence() {
             </div>
 
             {/* Right Column: District Export Profile Dossier (5 cols) */}
-            <div className="lg:col-span-5 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+            <div className="lg:col-span-5 bg-surface border border-border-main rounded-xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
               {/* Dossier Header */}
               <div className="p-4 border-b border-border-main bg-surface flex items-center justify-between">
                 <div>
@@ -1276,7 +1277,7 @@ export default function ExportImportIntelligence() {
               </div>
 
               {/* Dossier Tabs */}
-              <div className="flex border-b border-border-main bg-background text-xs font-medium">
+              <div className="flex overflow-x-auto border-b border-border-main bg-background text-xs font-medium">
                 {[
                   { id: 'overview', label: 'Overview' },
                   { id: 'crops', label: `Export Crops (${districtExportProfile.crops.length})` },
@@ -1287,7 +1288,7 @@ export default function ExportImportIntelligence() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveDossierTab(tab.id as any)}
-                    className={`flex-1 py-2 text-center border-b-2 transition ${
+                    className={`shrink-0 px-3 py-2 text-center border-b-2 transition ${
                       activeDossierTab === tab.id
                         ? 'border-agriculture text-agriculture font-bold bg-surface'
                         : 'border-transparent text-muted hover:text-text-main'
@@ -1932,7 +1933,7 @@ export default function ExportImportIntelligence() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-border-main">
-            <table className="w-full text-xs text-left">
+            <ResponsiveTable className="w-full text-xs text-left">
               <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3 w-12 text-center">Rank</th>
@@ -2006,7 +2007,7 @@ export default function ExportImportIntelligence() {
                   );
                 })}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
           </section>
         )}
@@ -2027,7 +2028,7 @@ export default function ExportImportIntelligence() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-border-main">
-            <table className="w-full text-xs text-left">
+            <ResponsiveTable className="w-full text-xs text-left">
               <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3 w-12 text-center">Rank</th>
@@ -2084,7 +2085,7 @@ export default function ExportImportIntelligence() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
           </section>
         )}
@@ -2127,7 +2128,7 @@ export default function ExportImportIntelligence() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-border-main">
-            <table className="w-full text-xs text-left">
+            <ResponsiveTable className="w-full text-xs text-left">
               <thead className="bg-background text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3">Facility Name</th>
@@ -2181,7 +2182,7 @@ export default function ExportImportIntelligence() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         </section>
         )}
@@ -2236,7 +2237,7 @@ export default function ExportImportIntelligence() {
               </div>
 
               <div className="overflow-x-auto rounded-lg border border-border-main">
-                <table className="w-full text-xs text-left">
+                <ResponsiveTable className="w-full text-xs text-left">
                   <thead className="bg-surface text-muted uppercase font-semibold border-b border-border-main">
                     <tr>
                       <th className="py-2.5 px-3">Commodity</th>
@@ -2282,7 +2283,7 @@ export default function ExportImportIntelligence() {
                       );
                     })}
                   </tbody>
-                </table>
+                </ResponsiveTable>
               </div>
             </div>
 

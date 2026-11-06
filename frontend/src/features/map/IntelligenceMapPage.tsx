@@ -942,7 +942,7 @@ export default function IntelligenceMapPage() {
   }, [selectedDistrictName]);
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-slate-900 text-slate-100 -m-4 md:-m-6 lg:-m-8 select-none font-sans">
+    <div className="h-[calc(100dvh-64px)] flex flex-col overflow-hidden bg-slate-900 text-slate-100 -m-4 md:-m-6 lg:-m-8 select-none font-sans">
       
       {/* Top Agricultural Intelligence Command Bar */}
       <div className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-30 shrink-0">
@@ -1098,10 +1098,10 @@ export default function IntelligenceMapPage() {
       </div>
 
       {/* Main Workspace (Map + Overlays + District Dossier) */}
-      <div className="flex-1 relative flex overflow-hidden min-h-0">
+      <div className="flex-1 relative flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0">
         
         {/* Left Floating Controls & Indicator Selector */}
-        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2.5 max-w-xs w-full pointer-events-none">
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2.5 max-w-[calc(100%-2rem)] sm:max-w-xs w-full pointer-events-none">
           
           {/* Active Indicators Selector Card */}
           <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl pointer-events-auto">
@@ -1209,7 +1209,7 @@ export default function IntelligenceMapPage() {
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative h-full w-full">
+        <div className="flex-1 min-h-[360px] relative h-full min-w-0 w-full">
           <div ref={mapContainer} className="absolute inset-0 z-0 bg-slate-950" />
 
           {/* Dynamic Map Legend (Bottom-Left) */}
@@ -1237,7 +1237,7 @@ export default function IntelligenceMapPage() {
 
         {/* Right Drawer: District Intelligence Dossier */}
         {selectedDistrict && (
-          <div className="w-full md:w-[460px] lg:w-[500px] shrink-0 bg-slate-900 border-l border-slate-800 z-30 flex flex-col h-full shadow-2xl overflow-hidden transition-all duration-300">
+          <div className="w-full md:w-[360px] xl:w-[460px] shrink-0 bg-slate-900 border-l border-slate-800 z-30 flex flex-col h-[55dvh] md:h-full shadow-2xl overflow-hidden transition-all duration-300">
             
             {/* Dossier Header */}
             <div className="p-4 border-b border-slate-800 bg-slate-950/70 shrink-0">

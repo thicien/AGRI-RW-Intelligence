@@ -1,3 +1,4 @@
+import { useWorkspaceNavigation } from '../../hooks/useWorkspaceNavigation';
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -41,6 +42,7 @@ export default function DataManagerLayout() {
   });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { sidebarRef, desktop } = useWorkspaceNavigation(mobileMenuOpen, setMobileMenuOpen);
   const [pipelineStatus, setPipelineStatus] = useState<'HEALTHY' | 'SYNCING'>('HEALTHY');
 
   // The 12 Official Pages for Data Manager (Section 3)
@@ -88,13 +90,17 @@ export default function DataManagerLayout() {
   }, []);
 
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-800 overflow-hidden">
+    <div className="workspace-shell flex h-dvh w-full bg-[#f8fafc] font-sans text-slate-800 overflow-hidden">
       
       {/* 1. SIDEBAR - Matching AgriLens Reference Background & Layout */}
-      <aside 
+      <aside
+        ref={sidebarRef} id="workspace-navigation" aria-label="Workspace navigation"
+        inert={!desktop && !mobileMenuOpen}
+        role={!desktop && mobileMenuOpen ? "dialog" : undefined}
+        aria-modal={!desktop && mobileMenuOpen ? true : undefined}
         className={`
-          fixed inset-y-0 left-0 z-50 w-72 text-white flex flex-col flex-shrink-0 shadow-2xl border-r border-[#1B4D33]/40 relative overflow-hidden transition-transform duration-200 ease-in-out
-          lg:static lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          workspace-sidebar fixed inset-y-0 left-0 z-50 w-72 max-w-[calc(100vw-3rem)] text-white flex flex-col flex-shrink-0 shadow-2xl border-r border-[#1B4D33]/40 overflow-hidden transition-transform duration-200 ease-in-out
+          xl:relative xl:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         style={{
           backgroundImage: "url('/sidebar_bg.jpg')",
@@ -104,15 +110,16 @@ export default function DataManagerLayout() {
           backgroundColor: '#063124'
         }}
       >
+        <button type="button" aria-label="Close workspace navigation" onClick={() => setMobileMenuOpen(false)} className="absolute right-2 top-2 z-20 rounded-lg bg-emerald-950 p-2 text-white hover:bg-emerald-800 xl:hidden"><X className="h-5 w-5" /></button>
         {/* Dark gradient overlay for high contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#063124]/92 via-[#073627]/75 to-transparent pointer-events-none z-0" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none z-0" />
 
         {/* Brand Header */}
-        <div className="h-20 flex items-center px-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
+        <div className="min-h-20 py-3 flex items-center px-5 pr-14 xl:pr-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
           <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-9 h-9 mr-3 object-contain flex-shrink-0 drop-shadow" />
           <div>
-            <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
+            <div className="font-bold text-lg leading-tight tracking-tight text-white flex flex-wrap items-center gap-1.5">
               AgriLens <span className="font-light text-emerald-300">Rwanda</span>
             </div>
             <div className="text-[11px] text-[#5CE68B] font-semibold tracking-tight mt-0.5 drop-shadow-xs uppercase">
@@ -193,17 +200,20 @@ export default function DataManagerLayout() {
           </div>
         </div>
       </aside>
+      {mobileMenuOpen && !desktop && <button type="button" aria-label="Dismiss workspace navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm xl:hidden" />}
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div inert={mobileMenuOpen && !desktop} className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0 z-10 shadow-xs">
+        <header className="workspace-header min-h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-10 shadow-xs">
           
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md hover:bg-slate-100 text-slate-600"
+              type="button"
+              aria-label="Open workspace navigation" aria-expanded={mobileMenuOpen} aria-controls="workspace-navigation"
+              onClick={() => setMobileMenuOpen(true)}
+              className="xl:hidden p-2 rounded-md hover:bg-slate-100 text-slate-600"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -212,7 +222,7 @@ export default function DataManagerLayout() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1.5">
                   <Database className="w-3.5 h-3.5 text-emerald-700" />
-                  Agricultural Data Governance & Quality Workspace
+                  <span className="sm:hidden">Data Workspace</span><span className="hidden sm:inline">Agricultural Data Governance & Quality Workspace</span>
                 </span>
                 <span className="hidden sm:inline-block text-xs text-slate-400">•</span>
                 <span className="hidden sm:inline-block text-xs font-medium text-slate-500">
@@ -234,13 +244,13 @@ export default function DataManagerLayout() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all shadow-xs"
             >
               <UploadCloud className="w-3.5 h-3.5" />
-              <span>Register Dataset</span>
+              <span className="hidden sm:inline">Register Dataset</span><span className="sm:hidden">Register</span>
             </NavLink>
           </div>
         </header>
 
         {/* Nested Content Pages */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/70 p-6 md:p-8">
+        <main id="workspace-content" tabIndex={-1} className="workspace-main min-h-0 min-w-0 flex-1 overflow-y-auto bg-slate-50/70 p-4 sm:p-6 xl:p-8">
           <Outlet />
         </main>
 

@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { 
@@ -1222,7 +1223,7 @@ export default function SoilConservation() {
           </div>
 
           {/* Map Container */}
-          <div className="min-h-[580px] h-[580px] relative w-full overflow-hidden rounded-2xl border border-border-main shadow-md bg-slate-50">
+          <div className="min-h-[360px] h-[60dvh] sm:h-[580px] relative w-full overflow-hidden rounded-2xl border border-border-main shadow-md bg-slate-50">
             <div 
               ref={mapContainer} 
               style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }} 
@@ -1271,7 +1272,7 @@ export default function SoilConservation() {
         </div>
 
         {/* Right Column (35%): District Soil & Fertility Profile */}
-        <div className="lg:col-span-4 rounded-2xl bg-surface border border-border-main shadow-sm flex flex-col h-[650px] overflow-hidden text-text-main">
+        <div className="lg:col-span-4 rounded-2xl bg-surface border border-border-main shadow-sm flex flex-col h-[min(650px,85dvh)] min-h-[400px] overflow-hidden text-text-main">
           {selectedDistrictData ? (
             <>
               {/* Profile Header */}
@@ -1885,7 +1886,7 @@ export default function SoilConservation() {
 
         {/* Interactive League Table */}
         <div className="overflow-x-auto rounded-xl border border-border-main">
-          <table className="w-full text-left text-xs">
+          <ResponsiveTable className="w-full text-left text-xs">
             <thead className="bg-background text-muted uppercase tracking-wider text-[11px] border-b border-border-main font-bold">
               <tr>
                 <th className="py-2.5 px-3 font-bold">Rank</th>
@@ -1949,7 +1950,7 @@ export default function SoilConservation() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 
@@ -1971,7 +1972,7 @@ export default function SoilConservation() {
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-border-main">
-          <table className="w-full text-left text-xs">
+          <ResponsiveTable className="w-full text-left text-xs">
             <thead className="bg-background text-muted uppercase tracking-wider text-[11px] border-b border-border-main font-bold">
               <tr>
                 <th className="py-2.5 px-3 font-bold">Project Name & Code</th>
@@ -2024,7 +2025,7 @@ export default function SoilConservation() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 

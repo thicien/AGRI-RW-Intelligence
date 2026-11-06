@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
@@ -1297,7 +1298,7 @@ export default function DistrictPostHarvestPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px] font-extrabold">
                         <th className="pb-3 font-extrabold">Crop Commodity</th>
@@ -1351,7 +1352,7 @@ export default function DistrictPostHarvestPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1406,7 +1407,7 @@ export default function DistrictPostHarvestPage() {
 
                 {/* Comparative Table */}
                 <div className="overflow-x-auto mt-4">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px] font-extrabold">
                         <th className="pb-3 font-extrabold">Core Indicator</th>
@@ -1454,7 +1455,7 @@ export default function DistrictPostHarvestPage() {
                         );
                       })}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1570,7 +1571,7 @@ export default function DistrictPostHarvestPage() {
 
                 {/* Table of Sectors */}
                 <div className="overflow-x-auto mt-4">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 uppercase text-[10px] font-extrabold">
                         <th className="pb-3 font-extrabold">Sector Name</th>
@@ -1628,7 +1629,7 @@ export default function DistrictPostHarvestPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1871,7 +1872,7 @@ export default function DistrictPostHarvestPage() {
 
       {/* 6. FACILITY INSPECTION MODAL */}
       {selectedFacilityModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-5 animate-in fade-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
@@ -1989,7 +1990,7 @@ export default function DistrictPostHarvestPage() {
 
       {/* 7. PROPOSE STORAGE HUB MODAL */}
       {isProposeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">

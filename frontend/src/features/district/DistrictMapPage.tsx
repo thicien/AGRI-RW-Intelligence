@@ -186,7 +186,7 @@ export default function DistrictMapPage() {
       {/* Map & Inspector Container */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Map Canvas */}
-        <div className="lg:col-span-3 h-[520px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative">
+        <div className="lg:col-span-3 h-[55dvh] min-h-[320px] sm:h-[520px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative">
           <div ref={mapContainer} className="w-full h-full" />
 
           {/* District Boundary Tag Overlay */}

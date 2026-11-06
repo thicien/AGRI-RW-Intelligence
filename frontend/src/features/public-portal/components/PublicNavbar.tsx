@@ -23,7 +23,7 @@ export default function PublicNavbar({
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const sections: Array<{ id: PublicSection; label: string; icon: React.ReactNode }> = [
-    { id: 'productivity', label: '01. Productivity', icon: <BarChart3 className="w-4 h-4" /> },
+    { id: 'productivity', label: '01. Production', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'irrigation', label: '02. Irrigation', icon: <Droplets className="w-4 h-4" /> },
     { id: 'soil', label: '03. Soil & Fertility', icon: <Leaf className="w-4 h-4" /> },
     { id: 'post-harvest', label: '04. Post-Harvest', icon: <Warehouse className="w-4 h-4" /> },
@@ -34,18 +34,18 @@ export default function PublicNavbar({
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100/90 shadow-xs">
       {/* Top Banner Notice */}
       <div className="bg-gradient-to-r from-[#072415] via-[#14532d] to-[#0a2f1c] text-white px-4 py-1.5 text-[11px] font-semibold flex items-center justify-between">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-emerald-200">Public Agricultural Intelligence Portal</span>
             <span className="hidden sm:inline text-emerald-400/60">|</span>
             <span className="hidden sm:inline text-emerald-100/90 font-normal">
-              Official NISR Seasonal Agricultural Survey (SAS) Evidence · Open Read-Only Access
+              {activeSection === 'irrigation' ? 'Seasonal records, estimates and scheme metadata / Evidence labelled by source' : 'Official NISR Seasonal Agricultural Survey (SAS) Evidence / Open Read-Only Access'}
             </span>
           </div>
 
           <div className="flex items-center gap-4 text-[10px] uppercase tracking-wider font-extrabold text-emerald-200">
-            <span className="bg-emerald-800/80 px-2 py-0.5 rounded border border-emerald-600/40">
+            <span className="hidden sm:inline bg-emerald-800/80 px-2 py-0.5 rounded border border-emerald-600/40">
               NISR Hackathon
             </span>
             <Link 
@@ -60,13 +60,13 @@ export default function PublicNavbar({
 
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between min-h-16 gap-2">
           {/* Brand & Portal Title */}
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2.5 group">
               <img src="/logo.png?v=2" alt="AgriLens Rwanda" className="w-8 h-8 object-contain" />
               <div>
-                <div className="font-black text-lg tracking-tight text-[#14532d] leading-none flex items-center gap-1">
+                <div className="font-black text-base sm:text-lg tracking-tight text-[#14532d] leading-none flex items-center gap-1">
                   AgriLens <span className="font-light text-emerald-600">RWANDA</span>
                 </div>
                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
@@ -123,10 +123,11 @@ export default function PublicNavbar({
               className="flex items-center gap-1.5 text-xs font-bold text-emerald-950 bg-emerald-100/90 hover:bg-emerald-200 px-3.5 py-2 rounded-lg border border-emerald-300/80 transition-all cursor-pointer shadow-2xs"
             >
               <Download className="w-3.5 h-3.5 text-emerald-800" />
-              <span>Research Export</span>
+              <span className="hidden sm:inline">Research Export</span><span className="sm:hidden">Export</span>
             </button>
 
             <button
+              aria-label="Toggle public portal navigation" aria-expanded={mobileMenuOpen} aria-controls="public-portal-navigation"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="xl:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 cursor-pointer"
             >
@@ -138,7 +139,7 @@ export default function PublicNavbar({
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-slate-200 bg-white p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
+        <div id="public-portal-navigation" className="xl:hidden max-h-[calc(100dvh-7rem)] overflow-y-auto border-t border-slate-200 bg-white p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
             Five Agricultural Sections
           </div>

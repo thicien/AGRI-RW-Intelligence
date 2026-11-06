@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import { apiUrl } from '../../config/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -82,7 +83,7 @@ export default function AdminGeographyPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold text-slate-500">Provinces</span>
           <div className="text-2xl font-extrabold text-slate-900 mt-1">5 Provinces</div>
@@ -161,7 +162,7 @@ export default function AdminGeographyPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <ResponsiveTable className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-5">District Name</th>
@@ -221,7 +222,7 @@ export default function AdminGeographyPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 

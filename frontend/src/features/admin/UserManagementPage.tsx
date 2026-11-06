@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { 
@@ -302,7 +303,7 @@ export default function UserManagementPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3 px-5">User / Contact</th>
@@ -462,13 +463,13 @@ export default function UserManagementPage() {
                 })
               )}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 
       {/* MODAL 1: Create Account */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -596,7 +597,7 @@ export default function UserManagementPage() {
 
       {/* MODAL 2: Reset Password */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -650,7 +651,7 @@ export default function UserManagementPage() {
 
       {/* MODAL 3: Update Role & Scope */}
       {showRoleModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+        <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">

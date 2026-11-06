@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext } from 'react-router-dom';
@@ -276,7 +277,7 @@ export default function DistrictInterventionsPage() {
           </div>
         ) : interventions.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <ResponsiveTable className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                   <th className="pb-3 pl-1">Priority</th>
@@ -334,7 +335,7 @@ export default function DistrictInterventionsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         ) : (
           <div className="text-center py-12 text-slate-400 text-xs">
@@ -345,7 +346,7 @@ export default function DistrictInterventionsPage() {
 
       {/* Status Modal */}
       {selectedIntervention && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <h3 className="text-lg font-bold text-slate-900">
               Update Intervention Status

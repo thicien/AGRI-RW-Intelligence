@@ -10,8 +10,8 @@ import PublicNavbar from './components/PublicNavbar';
 import PublicFilterBar from './components/PublicFilterBar';
 import DataSourcesMethodologyModal from './components/DataSourcesMethodologyModal';
 import ExportReportModal from './components/ExportReportModal';
-import ProductivitySection from './sections/ProductivitySection';
-import IrrigationSection from './sections/IrrigationSection';
+import ProductionExplorer from './sections/ProductionExplorer';
+import IrrigationExplorer from './sections/IrrigationExplorer';
 import SoilSection from './sections/SoilSection';
 import PostHarvestSection from './sections/PostHarvestSection';
 import ExportSection from './sections/ExportSection';
@@ -88,6 +88,8 @@ export default function PublicPortalPage() {
 
   const [districtDossier, setDistrictDossier] = useState<any>(null);
 
+  const isPublicExplorer = filters.section === 'productivity' || filters.section === 'irrigation';
+
   // Modals
   const [methodologyModalOpen, setMethodologyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -131,12 +133,8 @@ export default function PublicPortalPage() {
     async function loadSectionData() {
       setLoading(true);
       try {
-        if (filters.section === 'productivity') {
-          const data = await fetchProductivityData(filters.season, filters.crop, filters.district);
-          if (isMounted) setProductivityData(data);
-        } else if (filters.section === 'irrigation') {
-          const data = await fetchIrrigationData(filters.season);
-          if (isMounted) setIrrigationData(data);
+        if (filters.section === 'productivity' || filters.section === 'irrigation') {
+          return;
         } else if (filters.section === 'soil') {
           const data = await fetchSoilData(filters.season);
           if (isMounted) setSoilData(data);
@@ -211,7 +209,7 @@ export default function PublicPortalPage() {
     {
       id: 'productivity' as PublicSection,
       num: '01',
-      title: 'Agricultural Productivity',
+      title: 'Agricultural Production',
       desc: 'Crop production, cultivated area, and yield across seasons.',
       icon: <BarChart3 className="w-5 h-5 text-emerald-700" />,
       accent: 'border-emerald-500'
@@ -220,7 +218,7 @@ export default function PublicPortalPage() {
       id: 'irrigation' as PublicSection,
       num: '02',
       title: 'Irrigation Intelligence',
-      desc: 'Documented schemes, coverage, and opportunity areas.',
+      desc: 'District irrigation, seasonal coverage, and recorded schemes.',
       icon: <Droplets className="w-5 h-5 text-cyan-700" />,
       accent: 'border-cyan-500'
     },
@@ -256,8 +254,8 @@ export default function PublicPortalPage() {
       <PublicNavbar
         activeSection={filters.section}
         onSelectSection={handleSectionSelect}
-        onOpenMethodology={() => setMethodologyModalOpen(true)}
-        onOpenExport={() => setExportModalOpen(true)}
+        onOpenMethodology={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
+        onOpenExport={() => isPublicExplorer ? document.getElementById(filters.section === 'irrigation' ? 'irrigation-downloads' : 'production-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)}
       />
 
       {/* 2. Portal Hero & Mission Introduction */}
@@ -289,11 +287,11 @@ export default function PublicPortalPage() {
                 </span>
               </div>
               <p className="text-slate-600 text-[11px] leading-relaxed">
-                Empowered by verified datasets from the <strong>National Institute of Statistics of Rwanda (NISR)</strong> and <strong>MINAGRI</strong>. Visitors can explore, compare, and download approved research summaries.
+                {filters.section === 'irrigation' ? 'Explore the irrigation data held in AgriLens. Evidence classifications, sources, and reporting limits accompany each selected series.' : <>Empowered by verified datasets from the <strong>National Institute of Statistics of Rwanda (NISR)</strong> and <strong>MINAGRI</strong>. Visitors can explore, compare, and download approved research summaries.</>}
               </p>
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <button
-                  onClick={() => setMethodologyModalOpen(true)}
+                  onClick={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
                   className="text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <BookOpen className="w-3.5 h-3.5" /> View Methodology
@@ -350,16 +348,16 @@ export default function PublicPortalPage() {
       {/* 3. Main Body Container with Universal Filter Bar & Section Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full">
         {/* Universal Filter Bar */}
-        <PublicFilterBar
+        {!isPublicExplorer && <PublicFilterBar
           filters={filters}
           onChangeFilter={handleFilterChange}
           availableSeasons={availableSeasons}
           availableCrops={availableCrops}
           onResetFilters={handleResetFilters}
-        />
+        />}
 
         {/* Selected District Dossier Banner (if specific district is isolated) */}
-        {filters.district !== 'ALL' && (
+        {!isPublicExplorer && filters.district !== 'ALL' && (
           <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-900 via-[#14532d] to-[#0a2f1c] text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
@@ -388,7 +386,7 @@ export default function PublicPortalPage() {
         )}
 
         {/* Section Loading State */}
-        {loading ? (
+        {loading && !isPublicExplorer ? (
           <div className="py-24 text-center space-y-4">
             <div className="w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-700 animate-spin mx-auto" />
             <div className="text-sm font-extrabold text-slate-800">
@@ -402,26 +400,11 @@ export default function PublicPortalPage() {
           /* Render Active Agricultural Section */
           <>
             {filters.section === 'productivity' && (
-              <ProductivitySection
-                overview={productivityData.overview}
-                crops={productivityData.crops}
-                districtComparisons={productivityData.districtComparisons}
-                benchmark={productivityData.benchmark}
-                filters={filters}
-                onSelectDistrict={handleDistrictSelect}
-                onSelectCrop={(c) => handleFilterChange('crop', c)}
-              />
+              <ProductionExplorer initialDistrict={filters.district} />
             )}
 
             {filters.section === 'irrigation' && (
-              <IrrigationSection
-                overview={irrigationData.overview}
-                districts={irrigationData.districts}
-                schemes={irrigationData.schemes}
-                screening={irrigationData.screening}
-                filters={filters}
-                onSelectDistrict={handleDistrictSelect}
-              />
+              <IrrigationExplorer initialDistrict={filters.district} onDistrictChange={handleDistrictSelect} />
             )}
 
             {filters.section === 'soil' && (
@@ -580,7 +563,7 @@ export default function PublicPortalPage() {
                 Public Agricultural Intelligence Portal — Transforming National Institute of Statistics of Rwanda (NISR) Seasonal Agricultural Surveys into spatial evidence, district rankings, and research-grade agricultural intelligence.
               </p>
               <div className="text-[11px] text-emerald-300 font-bold">
-                NISR Big Data Hackathon Project · Agricultural Productivity Challenge
+                NISR Big Data Hackathon Project · Agricultural Production Challenge
               </div>
             </div>
 
@@ -592,7 +575,7 @@ export default function PublicPortalPage() {
               <ul className="space-y-2 text-emerald-100/70 text-xs">
                 <li>
                   <button onClick={() => handleSectionSelect('productivity')} className="hover:text-emerald-300 transition-colors cursor-pointer">
-                    01. Agricultural Productivity
+                    01. Agricultural Production
                   </button>
                 </li>
                 <li>
@@ -625,12 +608,12 @@ export default function PublicPortalPage() {
               </h4>
               <ul className="space-y-2 text-emerald-100/70 text-xs">
                 <li>
-                  <button onClick={() => setMethodologyModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
+                  <button onClick={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
                     Data Sources & Provenance
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setExportModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
+                  <button onClick={() => isPublicExplorer ? document.getElementById(filters.section === 'irrigation' ? 'irrigation-downloads' : 'production-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
                     Download Research Summary (CSV)
                   </button>
                 </li>

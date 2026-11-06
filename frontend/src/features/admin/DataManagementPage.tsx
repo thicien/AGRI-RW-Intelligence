@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState } from 'react';
 import { 
   Database, UploadCloud, FileText, CheckCircle2, AlertTriangle, 
@@ -195,7 +196,7 @@ export default function DataManagementPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <ResponsiveTable className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-background text-text-main uppercase font-bold tracking-wider border-b border-border-main text-[11px]">
                 <th className="p-3">Dataset Title & Scope</th>
@@ -232,7 +233,7 @@ export default function DataManagementPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 

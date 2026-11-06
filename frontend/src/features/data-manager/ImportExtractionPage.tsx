@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState } from 'react';
 import { 
   UploadCloud, FileSpreadsheet, FileText, CheckCircle2, 
@@ -148,7 +149,7 @@ export default function ImportExtractionPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <ResponsiveTable className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-700 uppercase font-bold border-b border-slate-200 text-[11px]">
                 <th className="p-3.5">Filename & Parser</th>
@@ -196,7 +197,7 @@ export default function ImportExtractionPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 

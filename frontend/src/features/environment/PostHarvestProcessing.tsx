@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -1126,7 +1127,7 @@ export default function PostHarvestProcessing() {
           {/* INTERACTIVE RWANDA POST-HARVEST MAP & DISTRICT PROFILE DOSSIER */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
             {/* Left Column: Rwanda Post-Harvest Choropleth Map (7 cols) */}
-            <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+            <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
               <div className="p-3.5 border-b border-border-main bg-surface flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div>
                   <h3 className="font-bold text-text-main flex items-center space-x-2">
@@ -1208,7 +1209,7 @@ export default function PostHarvestProcessing() {
             </div>
 
             {/* Right Column: District Post-Harvest Profile Dossier (5 cols) */}
-            <div className="lg:col-span-5 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[650px] shadow-sm">
+            <div className="lg:col-span-5 bg-surface border border-border-main rounded-2xl overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] shadow-sm">
               {/* Dossier Header */}
               <div className="p-4 border-b border-border-main bg-surface flex items-center justify-between">
                 <div>
@@ -1813,7 +1814,7 @@ export default function PostHarvestProcessing() {
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-border-main">
-            <table className="w-full text-xs text-left">
+            <ResponsiveTable className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3 w-12 text-center">Rank</th>
@@ -1893,7 +1894,7 @@ export default function PostHarvestProcessing() {
                   );
                 })}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
           </section>
         )}
@@ -1948,7 +1949,7 @@ export default function PostHarvestProcessing() {
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-border-main">
-            <table className="w-full text-xs text-left">
+            <ResponsiveTable className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-muted uppercase font-semibold border-b border-border-main">
                 <tr>
                   <th className="py-3 px-3">Facility Name</th>
@@ -2004,7 +2005,7 @@ export default function PostHarvestProcessing() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
           {filteredFacilityRegister.length > 30 && (
             <div className="text-center text-xs text-muted pt-2">

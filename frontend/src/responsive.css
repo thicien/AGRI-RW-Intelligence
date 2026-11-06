@@ -1,0 +1,215 @@
+/* Shared device behavior. Component breakpoints remain the primary layout rules. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 6rem;
+  }
+  body {
+    margin: 0;
+    min-width: 0;
+  }
+  #root {
+    min-width: 0;
+    min-height: 100dvh;
+  }
+  img,
+  video {
+    max-width: 100%;
+  }
+  input,
+  select,
+  textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a {
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3,
+  p,
+  dd {
+    overflow-wrap: anywhere;
+  }
+}
+
+.workspace-shell {
+  height: 100vh;
+  height: 100dvh;
+}
+.workspace-main {
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+.workspace-header {
+  gap: 0.75rem;
+  min-height: 4rem;
+  height: auto;
+  padding-block: 0.5rem;
+}
+.workspace-header > div {
+  min-width: 0;
+}
+.workspace-sidebar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.workspace-sidebar nav a,
+.workspace-sidebar a {
+  min-height: 2.75rem;
+}
+.workspace-sidebar > div:has(> img) {
+  flex-shrink: 0;
+}
+:where(.grid, .flex, .inline-flex) > :where(:not(svg):not(.maplibregl-canvas)) {
+  min-width: 0;
+}
+.recharts-responsive-container {
+  min-width: 0;
+}
+.responsive-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border-radius: inherit;
+  -webkit-overflow-scrolling: touch;
+}
+.responsive-table > table {
+  width: 100%;
+}
+.responsive-table:focus-visible {
+  outline-offset: -2px;
+}
+.responsive-dialog-backdrop {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.responsive-dialog-backdrop > :is(div, section, form) {
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.maplibregl-map {
+  min-width: 0;
+}
+.maplibregl-popup {
+  max-width: min(320px, calc(100vw - 3rem)) !important;
+}
+
+@media (max-width: 1279px) {
+  .workspace-sidebar {
+    visibility: visible;
+  }
+  .workspace-header .hidden.sm\:flex,
+  .workspace-header .hidden.md\:flex {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .workspace-header {
+    flex-wrap: wrap;
+  }
+  .workspace-header > div {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .workspace-header > div:first-of-type {
+    flex: 1 1 auto;
+  }
+  .workspace-header select {
+    max-width: 100%;
+  }
+  .workspace-main {
+    padding: 1rem;
+  }
+  .workspace-main > * {
+    max-width: 100%;
+  }
+  .workspace-main :is(h1, h2, h3, span, strong, dd) {
+    overflow-wrap: anywhere;
+  }
+  .workspace-main h1 {
+    font-size: clamp(1.375rem, 4vw, 1.875rem);
+    line-height: 1.25;
+  }
+  .workspace-main .flex.items-center.justify-between:not(.overflow-x-auto) {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .workspace-main .text-muted.flex[class*="space-x-"] {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .workspace-main .text-muted.flex[class*="space-x-"] > * {
+    margin-inline: 0;
+  }
+  .overflow-x-auto > button,
+  .overflow-x-auto > .flex > button {
+    flex-shrink: 0;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .responsive-table :is(th, td) {
+    padding: 0.75rem;
+  }
+  .responsive-dialog-backdrop > :is(div, section, form) {
+    border-radius: 1rem;
+  }
+}
+@media (pointer: coarse) {
+  button:not([role="switch"]),
+  select,
+  input:not([type="checkbox"]):not([type="radio"]),
+  a[class*="rounded"] {
+    min-height: 2.75rem;
+  }
+  button:has(> svg:only-child) {
+    min-width: 2.75rem;
+    flex-shrink: 0;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 1.125rem;
+    min-height: 1.125rem;
+  }
+}
+@media (max-width: 379px) {
+  .grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace-main {
+    padding: 0.75rem;
+  }
+  .workspace-header {
+    padding-inline: 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

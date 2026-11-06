@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { 
@@ -406,7 +407,7 @@ export default function RolesPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-background p-4 rounded-xl border border-border-main">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 bg-background p-4 rounded-xl border border-border-main">
               <div>
                 <label className="text-xs font-bold text-text-main block mb-1">Simulated Role:</label>
                 <select 
@@ -508,7 +509,7 @@ export default function RolesPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <ResponsiveTable className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-background text-text-main uppercase font-extrabold tracking-wider border-b border-border-main text-[11px]">
                   <th className="p-3 w-64">Capability</th>
@@ -545,7 +546,7 @@ export default function RolesPage() {
                     );
                   })}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
 
           <div className="pt-4 border-t border-border-main flex flex-wrap gap-4 text-xs text-muted">
@@ -589,7 +590,7 @@ export default function RolesPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <ResponsiveTable className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-background text-text-main uppercase font-extrabold tracking-wider border-b border-border-main text-[11px]">
                   <th className="p-3">User & Contact</th>
@@ -642,12 +643,12 @@ export default function RolesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
 
           {/* Edit Scope Modal */}
           {editingUser && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
+            <div className="responsive-dialog-backdrop fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
               <div className="bg-surface rounded-2xl border border-border-main max-w-md w-full p-6 shadow-2xl space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b border-border-main">
                   <h3 className="font-extrabold text-base text-text-main">
@@ -763,7 +764,7 @@ export default function RolesPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <ResponsiveTable className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-background text-text-main uppercase font-extrabold tracking-wider border-b border-border-main text-[11px]">
                   <th className="p-3">Timestamp</th>
@@ -810,7 +811,7 @@ export default function RolesPage() {
                   );
                 })}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         </div>
       )}

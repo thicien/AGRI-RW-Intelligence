@@ -56,7 +56,7 @@ export default function SecurityAccessPage() {
       </div>
 
       {/* Security Telemetry KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <span className="text-xs font-semibold text-slate-500">Security Violations</span>
           <div className="text-2xl font-extrabold text-amber-700 mt-1">

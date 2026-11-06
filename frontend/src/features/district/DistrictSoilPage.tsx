@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
@@ -795,7 +796,7 @@ export default function DistrictSoilPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
+                  <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200/70">
                       <tr>
                         <th className="py-3 px-4">Observation ID / Date</th>
@@ -841,7 +842,7 @@ export default function DistrictSoilPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -910,7 +911,7 @@ export default function DistrictSoilPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
+                  <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200/70">
                       <tr>
                         <th className="py-3 px-4">Indicator</th>
@@ -959,7 +960,7 @@ export default function DistrictSoilPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1170,7 +1171,7 @@ export default function DistrictSoilPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
+                  <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200/70">
                       <tr>
                         <th className="py-3 px-4">Sector</th>
@@ -1233,7 +1234,7 @@ export default function DistrictSoilPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1415,7 +1416,7 @@ export default function DistrictSoilPage() {
               {/* Ranked Table */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
+                  <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200/70">
                       <tr>
                         <th className="py-3.5 px-4">Rank / Tier</th>
@@ -1482,7 +1483,7 @@ export default function DistrictSoilPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1517,7 +1518,7 @@ export default function DistrictSoilPage() {
                 </div>
 
                 {/* 4 Stages Visual Pipeline */}
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                   <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 text-center">
                     <span className="text-[10px] font-extrabold text-slate-500 uppercase block">1. Recommended</span>
                     <span className="text-xs text-slate-700 font-bold block mt-1">Spatial screening need</span>
@@ -1683,7 +1684,7 @@ export default function DistrictSoilPage() {
 
       {/* Conservation Project Modal */}
       {selectedProject && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <span className="text-xs font-mono font-bold text-slate-500 uppercase">{selectedProject.code}</span>
@@ -1744,7 +1745,7 @@ export default function DistrictSoilPage() {
 
       {/* Field Verification Modal */}
       {verificationModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">

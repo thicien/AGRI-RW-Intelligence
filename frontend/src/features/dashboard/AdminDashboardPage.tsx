@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Leaf, MapPin, Bell, TrendingUp, TrendingDown, 
@@ -885,7 +886,7 @@ export default function AdminDashboardPage() {
           ) : (
             /* Ranked Tabular View */
             <div className="w-full h-[360px] overflow-y-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left text-xs">
+              <ResponsiveTable className="w-full text-left text-xs">
                 <thead className="bg-slate-50 text-slate-500 sticky top-0 border-b border-slate-200 font-bold">
                   <tr>
                     <th className="p-2.5">District</th>
@@ -928,7 +929,7 @@ export default function AdminDashboardPage() {
                     );
                   })}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
           )}
 
@@ -1295,7 +1296,7 @@ export default function AdminDashboardPage() {
         ) : (
           /* Display Mode 2: Detailed Data Table */
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 border-collapse">
+            <ResponsiveTable className="w-full text-left text-xs text-slate-700 border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-slate-700 font-black border-b border-slate-200">
                   <th className="p-3">Crop Name</th>
@@ -1350,7 +1351,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         )}
 
@@ -1612,7 +1613,7 @@ export default function AdminDashboardPage() {
 
       {/* DISTRICT DETAIL DOSSIER MODAL (Opened by Map click) */}
       {activeDistrict && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+        <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
@@ -1749,7 +1750,7 @@ export default function AdminDashboardPage() {
 
       {/* GENERATE CERTIFIED REPORT MODAL */}
       {reportModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+        <div className="responsive-dialog-backdrop fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
             
             <div className="w-12 h-12 bg-emerald-50 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto">
@@ -1818,7 +1819,7 @@ export default function AdminDashboardPage() {
 
       {/* CROP TRAJECTORY & MULTI-SEASON DOSSIER MODAL */}
       {selectedCropDossier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
             
             {/* Modal Header */}

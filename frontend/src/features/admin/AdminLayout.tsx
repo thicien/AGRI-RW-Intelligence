@@ -1,3 +1,4 @@
+import { useWorkspaceNavigation } from '../../hooks/useWorkspaceNavigation';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
@@ -44,6 +45,7 @@ export default function AdminLayout() {
   });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { sidebarRef, desktop } = useWorkspaceNavigation(mobileMenuOpen, setMobileMenuOpen);
   const [systemHealth, setSystemHealth] = useState<{
     status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
     latencyMs: number;
@@ -116,13 +118,17 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-800 overflow-hidden">
+    <div className="workspace-shell flex h-dvh w-full bg-[#f8fafc] font-sans text-slate-800 overflow-hidden">
       
       {/* 1. SIDEBAR - Matching AgriLens Reference Background & Layout */}
-      <aside 
+      <aside
+        ref={sidebarRef} id="workspace-navigation" aria-label="Workspace navigation"
+        inert={!desktop && !mobileMenuOpen}
+        role={!desktop && mobileMenuOpen ? "dialog" : undefined}
+        aria-modal={!desktop && mobileMenuOpen ? true : undefined}
         className={`
-          fixed inset-y-0 left-0 z-50 w-72 text-white flex flex-col flex-shrink-0 shadow-2xl border-r border-[#1B4D33]/40 relative overflow-hidden transition-transform duration-200 ease-in-out
-          lg:static lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          workspace-sidebar fixed inset-y-0 left-0 z-50 w-72 max-w-[calc(100vw-3rem)] text-white flex flex-col flex-shrink-0 shadow-2xl border-r border-[#1B4D33]/40 overflow-hidden transition-transform duration-200 ease-in-out
+          xl:relative xl:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         style={{
           backgroundImage: "url('/sidebar_bg.jpg')",
@@ -132,15 +138,16 @@ export default function AdminLayout() {
           backgroundColor: '#063124'
         }}
       >
+        <button type="button" aria-label="Close workspace navigation" onClick={() => setMobileMenuOpen(false)} className="absolute right-2 top-2 z-20 rounded-lg bg-emerald-950 p-2 text-white hover:bg-emerald-800 xl:hidden"><X className="h-5 w-5" /></button>
         {/* Dark gradient overlay for high contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#063124]/92 via-[#073627]/75 to-transparent pointer-events-none z-0" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none z-0" />
 
         {/* Brand Header */}
-        <div className="h-20 flex items-center px-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
+        <div className="min-h-20 py-3 flex items-center px-5 pr-14 xl:pr-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
           <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-9 h-9 mr-3 object-contain flex-shrink-0 drop-shadow" />
           <div>
-            <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
+            <div className="font-bold text-lg leading-tight tracking-tight text-white flex flex-wrap items-center gap-1.5">
               AgriLens <span className="font-light text-emerald-300">Rwanda</span>
             </div>
             <div className="text-[11px] text-[#5CE68B] font-semibold tracking-tight mt-0.5 drop-shadow-xs uppercase">
@@ -221,24 +228,19 @@ export default function AdminLayout() {
           </div>
         </div>
       </aside>
-
-      {/* Mobile Drawer Overlay */}
-      {mobileMenuOpen && (
-        <div 
-          onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs"
-        />
-      )}
+      {mobileMenuOpen && !desktop && <button type="button" aria-label="Dismiss workspace navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm xl:hidden" />}
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+      <div inert={mobileMenuOpen && !desktop} className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
         
         {/* Top Navbar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-30 shadow-xs">
+        <header className="workspace-header h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-30 shadow-xs">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+              type="button"
+              aria-label="Open workspace navigation" aria-expanded={mobileMenuOpen} aria-controls="workspace-navigation"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 xl:hidden"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -246,7 +248,7 @@ export default function AdminLayout() {
               <span className="hidden sm:inline">AgriLens Rwanda</span>
               <ChevronRight className="w-3.5 h-3.5 hidden sm:inline" />
               <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                System Administration Center
+                <span className="sm:hidden">System Admin</span><span className="hidden sm:inline">System Administration Center</span>
               </span>
             </div>
           </div>
@@ -275,7 +277,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Routed Subpage Content */}
-        <main className="flex-1 overflow-y-auto bg-[#f8fafc] p-4 sm:p-6 lg:p-8">
+        <main id="workspace-content" tabIndex={-1} className="workspace-main min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#f8fafc] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

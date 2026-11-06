@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import { apiUrl } from '../../config/api';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
@@ -990,7 +991,7 @@ export default function DistrictProductivityPage() {
               {/* Crop Production Table */}
               <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <ResponsiveTable className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                         <th className="py-3.5 pl-6 pr-3">Crop Name</th>
@@ -1122,7 +1123,7 @@ export default function DistrictProductivityPage() {
                         ))
                       )}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
 
                 {/* Table Footer Summary */}
@@ -1245,7 +1246,7 @@ export default function DistrictProductivityPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3 pl-6">Season</th>
@@ -1284,7 +1285,7 @@ export default function DistrictProductivityPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1535,7 +1536,7 @@ export default function DistrictProductivityPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
+                    <ResponsiveTable className="w-full text-left text-xs">
                       <thead>
                         <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                           <th className="pb-3 pl-2">Crop Name</th>
@@ -1578,7 +1579,7 @@ export default function DistrictProductivityPage() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </ResponsiveTable>
                   </div>
                 )}
               </div>
@@ -1675,7 +1676,7 @@ export default function DistrictProductivityPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <ResponsiveTable className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
                         <th className="py-3 pl-6">Season Code</th>
@@ -1718,7 +1719,7 @@ export default function DistrictProductivityPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </ResponsiveTable>
                 </div>
               </div>
 
@@ -1781,7 +1782,7 @@ export default function DistrictProductivityPage() {
 
       {/* CROP HISTORY DRILLDOWN MODAL */}
       {historyModalCrop && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
@@ -1840,7 +1841,7 @@ export default function DistrictProductivityPage() {
 
               {/* Table */}
               <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+                <ResponsiveTable className="w-full text-left text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
                       <th className="py-2.5 pl-4">Season</th>
@@ -1861,7 +1862,7 @@ export default function DistrictProductivityPage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </ResponsiveTable>
               </div>
 
             </div>

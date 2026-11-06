@@ -22,15 +22,15 @@ export default function LandingPage() {
       
       {/* 2. Navigation Bar */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm border-b border-emerald-100 py-3' : 'bg-transparent py-5'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-8 h-8 object-contain" />
-            <div className="font-extrabold text-xl tracking-tight text-[#14532d]">
+            <div className="font-extrabold text-lg sm:text-xl tracking-tight text-[#14532d]">
               AgriLens <span className="font-light text-emerald-600">RWANDA</span>
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-700">
+          <div className="hidden xl:flex items-center gap-6 text-sm font-semibold text-slate-700">
             <Link to="/public-portal" className="text-emerald-800 font-bold hover:text-emerald-950 transition-colors flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" /> Public Portal
             </Link>
@@ -43,7 +43,7 @@ export default function LandingPage() {
               Staff Sign In
             </Link>
             <Link to="/public-portal" className="bg-[#14532d] hover:bg-[#166534] text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-sm shadow-emerald-950/20 cursor-pointer flex items-center gap-1.5">
-              Access the Platform
+              Public Portal
             </Link>
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function LandingPage() {
             
             <div className="flex flex-wrap items-center gap-4">
               <Link to="/public-portal" className="bg-[#14532d] hover:bg-[#166534] text-white px-7 py-3.5 rounded-xl font-bold flex items-center transition-all shadow-md shadow-emerald-950/20 group cursor-pointer text-sm">
-                Access the Platform <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                Public Portal <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link to="/login" className="bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-950 px-6 py-3.5 rounded-xl font-bold transition-colors shadow-xs cursor-pointer text-sm">
                 Staff Sign In
@@ -77,7 +77,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right: Visual */}
-          <div className="relative lg:h-[600px] w-full animate-in fade-in zoom-in-95 duration-1000 delay-200">
+          <div className="relative h-[360px] sm:h-[460px] lg:h-[600px] w-full animate-in fade-in zoom-in-95 duration-1000 delay-200">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#0a2f1c] via-[#14532d] to-[#1c6a3f] rounded-2xl border border-emerald-800/40 overflow-hidden shadow-2xl">
               {/* Agricultural Background */}
               <img src="/crop_productivity.jpg" alt="Rwanda Agriculture Intelligence" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
@@ -136,7 +136,7 @@ export default function LandingPage() {
               to="/public-portal"
               className="bg-[#14532d] hover:bg-[#166534] text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-emerald-950/15 cursor-pointer shrink-0 self-start md:self-auto"
             >
-              Access the Platform <ArrowRight className="w-4 h-4" />
+              Public Portal <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -283,7 +283,7 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/public-portal" className="inline-flex items-center bg-[#14532d] hover:bg-[#166534] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-xl shadow-emerald-950/25 group cursor-pointer text-sm">
-              Access the Platform <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              Public Portal <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link to="/login" className="inline-flex items-center bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-950 px-6 py-4 rounded-xl font-bold transition-all shadow-sm cursor-pointer text-sm">
               Staff Sign In

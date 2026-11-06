@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -904,7 +905,7 @@ export default function Irrigation() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Rwanda Irrigation Map (7 cols ~ 60-70%) */}
-        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px] relative">
+        <div className="lg:col-span-7 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px] relative">
           
           {/* Map Header */}
           <div className="p-4 border-b border-border-main flex items-center justify-between bg-background/50 z-10 shrink-0">
@@ -1005,7 +1006,7 @@ export default function Irrigation() {
         </div>
 
         {/* Right Column: District Intelligence Profile (5 cols ~ 35%) */}
-        <div className="lg:col-span-5 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[650px]">
+        <div className="lg:col-span-5 bg-surface border border-border-main rounded-2xl shadow-sm overflow-hidden flex flex-col h-[min(650px,85dvh)] min-h-[400px]">
           
           {selectedDistrict ? (
             <div className="flex flex-col h-full">
@@ -1321,7 +1322,7 @@ export default function Irrigation() {
               />
             </div>
 
-            <div className="flex items-center gap-1 bg-background p-1 rounded-xl border border-border-main text-xs font-bold">
+            <div className="flex flex-wrap items-center gap-1 bg-background p-1 rounded-xl border border-border-main text-xs font-bold">
               {[
                 { id: 'ALL', label: 'All' },
                 { id: 'TOP_IRRIGATED', label: 'Top Irrigated' },
@@ -1354,7 +1355,7 @@ export default function Irrigation() {
 
         {/* Table View */}
         <div className="overflow-x-auto border border-border-main rounded-xl custom-scrollbar">
-          <table className="w-full text-left text-xs">
+          <ResponsiveTable className="w-full text-left text-xs">
             <thead className="bg-background/80 text-muted font-bold uppercase tracking-wider text-[10px] border-b border-border-main">
               <tr>
                 <th className="p-3">Rank</th>
@@ -1423,7 +1424,7 @@ export default function Irrigation() {
                 );
               })}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 
@@ -1474,7 +1475,7 @@ export default function Irrigation() {
 
           {/* Facilities Table */}
           <div className="overflow-x-auto border border-border-main rounded-xl custom-scrollbar max-h-96">
-            <table className="w-full text-left text-xs">
+            <ResponsiveTable className="w-full text-left text-xs">
               <thead className="bg-background/80 text-muted font-bold uppercase tracking-wider text-[10px] border-b border-border-main sticky top-0 backdrop-blur-xs">
                 <tr>
                   <th className="p-3">Scheme Name</th>
@@ -1520,7 +1521,7 @@ export default function Irrigation() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </ResponsiveTable>
           </div>
         </div>
       )}

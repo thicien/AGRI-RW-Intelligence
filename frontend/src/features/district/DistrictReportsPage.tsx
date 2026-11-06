@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext } from 'react-router-dom';
@@ -64,6 +65,8 @@ export default function DistrictReportsPage() {
       </div>
     );
   }
+
+  if (!report) return <div role="status" className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8"><h1 className="text-xl font-bold text-slate-900">District report unavailable</h1><p className="mt-2 text-sm text-slate-600">The report for {districtName} could not be loaded. Please try again when the reporting service is available.</p><button onClick={() => window.location.reload()} className="mt-4 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white">Retry</button></div>;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -171,7 +174,7 @@ export default function DistrictReportsPage() {
         {/* Sector Highlights Table */}
         <div className="mb-6">
           <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3">Sector Performance Highlights</h3>
-          <table className="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+          <ResponsiveTable className="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
             <thead className="bg-slate-100 text-slate-600 font-bold">
               <tr>
                 <th className="p-2.5">Sector</th>
@@ -192,7 +195,7 @@ export default function DistrictReportsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
 
         {/* Official NISR Citation & Seal */}

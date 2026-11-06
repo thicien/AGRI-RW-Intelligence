@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../../components/ResponsiveTable';
 import React, { useState } from 'react';
 import { 
   Table, Search, ArrowUpDown, Download, 
@@ -78,7 +79,7 @@ export default function AccessibleDataTable({
 
       {/* Responsive Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-slate-700 border-collapse">
+        <ResponsiveTable className="w-full text-left text-xs text-slate-700 border-collapse">
           <thead className="bg-slate-100 text-slate-800 uppercase text-[10px] font-black tracking-wider border-b border-slate-200">
             <tr>
               <th 
@@ -180,7 +181,7 @@ export default function AccessibleDataTable({
               })
             )}
           </tbody>
-        </table>
+        </ResponsiveTable>
       </div>
 
       {/* Footer */}

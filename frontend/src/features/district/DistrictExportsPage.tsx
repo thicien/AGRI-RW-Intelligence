@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../../config/api';
 import { useOutletContext, Link } from 'react-router-dom';
@@ -994,7 +995,7 @@ export default function DistrictExportsPage() {
           {/* Crops Table */}
           <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
+              <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Crop Name & HS Code</th>
@@ -1087,7 +1088,7 @@ export default function DistrictExportsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
           </div>
         </div>
@@ -1159,7 +1160,7 @@ export default function DistrictExportsPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
+              <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Indicator & Commodity</th>
@@ -1214,7 +1215,7 @@ export default function DistrictExportsPage() {
                     );
                   })}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
           </div>
         </div>
@@ -1287,7 +1288,7 @@ export default function DistrictExportsPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
+              <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Crop Name</th>
@@ -1324,7 +1325,7 @@ export default function DistrictExportsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
           </div>
         </div>
@@ -1591,7 +1592,7 @@ export default function DistrictExportsPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
+              <ResponsiveTable className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-3 px-4">Intervention Title</th>
@@ -1639,7 +1640,7 @@ export default function DistrictExportsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
           </div>
         </div>
@@ -1689,7 +1690,7 @@ export default function DistrictExportsPage() {
 
       {/* MODAL 1: CROP EXPORT INSPECTOR MODAL */}
       {selectedCropModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-3">
@@ -1800,7 +1801,7 @@ export default function DistrictExportsPage() {
 
       {/* MODAL 2: PROPOSE EXPORT LINKAGE INTERVENTION */}
       {isProposeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="responsive-dialog-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2">

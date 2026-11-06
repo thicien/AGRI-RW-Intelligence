@@ -1,3 +1,4 @@
+import ResponsiveTable from '../../components/ResponsiveTable';
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../../config/api';
 import { Link } from 'react-router-dom';
@@ -299,7 +300,7 @@ export default function DataManagerOverviewPage() {
 
         {/* Recent seasons table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <ResponsiveTable className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-700 uppercase font-bold border-y border-slate-200 text-[11px]">
                 <th className="p-3">Season Code</th>
@@ -324,7 +325,7 @@ export default function DataManagerOverviewPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         </div>
       </div>
 

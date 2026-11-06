@@ -1,3 +1,4 @@
+import { useWorkspaceNavigation } from '../hooks/useWorkspaceNavigation';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Map as MapIcon, BarChart3, Droplets, 
@@ -5,7 +6,7 @@ import {
   MessageSquare, Database, BrainCircuit, PlaySquare, 
   FileBarChart, Users, Settings, Bell, Search, User, ChevronDown,
   Layers, Globe, CheckCircle2, ShieldCheck, MapPin, Key, XCircle,
-  AlertTriangle, Lock, RefreshCw, UserCheck, Check, Building2
+  AlertTriangle, Lock, RefreshCw, UserCheck, Check, Building2, Menu, X
 } from 'lucide-react';
 import clsx from 'clsx';
 import React, { useState, useEffect } from 'react';
@@ -14,6 +15,8 @@ import { useAuth, PRESET_PERSONAS } from '../features/auth/AuthContext';
 export default function AppShell() {
   const { currentUser, switchPersona, canAccessRoute } = useAuth();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { sidebarRef, desktop } = useWorkspaceNavigation(mobileMenuOpen, setMobileMenuOpen);
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
@@ -57,11 +60,15 @@ export default function AppShell() {
   const visibleSections = allMenuSections;
 
   return (
-    <div className="flex h-screen w-screen bg-background overflow-hidden font-sans text-text-main">
+    <div className="workspace-shell flex h-dvh w-full bg-background overflow-hidden font-sans text-text-main">
       
       {/* Sidebar - Matching Reference Design Background & Layout */}
-      <aside 
-        className="w-72 text-white flex flex-col flex-shrink-0 shadow-2xl z-20 hidden md:flex border-r border-[#1B4D33]/40 relative overflow-hidden"
+      <aside
+        ref={sidebarRef} id="workspace-navigation" aria-label="Workspace navigation"
+        inert={!desktop && !mobileMenuOpen}
+        role={!desktop && mobileMenuOpen ? "dialog" : undefined}
+        aria-modal={!desktop && mobileMenuOpen ? true : undefined}
+        className={`workspace-sidebar fixed inset-y-0 left-0 z-50 w-72 max-w-[calc(100vw-3rem)] text-white flex flex-col shrink-0 shadow-2xl border-r border-[#1B4D33]/40 overflow-hidden transition-transform duration-200 xl:relative xl:translate-x-0 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
         style={{
           backgroundImage: "url('/sidebar_bg.jpg')",
           backgroundSize: 'cover',
@@ -70,15 +77,16 @@ export default function AppShell() {
           backgroundColor: '#063124'
         }}
       >
+        <button type="button" aria-label="Close workspace navigation" onClick={() => setMobileMenuOpen(false)} className="absolute right-2 top-2 z-20 rounded-lg bg-emerald-950 p-2 text-white hover:bg-emerald-800 xl:hidden"><X className="h-5 w-5" /></button>
         {/* Dark gradient overlay to preserve high contrast for navigation links */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#063124]/92 via-[#073627]/75 to-transparent pointer-events-none z-0" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none z-0" />
         
         {/* Brand Header */}
-        <div className="h-20 flex items-center px-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
+        <div className="min-h-20 py-3 flex items-center px-5 pr-14 xl:pr-5 border-b border-white/10 relative z-10 backdrop-blur-[2px]">
           <img src="/logo.png?v=2" alt="AgriLens Logo" className="w-9 h-9 mr-3 object-contain flex-shrink-0 drop-shadow" />
           <div>
-            <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
+            <div className="font-bold text-lg leading-tight tracking-tight text-white flex flex-wrap items-center gap-1.5">
               AgriLens <span className="font-light text-emerald-300">Rwanda</span>
             </div>
             <div className="text-[11px] text-[#5CE68B] font-semibold tracking-tight mt-0.5 drop-shadow-xs uppercase">
@@ -106,6 +114,7 @@ export default function AppShell() {
                   return (
                     <NavLink
                       key={item.to}
+                      onClick={() => setMobileMenuOpen(false)}
                       to={item.to}
                       className={({ isActive }) =>
                         clsx(
@@ -150,13 +159,15 @@ export default function AppShell() {
           </div>
         </div>
       </aside>
+      {mobileMenuOpen && !desktop && <button type="button" aria-label="Dismiss workspace navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm xl:hidden" />}
 
       {/* Main Content Area - with min-w-0 to prevent overflow/overlapping */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-background">
+      <div inert={mobileMenuOpen && !desktop} className="flex flex-col flex-1 min-w-0 overflow-hidden bg-background">
         
         {/* Header Bar */}
-        <header className="h-16 bg-surface border-b border-border-main flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+        <header className="workspace-header h-16 bg-surface border-b border-border-main flex items-center justify-between px-4 sm:px-6 gap-3 shadow-sm z-10 flex-shrink-0">
           
+          <button type="button" aria-label="Open workspace navigation" aria-expanded={mobileMenuOpen} aria-controls="workspace-navigation" onClick={() => setMobileMenuOpen(true)} className="workspace-menu-button xl:hidden shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100"><Menu className="h-5 w-5" /></button>
           {/* Left search */}
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-80 hidden lg:block">
@@ -198,7 +209,7 @@ export default function AppShell() {
 
               {/* Persona Popover */}
               {showPersonaMenu && (
-                <div className="absolute right-0 mt-2 w-96 bg-surface border border-border-main rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in space-y-3">
+                <div className="absolute right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-6rem)] overflow-y-auto bg-surface border border-border-main rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-border-main">
                     <div>
                       <div className="text-xs font-extrabold uppercase tracking-wider text-text-main">
@@ -259,7 +270,7 @@ export default function AppShell() {
         </header>
 
         {/* Content Viewport or Security Barrier */}
-        <main className="flex-1 overflow-y-auto bg-[#F4F7F9] p-4 md:p-6 lg:p-8">
+        <main id="workspace-content" tabIndex={-1} className="workspace-main min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#F4F7F9] p-4 md:p-6 lg:p-8">
           {!accessCheck.allowed ? (
             <div className="p-8 max-w-2xl mx-auto my-12 animate-in fade-in slide-in-from-bottom-4">
               <div className="bg-surface rounded-2xl border border-danger/30 p-8 shadow-xl text-center space-y-4">

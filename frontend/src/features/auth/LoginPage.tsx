@@ -75,7 +75,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f3f7f4] font-sans">
+    <div className="flex min-h-dvh w-full bg-[#f3f7f4] font-sans">
       {/* Left Panel: Visual/Map (Hidden on small screens) - Forest Green Theme */}
       <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative bg-[#0d331f] flex-col justify-end p-12 overflow-hidden">
         {/* Background Image / Map Mock */}
@@ -111,7 +111,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel: Login Form */}
-      <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col justify-center items-center p-8 sm:p-12 lg:p-16 bg-white overflow-y-auto border-l border-emerald-950/10">
+      <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col justify-center items-center px-5 py-8 sm:p-12 lg:p-12 xl:p-16 bg-white overflow-y-auto border-l border-emerald-950/10">
         <div className="w-full max-w-[400px]">
           
           {/* Logo with Forest Green Accents */}
