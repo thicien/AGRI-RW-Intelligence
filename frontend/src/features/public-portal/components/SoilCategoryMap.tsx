@@ -1,10 +1,118 @@
-import { useState } from 'react';
-import { RWANDA_REAL_DISTRICTS } from '../../landing/components/rwandaRealPaths';
-interface Props { title:string; data:{name:string;category:string|null}[]; selectedDistrict:string; allowedDistricts:string[]; onSelectDistrict:(name:string)=>void }
-const palette=['#0e7490','#7c3aed','#c2410c','#0369a1','#a16207','#475569','#be185d','#4d7c0f'];
-export default function SoilCategoryMap({title,data,selectedDistrict,allowedDistricts,onSelectDistrict}:Props){
- const [hover,setHover]=useState<string|null>(null),lookup=new Map(data.map(r=>[r.name,r.category]));
- const categories=[...new Set(data.map(r=>r.category).filter((v):v is string=>!!v))].sort(),colors=new Map(categories.map((c,i)=>[c,palette[i%palette.length]]));
- const active=hover||(selectedDistrict==='ALL'?null:selectedDistrict);
- return <figure className="rounded-xl border border-emerald-100 bg-slate-50 p-4"><figcaption className="text-sm font-semibold">{title}</figcaption><svg viewBox="0 0 600 528" className="mx-auto max-h-[420px] w-full" role="group" aria-label={title}>{RWANDA_REAL_DISTRICTS.map(shape=>{const value=lookup.get(shape.name)??null,allowed=allowedDistricts.includes(shape.name);return <path key={shape.name} d={shape.d} fill={value?colors.get(value):'#e2e8f0'} stroke={shape.name===selectedDistrict?'#052e16':'white'} strokeWidth={shape.name===selectedDistrict?3:1} role="button" aria-label={`${shape.name}: ${value||'No Data'}`} aria-pressed={shape.name===selectedDistrict} aria-disabled={!allowed} tabIndex={allowed?0:-1} className={allowed?'cursor-pointer focus:outline-none focus:stroke-amber-500':'opacity-35'} onMouseEnter={()=>setHover(shape.name)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(shape.name)} onBlur={()=>setHover(null)} onClick={()=>{if(allowed)onSelectDistrict(shape.name);}} onKeyDown={e=>{if(allowed&&(e.key==='Enter'||e.key===' ')){e.preventDefault();onSelectDistrict(shape.name);}}}><title>{shape.name}: {value||'No Data'}</title></path>;})}</svg><p className="min-h-8 text-xs font-semibold" aria-live="polite">{active?`${active}: ${lookup.get(active)||'No Data'}`:'Select a district to explore the stored classification.'}</p><ul className="mt-3 flex flex-wrap gap-3 text-xs">{categories.map(c=><li key={c}><span className="mr-1 inline-block h-3 w-3 rounded-sm" style={{backgroundColor:colors.get(c)}}/>{c}</li>)}<li><span className="mr-1 inline-block h-3 w-3 rounded-sm bg-slate-200"/>No Data</li></ul><p className="mt-3 text-xs text-slate-500">Colours identify stored categories and have no quality order. These classifications do not establish conditions in every field.</p></figure>;
+import { useState } from "react";
+import { RWANDA_REAL_DISTRICTS } from "../../landing/components/rwandaRealPaths";
+interface Props {
+  title: string;
+  categoryDomain?: string[];
+  data: { name: string; category: string | null }[];
+  selectedDistrict: string;
+  allowedDistricts: string[];
+  onSelectDistrict: (name: string) => void;
+}
+const palette = [
+  "#0e7490",
+  "#7c3aed",
+  "#c2410c",
+  "#0369a1",
+  "#a16207",
+  "#475569",
+  "#be185d",
+  "#4d7c0f",
+];
+export default function SoilCategoryMap({
+  title,
+  categoryDomain,
+  data,
+  selectedDistrict,
+  allowedDistricts,
+  onSelectDistrict,
+}: Props) {
+  const [hover, setHover] = useState<string | null>(null),
+    lookup = new Map(data.map((r) => [r.name, r.category]));
+  const categories = [
+      ...new Set(data.map((r) => r.category).filter((v): v is string => !!v)),
+    ].sort(),
+    colors = new Map(
+      (categoryDomain || categories).map((c, i) => [
+        c,
+        palette[i % palette.length],
+      ]),
+    );
+  const active =
+    hover || (selectedDistrict === "ALL" ? null : selectedDistrict);
+  return (
+    <figure className="rounded-xl border border-emerald-100 bg-slate-50 p-4">
+      <figcaption className="text-sm font-semibold">{title}</figcaption>
+      <svg
+        viewBox="0 0 600 528"
+        className="mx-auto max-h-[420px] w-full"
+        role="group"
+        aria-label={title}
+      >
+        {RWANDA_REAL_DISTRICTS.map((shape) => {
+          const value = lookup.get(shape.name) ?? null,
+            allowed = allowedDistricts.includes(shape.name);
+          return (
+            <path
+              key={shape.name}
+              d={shape.d}
+              fill={value ? colors.get(value) : "#e2e8f0"}
+              stroke={shape.name === selectedDistrict ? "#052e16" : "white"}
+              strokeWidth={shape.name === selectedDistrict ? 3 : 1}
+              role="button"
+              aria-label={`${shape.name}: ${value || "No Data"}`}
+              aria-pressed={shape.name === selectedDistrict}
+              aria-disabled={!allowed}
+              tabIndex={allowed ? 0 : -1}
+              className={
+                allowed
+                  ? "cursor-pointer focus:outline-none focus:stroke-amber-500"
+                  : "opacity-35"
+              }
+              onMouseEnter={() => setHover(shape.name)}
+              onMouseLeave={() => setHover(null)}
+              onFocus={() => setHover(shape.name)}
+              onBlur={() => setHover(null)}
+              onClick={() => {
+                if (allowed) onSelectDistrict(shape.name);
+              }}
+              onKeyDown={(e) => {
+                if (allowed && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  onSelectDistrict(shape.name);
+                }
+              }}
+            >
+              <title>
+                {shape.name}: {value || "No Data"}
+              </title>
+            </path>
+          );
+        })}
+      </svg>
+      <p className="min-h-8 text-xs font-semibold" aria-live="polite">
+        {active
+          ? `${active}: ${lookup.get(active) || "No Data"}`
+          : "Select a district to explore the stored classification."}
+      </p>
+      <ul className="mt-3 flex flex-wrap gap-3 text-xs">
+        {categories.map((c) => (
+          <li key={c}>
+            <span
+              className="mr-1 inline-block h-3 w-3 rounded-sm"
+              style={{ backgroundColor: colors.get(c) }}
+            />
+            {c}
+          </li>
+        ))}
+        <li>
+          <span className="mr-1 inline-block h-3 w-3 rounded-sm bg-slate-200" />
+          No Data
+        </li>
+      </ul>
+      <p className="mt-3 text-xs text-slate-500">
+        Colours identify stored categories and have no quality order. These
+        classifications do not establish conditions in every field.
+      </p>
+    </figure>
+  );
 }

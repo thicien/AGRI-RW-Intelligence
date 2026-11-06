@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
-import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -35,54 +34,10 @@ function loadEnv() {
 }
 loadEnv();
 
-function liberatePortIfOccupied(port: number) {
-  const logger = new Logger('PortGuard');
-  try {
-    if (process.platform === 'win32') {
-      const output = execSync('netstat -ano -p tcp', {
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'ignore'],
-        windowsHide: true,
-      });
-      const lines = output.split('\n');
-      for (const line of lines) {
-        if (line.includes(`:${port}`) && line.toUpperCase().includes('LISTENING')) {
-          const parts = line.trim().split(/\s+/);
-          const pid = parseInt(parts[parts.length - 1], 10);
-          if (pid && !isNaN(pid) && pid !== process.pid) {
-            logger.warn(`Port ${port} occupied by orphaned PID ${pid}. Liberating port...`);
-            try {
-              execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore', windowsHide: true });
-            } catch (e) {}
-          }
-        }
-      }
-    } else {
-      const output = execSync(`lsof -ti:${port}`, {
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'ignore'],
-      });
-      const lines = output.trim().split('\n');
-      for (const line of lines) {
-        const pid = parseInt(line.trim(), 10);
-        if (pid && !isNaN(pid) && pid !== process.pid) {
-          logger.warn(`Port ${port} occupied by orphaned PID ${pid}. Liberating port...`);
-          try {
-            process.kill(pid, 'SIGKILL');
-          } catch (e) {}
-        }
-      }
-    }
-  } catch (err) {
-    // Ignore any inspection errors
-  }
-}
-
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   const targetPort = parseInt(process.env.PORT || '3000', 10);
-  liberatePortIfOccupied(targetPort);
 
   const app = await NestFactory.create(AppModule);
 

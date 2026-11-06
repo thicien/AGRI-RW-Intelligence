@@ -12,9 +12,9 @@ import DataSourcesMethodologyModal from './components/DataSourcesMethodologyModa
 import ExportReportModal from './components/ExportReportModal';
 import ProductionExplorer from './sections/ProductionExplorer';
 import IrrigationExplorer from './sections/IrrigationExplorer';
-import SoilSection from './sections/SoilSection';
-import PostHarvestSection from './sections/PostHarvestSection';
-import ExportSection from './sections/ExportSection';
+import SoilPortal from './sections/SoilPortal';
+import PostHarvestExplorer from './sections/PostHarvestExplorer';
+import ExportExplorer from './sections/ExportExplorer';
 import type { 
   PublicSection, PublicFilterState, SeasonInfo, 
   ProductivityOverview, IrrigationOverview, SoilOverview, 
@@ -88,7 +88,7 @@ export default function PublicPortalPage() {
 
   const [districtDossier, setDistrictDossier] = useState<any>(null);
 
-  const isPublicExplorer = filters.section === 'productivity' || filters.section === 'irrigation';
+  const isPublicExplorer = true;
 
   // Modals
   const [methodologyModalOpen, setMethodologyModalOpen] = useState(false);
@@ -133,11 +133,8 @@ export default function PublicPortalPage() {
     async function loadSectionData() {
       setLoading(true);
       try {
-        if (filters.section === 'productivity' || filters.section === 'irrigation') {
+        if (isPublicExplorer) {
           return;
-        } else if (filters.section === 'soil') {
-          const data = await fetchSoilData(filters.season);
-          if (isMounted) setSoilData(data);
         } else if (filters.section === 'post-harvest') {
           const data = await fetchPostHarvestData(filters.season);
           if (isMounted) setPostHarvestData(data);
@@ -242,7 +239,7 @@ export default function PublicPortalPage() {
       id: 'export' as PublicSection,
       num: '05',
       title: 'Export Opportunities',
-      desc: 'Production trends, commercial surplus, and market readiness.',
+      desc: 'All-crop supply, documented export evidence, and market references.',
       icon: <Globe className="w-5 h-5 text-amber-700" />,
       accent: 'border-amber-500'
     }
@@ -254,8 +251,8 @@ export default function PublicPortalPage() {
       <PublicNavbar
         activeSection={filters.section}
         onSelectSection={handleSectionSelect}
-        onOpenMethodology={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
-        onOpenExport={() => isPublicExplorer ? document.getElementById(filters.section === 'irrigation' ? 'irrigation-downloads' : 'production-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)}
+        onOpenMethodology={() => filters.section !== 'productivity' ? document.getElementById(filters.section + '-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
+        onOpenExport={() => isPublicExplorer ? document.getElementById(filters.section === 'productivity' ? 'production-downloads' : filters.section + '-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)}
       />
 
       {/* 2. Portal Hero & Mission Introduction */}
@@ -287,11 +284,11 @@ export default function PublicPortalPage() {
                 </span>
               </div>
               <p className="text-slate-600 text-[11px] leading-relaxed">
-                {filters.section === 'irrigation' ? 'Explore the irrigation data held in AgriLens. Evidence classifications, sources, and reporting limits accompany each selected series.' : <>Empowered by verified datasets from the <strong>National Institute of Statistics of Rwanda (NISR)</strong> and <strong>MINAGRI</strong>. Visitors can explore, compare, and download approved research summaries.</>}
+                {filters.section !== 'productivity' ? 'Explore the evidence held in AgriLens. Sources, sampling support, classifications and reporting limits accompany each selected series.' : <>Empowered by verified datasets from the <strong>National Institute of Statistics of Rwanda (NISR)</strong> and <strong>MINAGRI</strong>. Visitors can explore, compare, and download approved research summaries.</>}
               </p>
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
                 <button
-                  onClick={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
+                  onClick={() => filters.section !== 'productivity' ? document.getElementById(filters.section + '-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)}
                   className="text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <BookOpen className="w-3.5 h-3.5" /> View Methodology
@@ -408,146 +405,19 @@ export default function PublicPortalPage() {
             )}
 
             {filters.section === 'soil' && (
-              <SoilSection
-                overview={soilData.overview}
-                districts={soilData.districts}
-                ranking={soilData.ranking}
-                projects={soilData.projects}
-                filters={filters}
-                onSelectDistrict={handleDistrictSelect}
-              />
+              <SoilPortal initialDistrict={filters.district} onDistrictChange={handleDistrictSelect} />
             )}
 
             {filters.section === 'post-harvest' && (
-              <PostHarvestSection
-                overview={postHarvestData.overview}
-                districts={postHarvestData.districts}
-                facilities={postHarvestData.facilities}
-                gapScreening={postHarvestData.gapScreening}
-                safeguardNotice={postHarvestData.safeguardNotice}
-                filters={filters}
-                onSelectDistrict={handleDistrictSelect}
-              />
+              <PostHarvestExplorer initialDistrict={filters.district} onDistrictChange={handleDistrictSelect} />
             )}
 
             {filters.section === 'export' && (
-              <ExportSection
-                overview={exportData.overview}
-                districts={exportData.districts}
-                products={exportData.products}
-                opportunities={exportData.opportunities}
-                safeguardNotice={exportData.safeguardNotice}
-                filters={filters}
-                onSelectDistrict={handleDistrictSelect}
-              />
+              <ExportExplorer initialDistrict={filters.district} onDistrictChange={handleDistrictSelect} />
             )}
           </>
         )}
       </main>
-
-      {/* 4. Public Access vs Authorized Access Comparison Section */}
-      <section className="bg-white border-t border-emerald-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#14532d]">
-              Platform Architecture
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1 mb-3">
-              Public Read-Only Access vs. Authorized Workspace
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              AgriLens Rwanda strictly isolates public evidence exploration from internal management workflows to ensure complete institutional integrity and data security.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Public Visitor Card */}
-            <div className="p-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="font-black text-lg text-emerald-950">
-                    Public Visitor
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-full">
-                    No Login Required
-                  </span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>View approved national agricultural statistics & rankings</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Explore reporting seasons, years, and all 30 districts</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Examine interactive territorial maps and historical comparisons</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Download approved public research summaries (CSV / PDF)</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-slate-400">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>Read-only: Cannot modify source datasets or add interventions</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-emerald-100 text-[11px] font-bold text-emerald-900">
-                ✓ Currently Active: Public Agricultural Intelligence Portal
-              </div>
-            </div>
-
-            {/* Authenticated Platform User Card */}
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="font-black text-lg text-slate-900">
-                    Authenticated Platform User
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full">
-                    Login Required
-                  </span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-600 shrink-0" />
-                    <span>Access role-specific decision workflows & administrative consoles</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-600 shrink-0" />
-                    <span>Upload raw NISR survey datasets and monitor ETL ingestion</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-600 shrink-0" />
-                    <span>Authorize and manage district agricultural interventions</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-600 shrink-0" />
-                    <span>Execute AI predictive scenarios, stress tests, and policy simulations</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-slate-600 shrink-0" />
-                    <span>Configure user accounts, RBAC permissions, and security audit logs</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                <Link
-                  to="/login"
-                  className="w-full py-2.5 bg-[#14532d] hover:bg-[#166534] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" /> Sign In to Authorized Workspace
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 5. Portal Footer */}
       <footer className="bg-[#082214] text-white border-t border-emerald-950 pt-12 pb-8">
@@ -608,12 +478,12 @@ export default function PublicPortalPage() {
               </h4>
               <ul className="space-y-2 text-emerald-100/70 text-xs">
                 <li>
-                  <button onClick={() => filters.section === 'irrigation' ? document.getElementById('irrigation-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
+                  <button onClick={() => filters.section !== 'productivity' ? document.getElementById(filters.section + '-sources')?.scrollIntoView({ behavior: 'smooth' }) : setMethodologyModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
                     Data Sources & Provenance
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => isPublicExplorer ? document.getElementById(filters.section === 'irrigation' ? 'irrigation-downloads' : 'production-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
+                  <button onClick={() => isPublicExplorer ? document.getElementById(filters.section === 'productivity' ? 'production-downloads' : filters.section + '-downloads')?.scrollIntoView({ behavior: 'smooth' }) : setExportModalOpen(true)} className="hover:text-emerald-300 transition-colors cursor-pointer">
                     Download Research Summary (CSV)
                   </button>
                 </li>

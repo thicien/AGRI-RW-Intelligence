@@ -5,6 +5,9 @@ import { PostHarvestService } from './post-harvest.service';
 export class PostHarvestController {
   constructor(private readonly postHarvestService: PostHarvestService) {}
 
+  @Get('public-explorer')
+  getPublicExplorer() { return this.postHarvestService.getPublicExplorer(); }
+
   @Get('decision-workspace')
   async getDecisionWorkspace(
     @Query('season') season: string = '2025A',

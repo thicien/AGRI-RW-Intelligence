@@ -231,10 +231,7 @@ test("phone production filters, local table scrolling, and source dialog", async
   );
   await table.focus();
   await page.keyboard.press("ArrowRight");
-  await page
-    .getByRole("button", { name: "Toggle public portal navigation" })
-    .click();
-  await page.getByRole("button", { name: "Methodology & Sources" }).click();
+  await page.getByRole("button", { name: "Data Sources & Provenance" }).click();
   const dialog = page.locator(".responsive-dialog-backdrop > div").last();
   const box = await dialog.boundingBox();
   expect(box!.height).toBeLessThanOrEqual(844 - 32);
@@ -253,21 +250,40 @@ test("login remains scrollable in landscape with a short viewport", async ({
 test.describe("Touch devices", () => {
   test.use({ hasTouch: true });
 
-  test('touch layouts fit narrow phones', async ({ page }) => {
+  test("touch layouts fit narrow phones", async ({ page }) => {
     for (const width of [320, 390]) {
       await page.setViewportSize({ width, height: 844 });
-      for (const route of ['/', '/public-portal', '/admin/dashboard', '/admin/crops', '/admin/irrigation', '/admin/post-harvest', '/admin/imports-exports', '/district/productivity', '/data-manager/overview', '/system-admin/users']) {
-        await page.goto(route, { waitUntil: 'networkidle' });
+      for (const route of [
+        "/",
+        "/public-portal",
+        "/admin/dashboard",
+        "/admin/crops",
+        "/admin/irrigation",
+        "/admin/post-harvest",
+        "/admin/imports-exports",
+        "/district/productivity",
+        "/data-manager/overview",
+        "/system-admin/users",
+      ]) {
+        await page.goto(route, { waitUntil: "networkidle" });
         const overflow = await page.evaluate(() => {
-          const main = document.querySelector<HTMLElement>('.workspace-main');
-          return { document: document.documentElement.scrollWidth - window.innerWidth, main: main ? main.scrollWidth - main.clientWidth : 0 };
+          const main = document.querySelector<HTMLElement>(".workspace-main");
+          return {
+            document: document.documentElement.scrollWidth - window.innerWidth,
+            main: main ? main.scrollWidth - main.clientWidth : 0,
+          };
         });
-        expect(overflow.document, route + ' document at ' + width).toBeLessThanOrEqual(2);
-        expect(overflow.main, route + ' content at ' + width).toBeLessThanOrEqual(2);
+        expect(
+          overflow.document,
+          route + " document at " + width,
+        ).toBeLessThanOrEqual(2);
+        expect(
+          overflow.main,
+          route + " content at " + width,
+        ).toBeLessThanOrEqual(2);
       }
     }
   });
-
 
   test("phone controls provide comfortable touch targets", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });

@@ -37,3 +37,7 @@ Thumbs.db
 *.tmp
 # Database migration artifacts
 *_restore_list.txt
+
+# Browser verification artifacts
+frontend/test-results/
+frontend/playwright-report/

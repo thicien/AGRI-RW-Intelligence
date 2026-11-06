@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from "node:fs";
 
 test.use({ hasTouch: true });
 const base = (
@@ -318,12 +318,14 @@ test("public irrigation source and export controls target the current explorer",
   await page.goto("/public-portal?section=irrigation", {
     waitUntil: "networkidle",
   });
-  await page
-    .getByRole("button", { name: "Toggle public portal navigation" })
-    .click();
-  await page.getByRole("button", { name: "Methodology & Sources" }).click();
+  await page.getByRole("button", { name: "Data Sources & Provenance" }).click();
   await expect(page.locator("#irrigation-sources")).toBeInViewport();
-  await page.getByRole("button", { name: "Export", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: "Download Research Summary (CSV)",
+      exact: true,
+    })
+    .click();
   await expect(page.locator("#irrigation-downloads")).toBeInViewport();
 });
 
@@ -351,46 +353,119 @@ test("unavailable irrigation service shows a retry state without invented values
   ).toBeVisible();
 });
 
-
-test('live irrigation snapshot preserves database figures and responsive layouts', async ({page}, testInfo) => {
-  const path='test-results/irrigation-live.json';
-  test.skip(!existsSync(path),'Optional read-only database snapshot is not present.');
-  const snapshot=JSON.parse(readFileSync(path,'utf8'));
-  await page.route('**/irrigation/public-explorer',r=>r.fulfill({json:snapshot}));
-  await page.goto('/public-portal?section=irrigation',{waitUntil:'networkidle'});
-  await expect(page.locator('section[aria-labelledby="irrigation-overview"]')).toContainText('Modelled estimates');
-  for(const width of [320,390,768,1024,1280,1366]){
-    await page.setViewportSize({width,height:844});
-    await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth),'live snapshot at '+width).toBeLessThanOrEqual(2);
+test("live irrigation snapshot preserves database figures and responsive layouts", async ({
+  page,
+}, testInfo) => {
+  const path = "test-results/irrigation-live.json";
+  test.skip(
+    !existsSync(path),
+    "Optional read-only database snapshot is not present.",
+  );
+  const snapshot = JSON.parse(readFileSync(path, "utf8"));
+  await page.route("**/irrigation/public-explorer", (r) =>
+    r.fulfill({ json: snapshot }),
+  );
+  await page.goto("/public-portal?section=irrigation", {
+    waitUntil: "networkidle",
+  });
+  await expect(
+    page.locator('section[aria-labelledby="irrigation-overview"]'),
+  ).toContainText("Modelled estimates");
+  for (const width of [320, 390, 768, 1024, 1280, 1366]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      ),
+      "live snapshot at " + width,
+    ).toBeLessThanOrEqual(2);
   }
-  await page.getByLabel('Irrigation agricultural year',{exact:true}).selectOption('2025');
-  await page.getByLabel('Irrigation season',{exact:true}).selectOption('2025A');
-  await page.getByLabel('Irrigation district',{exact:true}).selectOption('Nyabihu');
-  const actual=snapshot.records.find((r:{district:string;season_code:string})=>r.district==='Nyabihu'&&r.season_code==='2025A');
-  const overview=page.locator('section[aria-labelledby="irrigation-overview"]');
-  await expect(overview.getByText('Total irrigated area',{exact:true}).locator('..')).toContainText(Number(actual.irrigated).toLocaleString('en-GB',{maximumFractionDigits:1}));
-  await expect(overview.getByText('Irrigation coverage',{exact:true}).locator('..')).toContainText((Number(actual.irrigated)/Number(actual.cultivated)*100).toLocaleString('en-GB',{maximumFractionDigits:2}));
-  await page.setViewportSize({width:390,height:844});await overview.scrollIntoViewIfNeeded();
-  await page.screenshot({path:testInfo.outputPath('irrigation-live-phone.png')});
-  await page.setViewportSize({width:1366,height:768});await page.locator('section[aria-labelledby="irrigation-map"]').scrollIntoViewIfNeeded();
-  await page.screenshot({path:testInfo.outputPath('irrigation-live-map-laptop.png')});
+  await page
+    .getByLabel("Irrigation agricultural year", { exact: true })
+    .selectOption("2025");
+  await page
+    .getByLabel("Irrigation season", { exact: true })
+    .selectOption("2025A");
+  await page
+    .getByLabel("Irrigation district", { exact: true })
+    .selectOption("Nyabihu");
+  const actual = snapshot.records.find(
+    (r: { district: string; season_code: string }) =>
+      r.district === "Nyabihu" && r.season_code === "2025A",
+  );
+  const overview = page.locator(
+    'section[aria-labelledby="irrigation-overview"]',
+  );
+  await expect(
+    overview.getByText("Total irrigated area", { exact: true }).locator(".."),
+  ).toContainText(
+    Number(actual.irrigated).toLocaleString("en-GB", {
+      maximumFractionDigits: 1,
+    }),
+  );
+  await expect(
+    overview.getByText("Irrigation coverage", { exact: true }).locator(".."),
+  ).toContainText(
+    (
+      (Number(actual.irrigated) / Number(actual.cultivated)) *
+      100
+    ).toLocaleString("en-GB", { maximumFractionDigits: 2 }),
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await overview.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: testInfo.outputPath("irrigation-live-phone.png"),
+  });
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page
+    .locator('section[aria-labelledby="irrigation-map"]')
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: testInfo.outputPath("irrigation-live-map-laptop.png"),
+  });
 });
 
-
-test('switching public explorers preserves the selected district and export target', async ({page}) => {
-  await page.setViewportSize({width:390,height:844});
-  await page.route('**/crop-statistics/public-production',r=>r.fulfill({json:{records:fixture.production,source:'Synthetic crop production fixture'}}));
-  await page.goto('/public-portal',{waitUntil:'networkidle'});
-  await expect(page.getByRole('heading',{name:'National production overview'})).toBeVisible();
-  await page.getByRole('button',{name:'Toggle public portal navigation'}).click();
-  await page.getByRole('button',{name:'02. Irrigation',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'National irrigation overview'})).toBeVisible();
+test("switching public explorers preserves the selected district and export target", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/crop-statistics/public-production", (r) =>
+    r.fulfill({
+      json: {
+        records: fixture.production,
+        source: "Synthetic crop production fixture",
+      },
+    }),
+  );
+  await page.goto("/public-portal", { waitUntil: "networkidle" });
+  await expect(
+    page.getByRole("heading", { name: "National production overview" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: /02 Irrigation Intelligence/ })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "National irrigation overview" }),
+  ).toBeVisible();
   await selectNyabihu(page);
-  await page.getByRole('button',{name:'Toggle public portal navigation'}).click();
-  await page.getByRole('button',{name:'01. Production',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Nyabihu District production overview'})).toBeVisible();
-  await expect(page.locator('#irrigation-overview')).toHaveCount(0);
-  await page.getByRole('button',{name:'Export',exact:true}).click();
-  await expect(page.locator('#production-downloads')).toBeInViewport();
+  await page
+    .getByRole("button", { name: /01 Agricultural Production/ })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Nyabihu District production overview" }),
+  ).toBeVisible();
+  await expect(page.locator("#irrigation-overview")).toHaveCount(0);
+  await page
+    .getByRole("button", {
+      name: "Download Research Summary (CSV)",
+      exact: true,
+    })
+    .click();
+  await expect(page.locator("#production-downloads")).toBeInViewport();
 });

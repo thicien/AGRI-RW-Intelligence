@@ -5,6 +5,9 @@ import { TradeService } from './trade.service';
 export class TradeController {
   constructor(private readonly tradeService: TradeService) {}
 
+  @Get('public-explorer')
+  getPublicExplorer() { return this.tradeService.getPublicExplorer(); }
+
   @Get('decision-workspace')
   async getDecisionWorkspace(
     @Query('season') season: string = '2025A',

@@ -1,3 +1,4 @@
+import { seasonalSoilEvidence } from './seasonal-soil-evidence';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -5,6 +6,11 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class SoilFertilityService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
+
+  async getPublicSourceTables(seriesId?: string) {
+    if (seriesId) return { records: seasonalSoilEvidence.records.filter(r => r.series_id === seriesId) };
+    return { series: seasonalSoilEvidence.series, audit: seasonalSoilEvidence.audit, methodology: seasonalSoilEvidence.methodology, periods: (await this.dataSource.query('SELECT season_code FROM agrilens.seasons ORDER BY season_code')).map((r: {season_code: string}) => r.season_code) };
+  }
 
   /** Public soil evidence; sample observations and district summaries remain separate. */
   async getPublicExplorer() {
@@ -73,7 +79,7 @@ export class SoilFertilityService {
     return { observations, summaries, production, methodology: {
       coverage: 'Represented sampling area is not recorded. Cultivated district hectares are not treated as hectares covered by soil sampling.',
       observations: 'One observation row is one property record, not necessarily a distinct sample site. Source methods, depths, units and dates are shown as stored.',
-      summaries: 'District summaries are not linked to individual observations. Their observation counts, sampling depths and methods are undocumented.',
+      summaries: 'Planner summary fields originate in baseline-scaling and district-profile seed scripts, not a verified repeated laboratory survey. District summaries are not linked to individual observations. Their observation counts, sampling depths and methods are undocumented.',
       ranking: 'Only observations with the same recorded method, depth and unit can be ordered as descriptive sample medians. They do not represent district-wide soil quality.',
       comparison: 'Changes require matched site keys, identical method, depth, unit and indicator, and separate observation dates within assigned periods. Summary rows do not establish seasonal soil change.',
       practices: 'Practice reporting is separate from evidence of effectiveness. Farmer percentages are not hectare percentages; practice areas may overlap or exceed cultivated-area totals.',

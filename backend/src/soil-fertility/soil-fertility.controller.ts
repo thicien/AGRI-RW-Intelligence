@@ -5,6 +5,9 @@ import { SoilFertilityService } from './soil-fertility.service';
 export class SoilFertilityController {
   constructor(private readonly soilFertilityService: SoilFertilityService) {}
 
+  @Get('public-source-tables')
+  getPublicSourceTables(@Query('series') series?: string) { return this.soilFertilityService.getPublicSourceTables(series); }
+
   @Get('public-explorer')
   async getPublicExplorer() {
     return this.soilFertilityService.getPublicExplorer();
